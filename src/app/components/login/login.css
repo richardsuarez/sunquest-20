@@ -1,0 +1,43 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+form{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0px 0px 15px #F1EA39;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+}
+.login-form{
+    width: 350px;
+}
+
+.login-form-mobile{
+    width: 80%;
+}
+
+mat-form-field{
+    margin-bottom: 15px;
+}
+
+.logo{
+    width: 400px;
+}
+
+.logoMobile{
+    width: 90%;
+}
+
+.version{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 30px;
+}

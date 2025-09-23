@@ -1,0 +1,26 @@
+<div class="container">
+    <img [class.logo]="!isMobile" [class.logoMobile]="isMobile" src="../../../assets/logo.png" alt="logo">
+    <form [class.login-form]="!isMobile" [class.login-form-mobile]="isMobile" [formGroup]="form_login">
+        <mat-form-field floatLabel="always" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" required formControlName="email">
+            <mat-error *ngIf="form_login.controls.email.hasError('email')">Invalid email</mat-error>
+        </mat-form-field>
+        <mat-form-field floatLabel="always" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Password</mat-label>
+            <input matInput [type]="isVisible ? 'text': 'password'" required formControlName="password">
+            <mat-icon matSuffix *ngIf="!isVisible" (click)="isVisible = true;">visibility</mat-icon>
+            <mat-icon matSuffix *ngIf="isVisible" (click)="isVisible = false;">visibility_off</mat-icon>
+            <mat-error *ngIf="form_login.controls.password.hasError('Invalid')">Invalid email</mat-error>
+        </mat-form-field>
+        <button mat-raised-button style="background-color: #ED2D89; color: white" type="submit" (click)="signIn()">Sign In</button>
+        
+        <div class="version">
+            Version: {{ appVersion }}
+        </div>
+    </form>
+
+</div>
+
+
+

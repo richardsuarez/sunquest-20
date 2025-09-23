@@ -1,0 +1,30 @@
+<div class="container">
+    <div class="sub-container">
+        <div style="cursor: pointer" routerLink="/main">
+            <img src="../../../../assets/logo.png" alt="Sun Quest logo" width="150px">
+        </div>
+        <nav *ngIf="!isMobile" class="menu">
+            <div class="shortcut" routerLink="/main/customer">Customers</div>
+            <div class="shortcut" routerLink="/main/book">Bookings</div>
+            <div class="shortcut" routerLink="/main/report/book">Book Report</div>
+            <button mat-raised-button style="display: flex; align-items: center; gap: 5px" (click)="logout()">
+                <mat-icon>logout</mat-icon>
+                Log Out
+            </button>
+        </nav>
+        <div style="display: flex; align-items: center; gap: 30px" *ngIf="isMobile">
+            <button mat-icon-button style="height: 36px; width: 36px; padding: 0px !important"
+                (click)="toggleMobileMainMenu()">
+                <mat-icon style="font-size: 36px; height: 36px; width: 36px;">menu</mat-icon>
+            </button>
+            <button mat-icon-button style="display: flex; align-items: center; gap: 5px" (click)="logout()">
+                <mat-icon>logout</mat-icon>
+            </button>
+        </div>
+    </div>
+</div>
+<div *ngIf="isMobile" class="dropdown-menu" [class.open]="mobileMainMenu">
+    <button mat-menu-item routerLink="/main/customers" (click)="toggleMobileMainMenu()">Customers</button>
+    <button mat-menu-item routerLink="/main/book" (click)="toggleMobileMainMenu()">Bookings</button>
+    <button mat-menu-item routerLink="/main/report/book" (click)="toggleMobileMainMenu()">Book Reports</button>
+</div>

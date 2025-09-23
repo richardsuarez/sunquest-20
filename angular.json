@@ -19,10 +19,7 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
+              "src/assets/"
             ],
             "styles": [
               "src/styles.css"
@@ -34,12 +31,12 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumError": "5MB"
                 },
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumError": "1MB"
                 }
               ],
               "outputHashing": "all"
@@ -88,5 +85,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

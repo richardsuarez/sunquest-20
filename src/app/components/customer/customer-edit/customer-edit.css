@@ -1,0 +1,98 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0px 20px;
+}
+
+.header{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    padding: 20px;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.body{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    width: 100%;
+    max-width: 700px;
+    padding-bottom: 20px;
+
+    h1{
+        margin: 0px !important
+    }
+}
+
+.form-desktop{
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.form-mobile{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.form-actions-desktop{
+    display: flex;
+    justify-content: end;
+    gap: 20px;
+    align-items: center;
+
+    button{
+        width: 120px
+    }
+}
+
+.form-actions-mobile{
+    display: flex;
+    justify-content: space-between;
+    flex-grow: 1;
+    gap: 20px;
+    align-items: center;
+
+
+    button{
+        width: 45%
+    }
+}
+
+.secondary-customer {
+  border: 1px solid lightgray;
+  padding: 0px 10px;
+  border-radius: 5px;
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* reusable row used where you had display:flex inline */
+.row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start; /* keep items top-aligned */
+  flex-wrap: nowrap; /* default; we'll let children shrink via min-width:0 */
+}
+
+/* allow each child (mat-form-field etc.) to shrink and take equal share */
+.row > * {
+  flex: 1 1 0;  /* grow, shrink, base 0 */
+  min-width: 0;  /* critical: permits shrinking instead of overflowing */
+  box-sizing: border-box;
+}
+
+/* For very small screens make rows wrap so fields stack */
+@media (max-width: 600px) {
+  .row {
+    flex-wrap: wrap;
+  }
+  .row > * {
+    flex-basis: 100%;
+  }
+}
