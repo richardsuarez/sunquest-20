@@ -17,6 +17,8 @@ import { AllowAlphaAndSpecificCharDirective } from "../../../shared/directives/a
 import { AllowOnlyNumbersDirective } from "../../../shared/directives/allow-only-numbers.directive";
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DataService } from '../../../shared/firebase/data.service';
+import { CustomerStateService } from '../state/state';
+import { CustomerComponent } from '../container/customer';
 //import { Store } from '@ngrx/store';
 //import { AppState } from '../../../store/app.state';
 
@@ -97,7 +99,8 @@ export class CustomerEdit implements OnInit, OnDestroy{
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
-    @Inject(DataService) private readonly data: DataService,
+    private customerState: CustomerStateService
+    //@Inject(DataService) private readonly data: DataService,
     //private readonly store: Store<AppState>,
   ){
     //this.savingCustomer$ = store.select(savingCustomer)
@@ -112,6 +115,10 @@ export class CustomerEdit implements OnInit, OnDestroy{
     ]).pipe(takeUntil(this.destroy$)).subscribe(res => {
       this.isMobile = res.matches;
     })
+
+    if(this.customerState.customerViewModel()){
+      this.customerForm.patchValue(this.customerState.customerViewModel()!);
+    }
   }
 
   ngOnDestroy(){
@@ -157,6 +164,9 @@ export class CustomerEdit implements OnInit, OnDestroy{
 
   onSubmit(){
     if(this.customerForm.valid){
+      this.customerState.setCustomer({id: '', ...this.customerForm.getRawValue()})
+      this.customerForm.reset();
+      this.router.navigate(['main/customer/'])
       //this.data.addCustomer({id: '', ...this.customerForm.getRawValue()})
       //this.store.dispatch(addCustomerStart({customer: {id: '', ...this.customerForm.getRawValue()}}))
     } else {
