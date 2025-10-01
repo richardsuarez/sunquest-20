@@ -50,6 +50,42 @@
                     <input type="text" matInput formControlName="telephone" appAllowOnlyNumbers>
                 </mat-form-field>
             </div>
+
+            <mat-checkbox style="margin-bottom: 10px;" (change)="toggleAddSecondaryCustomer()"
+                [checked]="showSecondaryCustomer">Add secondary
+                customer</mat-checkbox>
+
+            <div *ngIf="showSecondaryCustomer" class="secondary-customer">
+                <h3>Secondary Customer</h3>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                        <mat-label>First Name</mat-label>
+                        <input type="text" matInput formControlName="secondaryFirstName" appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                        <mat-label>Last Name</mat-label>
+                        <input type="text" matInput formControlName="secondaryLastName" appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                        <mat-label>Middle Name</mat-label>
+                        <input type="text" matInput formControlName="secondaryMiddleName" appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                        <mat-label>Title</mat-label>
+                        <mat-select formControlName="secondaryTitle">
+                            <mat-option value="Mr.">Mr.</mat-option>
+                            <mat-option value="Mrs.">Mrs.</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+            </div>
+
             <mat-form-field floatLabel="always" appearance="outline" style="width: 100% !important">
                 <mat-label>Address 1</mat-label>
                 <input type="text" matInput required formControlName="address1">
@@ -73,7 +109,7 @@
                     <mat-label>City</mat-label>
                     <input type="text" matInput formControlName="city" appAllowAlphaAndSpecificChar>
                 </mat-form-field>
-                
+
             </div>
             <div style="display: flex; justify-content: space-between; gap: 20px !important">
                 <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
