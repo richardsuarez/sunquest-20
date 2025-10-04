@@ -1,5 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Component, Inject, inject, Injectable, OnDestroy, OnInit } from '@angular/core';
+import { Component, Injectable, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,13 +15,8 @@ import { MatInput } from '@angular/material/input';
 import { AllowAlphanumericDirective } from "../../../shared/directives/allow-alphanumeric.directive";
 import { AllowAlphaAndSpecificCharDirective } from "../../../shared/directives/allow-alpha-and-specific-char.directive";
 import { AllowOnlyNumbersDirective } from "../../../shared/directives/allow-only-numbers.directive";
-import { MatCheckbox } from '@angular/material/checkbox';
-import { DataService } from '../../../shared/firebase/data.service';
 import { CustomerStateService } from '../state/state';
-import { CustomerComponent } from '../container/customer';
-//import { Store } from '@ngrx/store';
-//import { AppState } from '../../../store/app.state';
-
+import { DataService } from '../../../shared/firebase/data.service';
 
 @Component({
   selector: 'app-customer-edit',
@@ -37,22 +32,20 @@ import { CustomerComponent } from '../container/customer';
     MatIconModule,
     MatProgressSpinnerModule,
     MatSelect,
-    MatCheckbox,
     AllowAlphanumericDirective,
     AllowAlphaAndSpecificCharDirective,
     AllowOnlyNumbersDirective,
     AsyncPipe,
-],
+  ],
   templateUrl: './customer-edit.html',
-  styleUrl: './customer-edit.css'
+  styleUrl: './customer-edit.css',
 })
 @Injectable()
-export class CustomerEdit implements OnInit, OnDestroy{
+export class CustomerEdit implements OnInit, OnDestroy {
   crud!: string;
   destroy$ = new Subject<void>()
   isMobile!: boolean;
   savingCustomer$!: Observable<boolean>;
-  showSecondaryCustomer = false;
 
   customerForm: FormGroup<{
     primaryFirstName: FormControl<string | null>;
@@ -99,15 +92,15 @@ export class CustomerEdit implements OnInit, OnDestroy{
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
-    private customerState: CustomerStateService
-    //@Inject(DataService) private readonly data: DataService,
+    private customerState: CustomerStateService,
+    private readonly data: DataService
     //private readonly store: Store<AppState>,
-  ){
+  ) {
     //this.savingCustomer$ = store.select(savingCustomer)
-     
+
   }
 
-  ngOnInit(){
+  ngOnInit() {
     this.crud = this.route.snapshot.paramMap.get('crud') ?? '';
     this.breakpoints.observe([
       Breakpoints.HandsetLandscape,
@@ -116,66 +109,64 @@ export class CustomerEdit implements OnInit, OnDestroy{
       this.isMobile = res.matches;
     })
 
-    if(this.customerState.customerViewModel()){
-      this.customerForm.patchValue(this.customerState.customerViewModel()!);
-    }
+
+    this.customerForm.patchValue(this.customerState.customerViewModel() || {});
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  canDeactivate():Observable<boolean> | Promise<boolean> | boolean {
-      // only show the popup if the user modifies any fields AND DISCREPANCY VIEW MODAL IN STATE IS NOT NULL 
-      // when discrepancyViewModel is null means user SUBMITS form for add/edit discrepancy and we won't show popup message when submit
-      if(this.customerForm && !this.customerForm.pristine){
-        const dialogRef = this.matDialog.open(
-          PopupComponent,
-          {
-            data:{
-              title: 'Save Changes',
-              message: 'Are you sure you want to leave? Your changes will not be saved',
-              cancelButton: 'Discard',
-              successButton: 'Save',
-            }
+  canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
+    // only show the popup if the user modifies any fields AND DISCREPANCY VIEW MODAL IN STATE IS NOT NULL 
+    // when discrepancyViewModel is null means user SUBMITS form for add/edit discrepancy and we won't show popup message when submit
+    if (this.customerForm && !this.customerForm.pristine) {
+      const dialogRef = this.matDialog.open(
+        PopupComponent,
+        {
+          data: {
+            title: 'Save Changes',
+            message: 'Are you sure you want to leave? Your changes will not be saved',
+            cancelButton: 'Discard',
+            successButton: 'Save',
           }
-        );
-        return dialogRef.afterClosed().pipe(
-          takeUntil(this.destroy$),
-          map(result => {
-            switch(result){
-              case 'Success': this.onSubmit(); return false;
-              case 'Cancel': return true;
-              default: return false;
-            }  // allow navigation if the user click discard button or click outside modal
-          }))
-      }
-      return true;
+        }
+      );
+      return dialogRef.afterClosed().pipe(
+        takeUntil(this.destroy$),
+        map(result => {
+          switch (result) {
+            case 'Success': this.onSubmit(); return false;
+            case 'Cancel': return true;
+            default: return false;
+          }  // allow navigation if the user click discard button or click outside modal
+        }))
     }
+    return true;
+  }
 
-  crudTitle(){
+  crudTitle() {
     return this.crud === 'new' ? 'New' : 'Edit';
   }
 
-  navigateBack(){
+  navigateBack() {
     this.router.navigate(['main/customer/'])
   }
 
-  onSubmit(){
-    if(this.customerForm.valid){
-      this.customerState.setCustomer({id: '', ...this.customerForm.getRawValue()})
+  onSubmit() {
+    if (this.customerForm.valid && !this.customerForm.pristine) {
+      if (this.crud === 'edit' && this.customerState.customerViewModel()) {
+        this.data.updateCustomer({ ...this.customerForm.getRawValue() })
+      }
+      else if (this.crud === 'new') {
+        this.data.addCustomer({ id: '', ...this.customerForm.getRawValue() })
+      }
       this.customerForm.reset();
       this.router.navigate(['main/customer/'])
-      //this.data.addCustomer({id: '', ...this.customerForm.getRawValue()})
-      //this.store.dispatch(addCustomerStart({customer: {id: '', ...this.customerForm.getRawValue()}}))
     } else {
       this.customerForm.markAllAsTouched();
     }
-  }
-
-  toggleAddSecondaryCustomer(){
-    this.showSecondaryCustomer = !this.showSecondaryCustomer;
   }
 }
 

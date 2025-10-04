@@ -17,7 +17,7 @@ export class PopupComponent {
     public dialogRef: MatDialogRef<PopupComponent>,
     @Inject(MAT_DIALOG_DATA) readonly data: {
       title: string,
-      messahe: string,
+      message: string,
       cancelButton: string,
       successButton: string,
     }
