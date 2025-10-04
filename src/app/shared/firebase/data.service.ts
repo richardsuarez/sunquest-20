@@ -18,8 +18,10 @@ export class DataService {
   // #region Customer
 
   addCustomer(customer: Customer) {
+    const cvm = this.state.customerViewModel()
+    if(!cvm) return Promise.reject('No customer to add');
     const newCustomerRef = collection(this.firestore, 'customers');
-    return addDoc(newCustomerRef, customer);
+    return addDoc(newCustomerRef, {...customer, id: cvm.id} as Customer);
   }
 
   getCustomerList(): Observable<Customer[]>{
