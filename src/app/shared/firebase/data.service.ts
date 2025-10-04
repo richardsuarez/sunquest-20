@@ -1,6 +1,9 @@
-import { Inject, Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { Customer} from '../../components/customer/model/customer.model';
+import { Injectable } from '@angular/core';
+import { Customer, SearchCriteria} from '../../components/customer/model/customer.model';
+import { addDoc, collection, deleteDoc, doc, Firestore, updateDoc } from '@angular/fire/firestore';
+import { collectionData } from '@angular/fire/firestore';
+import { Observable, withLatestFrom } from 'rxjs';
+import { CustomerStateService } from '../../components/customer/state/state';
 
 @Injectable({
   providedIn: 'root'
@@ -8,23 +11,33 @@ import { Customer} from '../../components/customer/model/customer.model';
 export class DataService {
 
   constructor(
-    @Inject(AngularFirestore) private firestore: AngularFirestore,
+    private readonly firestore: Firestore,
+    private readonly state: CustomerStateService,
   ) { }
 
   // #region Customer
 
   addCustomer(customer: Customer) {
-    const id = this.firestore.createId();
-    customer.id = id;
-    this.firestore.collection('Customer').add(customer)
-      .then(() => {
-        console.log('Customer added successfully!');
-      }).catch((error) => {
-        console.error('Error adding customer: ', error);
-      });
+    const newCustomerRef = collection(this.firestore, 'customers');
+    return addDoc(newCustomerRef, customer);
   }
 
-  //getCustomerList(criteria: SearchCriteria): Observable
+  getCustomerList(): Observable<Customer[]>{
+    const CustomerListRef = collection(this.firestore, 'customers');
+    return collectionData(CustomerListRef, { idField: 'id' }) as Observable<Customer[]>;
+  }
+
+  deleteCustomer(id: string) {
+    const customerDocRef = doc(this.firestore, `customers/${id}`);
+    return deleteDoc(customerDocRef);
+  }
+
+  updateCustomer(customer: Partial<Customer>) {
+    const cvm = this.state.customerViewModel()
+    if(!cvm) return Promise.reject('No customer to update');
+    const customerDocRef = doc(this.firestore, `customers/${cvm.id}`);
+    return updateDoc(customerDocRef, { ...customer });
+  }
 
   // #endregion Customer
 }

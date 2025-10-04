@@ -18,7 +18,7 @@ export class CustomerStateService {
 
   resetCustomerViewModel() {
     this.customerViewModel.set({
-      id: '',
+      id: new Date().toISOString(),
       primaryFirstName: '',
       primaryLastName: '',
       primaryMiddleName: '',

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Observable, Subject, takeUntil } from 'rxjs';
+import { map, Observable, Subject, takeUntil } from 'rxjs';
 import { SearchCriteria } from '../model/customer.model';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -17,6 +17,9 @@ import { MatDividerModule } from '@angular/material/divider';
 //import { customerList, criteria } from '../../store/customer/customer.selector';
 //import * as CustomerActions from '../../store/customer/customer.actions';
 import { Customer } from '../model/customer.model';
+import { DataService } from '../../../shared/firebase/data.service';
+import { MatDialog } from '@angular/material/dialog';
+import { PopupComponent } from '../../../shared/popup/popup.component';
 
 @Component({
   selector: 'app-customer',
@@ -28,25 +31,27 @@ import { Customer } from '../model/customer.model';
     MatCardModule,
     MatInput,
     MatButtonModule,
-    MatDividerModule
+    MatDividerModule,
   ],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
 export class CustomerComponent implements OnInit, OnDestroy {
 
-  isMobile!: boolean
-  destroy$ = new Subject<void>()
-
-  searchCustomer = new FormControl<string | null>('')
+  isMobile!: boolean;
+  destroy$ = new Subject<void>();
+  customerList$!: Observable<Customer[]>;
+  searchCustomer = new FormControl<string | null>('');
   constructor(
     private readonly breakpoints: BreakpointObserver,
     private readonly router: Router,
     readonly customerState: CustomerStateService,
+    private readonly data: DataService,
+    private readonly matDialog: MatDialog,
     //private readonly store: Store<AppState>,
   ) {
-    //this.customerListObserver$ = store.select(customerList)
-    //this.criteria$ = this.store.select(criteria)
+
+    this.customerList$ = this.data.getCustomerList();
   }
 
   ngOnInit() {
@@ -89,7 +94,26 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
   deleteCustomer(customer: Customer | undefined) {
     if (customer && customer.id) {
-      this.customerState.deleteCustomer(customer.id);
+      const dialogRef = this.matDialog.open(
+        PopupComponent,
+        {
+          data: {
+            title: 'Delete Customer',
+            message: `Are you sure you want to delete ${customer.primaryTitle} ${customer.primaryFirstName} ${customer.primaryLastName}?`,
+            cancelButton: 'No',
+            successButton: 'Yes',
+          }
+        }
+      );
+      dialogRef.afterClosed().pipe(
+        takeUntil(this.destroy$),
+        map(result => {
+          if (result) {
+            this.data.deleteCustomer(customer.id);
+          }  // allow navigation if the user click discard button or click outside modal
+        })
+      ).subscribe();
+      
     }
   }
 

@@ -11,6 +11,7 @@ import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 import { routes } from './app.routes';
 
 import {environment } from './shared/firebase/environment'; 
+import { Firestore } from '@angular/fire/firestore';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
       AngularFireAuthModule,
       AngularFirestoreModule,
       AngularFireStorageModule,
+      Firestore
     ),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),

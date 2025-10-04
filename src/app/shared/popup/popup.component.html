@@ -1,8 +1,8 @@
-<h2 mat-dialog-title>Save Changes</h2>
+<h2 mat-dialog-title>{{data.title}}</h2>
 <mat-dialog-content>
-    <p>Are you sure you want to leave ? Your changes will not be saved</p>
+    <p>{{data.message}}</p>
 </mat-dialog-content>
 <mat-dialog-actions>
-    <button mat-button mat-raised-button (click)="cancel()" style="color: black">Discard</button>
-    <button mat-button mat-raised-button style="background-color: #ED2D89; color: white" (click)="save()">Save</button>
+    <button mat-button mat-raised-button (click)="cancel()" style="color: black">{{data.cancelButton}}</button>
+    <button mat-button mat-raised-button style="background-color: #ED2D89; color: white" (click)="save()">{{data.successButton}}</button>
 </mat-dialog-actions>
