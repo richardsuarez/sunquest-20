@@ -1,9 +1,9 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Component, Injectable, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, Injectable, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map, Observable, Subject, takeUntil } from 'rxjs';
+import { map, Observable, Subject, takeUntil, withLatestFrom } from 'rxjs';
 import { PopupComponent } from '../../../shared/popup/popup.component';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -15,8 +15,10 @@ import { MatInput } from '@angular/material/input';
 import { AllowAlphanumericDirective } from "../../../shared/directives/allow-alphanumeric.directive";
 import { AllowAlphaAndSpecificCharDirective } from "../../../shared/directives/allow-alpha-and-specific-char.directive";
 import { AllowOnlyNumbersDirective } from "../../../shared/directives/allow-only-numbers.directive";
-import { CustomerStateService } from '../state/state';
-import { DataService } from '../../../shared/firebase/data.service';
+import { Store } from '@ngrx/store';
+import { customerViewModel, savingCustomer } from '../store/customer.selectors';
+import { Customer } from '../model/customer.model';
+import { updateCustomerStart, addCustomerStart } from '../store/customer.actions';
 
 @Component({
   selector: 'app-customer-edit',
@@ -46,6 +48,8 @@ export class CustomerEdit implements OnInit, OnDestroy {
   destroy$ = new Subject<void>()
   isMobile!: boolean;
   savingCustomer$!: Observable<boolean>;
+  customerVM$!: Observable<Partial<Customer> | null>;
+  currentCustomer!: Partial<Customer> | null;
 
   customerForm: FormGroup<{
     primaryFirstName: FormControl<string | null>;
@@ -87,16 +91,16 @@ export class CustomerEdit implements OnInit, OnDestroy {
     zipCode: new FormControl<string | null>(''),
   })
 
+  private store = inject(Store)
+
   constructor(
     readonly breakpoints: BreakpointObserver,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
-    private customerState: CustomerStateService,
-    private readonly data: DataService
-    //private readonly store: Store<AppState>,
   ) {
-    //this.savingCustomer$ = store.select(savingCustomer)
+    this.savingCustomer$ = this.store.select(savingCustomer)
+    this.customerVM$ = this.store.select(customerViewModel)
 
   }
 
@@ -108,10 +112,14 @@ export class CustomerEdit implements OnInit, OnDestroy {
     ]).pipe(takeUntil(this.destroy$)).subscribe(res => {
       this.isMobile = res.matches;
     })
-
-
-    this.customerForm.patchValue(this.customerState.customerViewModel() || {});
+    this.customerVM$.pipe(takeUntil(this.destroy$)).subscribe((customer) => {
+      this.currentCustomer = customer;
+      if (customer) {
+        this.customerForm.patchValue(customer);
+      }
+    })
   }
+
 
   ngOnDestroy() {
     this.destroy$.next();
@@ -156,11 +164,11 @@ export class CustomerEdit implements OnInit, OnDestroy {
 
   onSubmit() {
     if (this.customerForm.valid && !this.customerForm.pristine) {
-      if (this.crud === 'edit' && this.customerState.customerViewModel()) {
-        this.data.updateCustomer({ ...this.customerForm.getRawValue() })
+      if (this.crud === 'edit' && this.currentCustomer) {
+        this.store.dispatch(updateCustomerStart({customer: this.customerForm.getRawValue()}))
       }
-      else if (this.crud === 'new') {
-        this.data.addCustomer({ id: '', ...this.customerForm.getRawValue() })
+      else if (this.crud === 'new' && this.currentCustomer) {
+        this.store.dispatch(addCustomerStart({customer: this.customerForm.getRawValue()}))
       }
       this.customerForm.reset();
       this.router.navigate(['main/customer/'])
