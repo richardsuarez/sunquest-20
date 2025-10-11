@@ -1,6 +1,6 @@
 {
   "name": "sunquest",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -31,12 +31,16 @@
     "@angular/material": "~20.0.5",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "@ngrx/effects": "^20.0.1",
+    "@ngrx/store": "^20.0.1",
+    "@ngrx/store-devtools": "^20.0.1",
     "firebase": "^11.10.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
+    "@angular-eslint/schematics": "^20.3.0",
     "@angular/build": "^20.3.2",
     "@angular/cli": "^20.3.2",
     "@angular/compiler-cli": "^20.3.0",

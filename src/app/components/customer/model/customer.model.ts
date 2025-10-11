@@ -1,5 +1,5 @@
 export interface Customer {
-    id: string;
+    DocumentID: string;
     primaryFirstName: string | null;
     primaryLastName: string | null;
     primaryMiddleName: string | null;
@@ -18,14 +18,13 @@ export interface Customer {
     city: string | null;
     state: string | null;
     zipCode: string | null;
+    joinedOn: Date | null;
 }
 
 export interface SearchCriteria {
     searchValue: string;
-    pagination: Pagination
-}
-
-export interface Pagination {
-    paginationNumber: number
-    itemsPerPage: number
+    pagination: {
+        page: number,
+        pageSize: number
+    }
 }

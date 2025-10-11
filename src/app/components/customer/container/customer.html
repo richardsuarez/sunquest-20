@@ -22,10 +22,10 @@
             <div mat-card-avatar class="customer-avatar">
                 <mat-icon>person</mat-icon>
             </div>
-            <mat-card-title>{{ customer.primaryTitle }} {{ customer.primaryFirstName }} {{ customer.primaryLastName
+            <mat-card-title>{{ customer.primaryTitle }} {{ customer.primaryLastName }}, {{ customer.primaryFirstName
                 }}</mat-card-title>
             <mat-card-subtitle *ngIf="customer.secondaryFirstName">
-                {{ customer.secondaryTitle }} {{ customer.secondaryFirstName }} {{ customer.secondaryLastName }}
+                {{ customer.secondaryTitle }} {{ customer.secondaryLastName }} {{ customer.secondaryFirstName }}
             </mat-card-subtitle>
         </mat-card-header>
 
@@ -72,3 +72,11 @@
         <h2>No customers found.</h2>
     </div>
 </div>
+
+<mat-paginator 
+    class="pagination" 
+    [length]="100" 
+    [pageSize]="2"
+    aria-label="Select page"
+    (page)="onPageChange($event)">
+</mat-paginator>

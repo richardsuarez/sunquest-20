@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { map, Observable, Subject, takeUntil } from 'rxjs';
 import { SearchCriteria } from '../model/customer.model';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -10,16 +10,14 @@ import { MatFormField } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { MatInput } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { CustomerStateService } from '../state/state';
 import { MatDividerModule } from '@angular/material/divider';
-//import { Store } from '@ngrx/store';
-//import { AppState } from '../../store/app.state';
-//import { customerList, criteria } from '../../store/customer/customer.selector';
-//import * as CustomerActions from '../../store/customer/customer.actions';
 import { Customer } from '../model/customer.model';
-import { DataService } from '../../../shared/firebase/data.service';
 import { MatDialog } from '@angular/material/dialog';
 import { PopupComponent } from '../../../shared/popup/popup.component';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { Store } from '@ngrx/store';
+import { customerList } from '../store/customer.selectors';
+import * as CustomerActions from '../store/customer.actions'
 
 @Component({
   selector: 'app-customer',
@@ -32,26 +30,27 @@ import { PopupComponent } from '../../../shared/popup/popup.component';
     MatInput,
     MatButtonModule,
     MatDividerModule,
+    MatPaginatorModule
   ],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
-export class CustomerComponent implements OnInit, OnDestroy {
+export class CustomerComponent implements OnInit, OnDestroy, AfterViewInit {
+
+  @ViewChild('paginator') paginator: MatPaginator | undefined;
 
   isMobile!: boolean;
   destroy$ = new Subject<void>();
   customerList$!: Observable<Customer[]>;
   searchCustomer = new FormControl<string | null>('');
+
+  private store = inject(Store)
   constructor(
     private readonly breakpoints: BreakpointObserver,
     private readonly router: Router,
-    readonly customerState: CustomerStateService,
-    private readonly data: DataService,
     private readonly matDialog: MatDialog,
-    //private readonly store: Store<AppState>,
   ) {
-
-    this.customerList$ = this.data.getCustomerList();
+    this.customerList$ = this.store.select(customerList)
   }
 
   ngOnInit() {
@@ -62,18 +61,19 @@ export class CustomerComponent implements OnInit, OnDestroy {
       this.isMobile = res.matches
     });
 
-    /* this.criteria$.pipe(takeUntil(this.destroy$))
-      .subscribe((criteria) => {
-        this.store.dispatch(CustomerActions.getCustomerListStart({criteria}))
-      }) */
+    
   }
 
   ngOnDestroy() {
     this.destroy$.complete()
   }
 
+  ngAfterViewInit(){
+      this.store.dispatch(CustomerActions.getCustomerListStart())
+  }
+
   addCustomer() {
-    this.customerState.resetCustomerViewModel();
+    this.store.dispatch(CustomerActions.createCustomer())
     this.router.navigate(['main/customer/new'])
   }
 
@@ -87,13 +87,13 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
   toEditCustomer(customer: Customer | undefined) {
     if (customer) {
-      this.customerState.setCustomerViewModel(customer);
+      this.store.dispatch(CustomerActions.loadCustomer({ customer }));
       this.router.navigate(['main/customer/edit']);
     }
   }
 
   deleteCustomer(customer: Customer | undefined) {
-    if (customer && customer.id) {
+    if (customer && customer.DocumentID) {
       const dialogRef = this.matDialog.open(
         PopupComponent,
         {
@@ -109,12 +109,25 @@ export class CustomerComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         map(result => {
           if (result) {
-            this.data.deleteCustomer(customer.id);
+            this.store.dispatch(CustomerActions.deleteCustomerStart({ id: customer.DocumentID }));
           }  // allow navigation if the user click discard button or click outside modal
         })
       ).subscribe();
-      
+
     }
+  }
+
+  onPageChange(event: any) {
+    this.store.dispatch(CustomerActions.updateSearchCriteria({
+      criteria: {
+        searchValue: this.searchCustomer.value || '',
+        pagination:{
+          page: event.pageIndex,
+          pageSize: event.pageSize
+        }
+      }
+    }));
+    this.store.dispatch(CustomerActions.getCustomerListStart());
   }
 
 }

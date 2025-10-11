@@ -95,3 +95,9 @@ mat-card-actions {
   justify-content: flex-end;
   gap: 10px;
 }
+
+.pagination{
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}

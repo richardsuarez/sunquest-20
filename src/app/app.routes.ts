@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
 import { CanDeactivateGuard } from './shared/can-deactivate-guard.service';
+import { provideState } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { CUSTOMER_FEATURE_KEY, customerReducer } from './components/customer/store/customer.reducers';
+import { CustomerEffects } from './components/customer/store/customer.effects';
 
 export const routes: Routes = [
     {
@@ -22,6 +26,10 @@ export const routes: Routes = [
             },
             {
                 path: 'customer',
+                providers: [
+                    provideState(CUSTOMER_FEATURE_KEY, customerReducer),
+                    provideEffects([CustomerEffects]),
+                ],
                 children: [
                     {
                         path: '',
