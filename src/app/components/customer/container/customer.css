@@ -24,8 +24,6 @@
 .search{
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 10px;
     padding: 0px 10px 0px 10px;
     margin-bottom: 15px;
 }
@@ -62,8 +60,15 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.customer-avatar {
+.female-customer-avatar {
   background-color: #e91e63;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.male-customer-avatar {
+  background-color: #1e7de9;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -96,3 +96,7 @@
     flex-basis: 100%;
   }
 }
+
+::ng-deep mat-form-field{
+  max-width: 100% !important
+}

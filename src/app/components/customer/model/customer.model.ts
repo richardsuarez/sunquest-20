@@ -23,8 +23,5 @@ export interface Customer {
 
 export interface SearchCriteria {
     searchValue: string;
-    pagination: {
-        page: number,
-        pageSize: number
-    }
+    pageSize: number
 }

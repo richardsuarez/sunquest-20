@@ -1,12 +1,21 @@
 import { createAction, props } from "@ngrx/store";
 import { Customer, SearchCriteria } from "../model/customer.model";
 
-export const getCustomerListStart = createAction(
-    '[Customer] Start retrieving customer list'
+export const getNextCustomerListStart = createAction(
+    '[Customer] Start retrieving the next customer list'
 );
 
-export const getCustomerListEnd = createAction(
-    '[Customer] End retrieving customer list',
+export const getNextCustomerListEnd = createAction(
+    '[Customer] End retrieving the next customer list',
+    props<{ customerList: Customer[], total: number }>()
+);
+
+export const getPreviousCustomerListStart = createAction(
+    '[Customer] Start retrieving the previous customer list'
+);
+
+export const getPreviousCustomerListEnd = createAction(
+    '[Customer] End retrieving the previous customer list',
     props<{ customerList: Customer[] }>()
 );
 
@@ -22,6 +31,7 @@ export const addCustomerStart = createAction(
 
 export const addCustomerEnd = createAction(
     '[Customer] End add new customer',
+    props<{customer: Partial<Customer>}>()
 );
 
 export const updateCustomerStart = createAction(
@@ -31,6 +41,7 @@ export const updateCustomerStart = createAction(
 
 export const updateCustomerEnd = createAction(
     '[Customer] End updating customer',
+    props<{customer: Partial<Customer>}>()
 );
 
 export const deleteCustomerStart = createAction(
@@ -54,6 +65,18 @@ export const loadCustomer = createAction(
 export const updateSearchCriteria = createAction(
     '[Customer] Update search criteria',
     props<{criteria: SearchCriteria}>()
+);
+
+export const resetLastCustomer = createAction(
+    '[Customer] Reset last customer'
+);
+
+export const resetCustomerViewModel = createAction(
+    '[Customer] Reset customer view model'
+);
+
+export const resetSearchCriteria = createAction(
+    '[Customer] Reset search criteria'
 )
 
 

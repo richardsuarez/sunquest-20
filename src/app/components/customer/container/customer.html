@@ -8,24 +8,30 @@
     <mat-form-field appearance="outline" subscriptSizing="dynamic" [class.form-field]="!isMobile"
         [class.form-field-mobile]="isMobile">
         <input type="text" matInput [formControl]="searchCustomer"
-            [placeholder]="!isMobile ? 'Search by first name, last name or telephone number' : 'Search customer'">
+            [placeholder]="!isMobile ? 'Search by first name, last name or phone number' : 'Search customer'"
+            (keyup.enter)="onSearch()">
+        <button mat-icon-button matSuffix class="search-button" color="primary" (click)="onSearch()">
+            <mat-icon>search</mat-icon>
+        </button>
     </mat-form-field>
-    <button mat-icon-button class="search-button" color="primary" [disabled]="searchCustomer.value?.length === 0"
-        type="submit">
-        <mat-icon>search</mat-icon>
-    </button>
+
+</div>
+<div *ngIf="loading$ | async">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
 </div>
 <div class="body">
     <mat-card *ngFor="let customer of customerList$ | async" [class.customer-card-desktop]="!isMobile"
         [class.customer-card-mobile]="isMobile">
         <mat-card-header>
-            <div mat-card-avatar class="customer-avatar">
+            <div mat-card-avatar [class.male-customer-avatar]="customer.primaryTitle === 'Mr.'"
+                [class.female-customer-avatar]="customer.primaryTitle === 'Mrs.'">
                 <mat-icon>person</mat-icon>
             </div>
-            <mat-card-title>{{ customer.primaryTitle }} {{ customer.primaryLastName }}, {{ customer.primaryFirstName
-                }}</mat-card-title>
+            <mat-card-title>{{ customer.primaryTitle }} {{ customer.primaryLastName }}, {{ customer.primaryFirstName }}
+                {{ customer.primaryMiddleName }}</mat-card-title>
             <mat-card-subtitle *ngIf="customer.secondaryFirstName">
-                {{ customer.secondaryTitle }} {{ customer.secondaryLastName }} {{ customer.secondaryFirstName }}
+                {{ customer.secondaryTitle }} {{ customer.secondaryLastName }}, {{ customer.secondaryFirstName }} {{
+                customer.secondaryMiddleName }}
             </mat-card-subtitle>
         </mat-card-header>
 
@@ -34,16 +40,19 @@
                 <h4>Contact Information</h4>
                 <p>
                     <mat-icon>email</mat-icon>
-                    <a [href]="'mailto:' + customer.email">{{ customer.email }}</a>
+                    <a *ngIf="customer.email" [href]="'mailto:' + customer.email">{{ customer.email }}</a>
+                    <span *ngIf="!customer.email">No provided</span>
                 </p>
                 <div style="display: flex; gap: 25px">
                     <p>
                         <mat-icon>phone</mat-icon>
-                        <a [href]="'tel:' + customer.phone">{{ customer.phone }}</a>
+                        <a *ngIf="customer.phone" [href]="'tel:' + customer.phone">{{ customer.phone }}</a>
+                        <span *ngIf="!customer.phone">No provided</span>
                     </p>
                     <p *ngIf="customer.telephone">
                         <mat-icon>phone</mat-icon>
-                        <a [href]="'tel:' + customer.telephone">{{ customer.telephone }}</a>
+                        <a *ngIf="!customer.telephone" [href]="'tel:' + customer.telephone">{{ customer.telephone }}</a>
+                        <span *ngIf="!customer.telephone">No provided</span>
                 </div>
 
             </section>
@@ -73,10 +82,6 @@
     </div>
 </div>
 
-<mat-paginator 
-    class="pagination" 
-    [length]="100" 
-    [pageSize]="2"
-    aria-label="Select page"
-    (page)="onPageChange($event)">
+<mat-paginator class="pagination" [length]="totalPagination$ | async" [pageSize]="searchCriteria.pageSize"
+    aria-label="Select page" (page)="onPageChange($event)">
 </mat-paginator>

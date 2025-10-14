@@ -11,27 +11,42 @@ const initialState: CustomerState = {
     customerViewModel: null,
     searchCriteria: {
         searchValue: '',
-        pagination: {
-            page: 1,
-            pageSize: 2,
-        }
+        pageSize: 4,
     },
-    lastCustomer: null,
+    firstCustomerViewed: null,
+    lastCustomerViewed: null,
     savingCustomer: false,
+    totalPagination: 0,
     appError: null,
 }
 
 export const customerReducer = createReducer(
     initialState,
-    on(CustomerActions.getCustomerListStart, (state) => ({
+    on(CustomerActions.getNextCustomerListStart, (state) => ({
         ...state,
         loading: true,
         appError: null
     })),
-    on(CustomerActions.getCustomerListEnd, (state, action) => ({
+    on(CustomerActions.getNextCustomerListEnd, (state, action) => ({
         ...state,
         loading: false,
-        customerList: action.customerList
+        customerList: action.customerList,
+        firstCustomerViewed: action.customerList[0], // store a reference to the first customer in the list
+        lastCustomerViewed: action.customerList[action.customerList.length - 1], // store a reference to the last customer in the list
+        totalPagination: action.total
+    })),
+
+    on(CustomerActions.getPreviousCustomerListStart, (state) => ({
+        ...state,
+        loading: true,
+        appError: null
+    })),
+    on(CustomerActions.getPreviousCustomerListEnd, (state, action) => ({
+        ...state,
+        loading: false,
+        customerList: action.customerList,
+        firstCustomerViewed: action.customerList[0], // store a reference to the first customer in the list
+        lastCustomerViewed: action.customerList[action.customerList.length - 1], // store a reference to the last customer in the list
     })),
 
     on(CustomerActions.failure, (state, action) => ({
@@ -94,5 +109,24 @@ export const customerReducer = createReducer(
     on(CustomerActions.loadCustomer, (state, action) => ({
         ...state,
         customerViewModel: action.customer
+    })),
+    on(CustomerActions.updateSearchCriteria, (state, action) => ({
+        ...state,
+        searchCriteria: action.criteria
+    })),
+    on(CustomerActions.resetLastCustomer, (state) => ({
+        ...state,
+        lastCustomerViewed: null
+    })),
+    on(CustomerActions.resetCustomerViewModel, (state) => ({
+        ...state,
+        customerViewModel: null
+    })),
+    on(CustomerActions.resetSearchCriteria, (state) => ({
+        ...state,
+        searchCriteria: {
+            searchValue: '',
+            pageSize: 4,
+        },
     }))
 )
