@@ -1,22 +1,23 @@
-import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { map, Observable, Subject, takeUntil } from 'rxjs';
-import { SearchCriteria } from '../model/customer.model';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormField } from '@angular/material/form-field';
-import { MatCardModule } from '@angular/material/card';
-import { MatInput } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
+import { customerList, loading, searchCriteria, totalPagination } from '../store/customer.selectors';
 import { Customer } from '../model/customer.model';
+import { CommonModule } from '@angular/common';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { map, Observable, Subject, takeUntil } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { PopupComponent } from '../../../shared/popup/popup.component';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatFormField, MatSuffix } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { PopupComponent } from '../../../shared/popup/popup.component';
+import { Router } from '@angular/router';
+import { SearchCriteria } from '../model/customer.model';
 import { Store } from '@ngrx/store';
-import { customerList } from '../store/customer.selectors';
 import * as CustomerActions from '../store/customer.actions'
 
 @Component({
@@ -30,19 +31,24 @@ import * as CustomerActions from '../store/customer.actions'
     MatInput,
     MatButtonModule,
     MatDividerModule,
-    MatPaginatorModule
-  ],
+    MatPaginatorModule,
+    MatProgressBar,
+    MatSuffix
+],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
-export class CustomerComponent implements OnInit, OnDestroy, AfterViewInit {
+export class CustomerComponent implements OnInit, OnDestroy {
 
   @ViewChild('paginator') paginator: MatPaginator | undefined;
 
   isMobile!: boolean;
   destroy$ = new Subject<void>();
+  loading$!: Observable<boolean>;
   customerList$!: Observable<Customer[]>;
   searchCustomer = new FormControl<string | null>('');
+  searchCriteria!: SearchCriteria;
+  totalPagination$!: Observable<number>
 
   private store = inject(Store)
   constructor(
@@ -50,7 +56,12 @@ export class CustomerComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly router: Router,
     private readonly matDialog: MatDialog,
   ) {
+    this.loading$ = this.store.select(loading)
     this.customerList$ = this.store.select(customerList)
+    this.totalPagination$ = this.store.select(totalPagination)
+    this.store.select(searchCriteria).pipe(takeUntil(this.destroy$))
+      .subscribe((criteria) => this.searchCriteria = criteria)
+
   }
 
   ngOnInit() {
@@ -60,16 +71,13 @@ export class CustomerComponent implements OnInit, OnDestroy, AfterViewInit {
     ]).subscribe(res => {
       this.isMobile = res.matches
     });
-
-    
+    this.store.dispatch(CustomerActions.resetSearchCriteria())
+    this.store.dispatch(CustomerActions.resetLastCustomer())
+    this.store.dispatch(CustomerActions.getNextCustomerListStart())
   }
 
   ngOnDestroy() {
     this.destroy$.complete()
-  }
-
-  ngAfterViewInit(){
-      this.store.dispatch(CustomerActions.getCustomerListStart())
   }
 
   addCustomer() {
@@ -118,16 +126,39 @@ export class CustomerComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPageChange(event: any) {
+
+    if (event.previousPageIndex < event.pageIndex) {
+      // looking for the next page
+      this.store.dispatch(CustomerActions.updateSearchCriteria({
+        criteria: {
+          searchValue: this.searchCriteria.searchValue || '',
+          pageSize: this.searchCriteria.pageSize
+        }
+      }));
+      this.store.dispatch(CustomerActions.getNextCustomerListStart());
+    } else {
+      this.store.dispatch(CustomerActions.updateSearchCriteria({
+        criteria: {
+          searchValue: this.searchCriteria.searchValue || '',
+          pageSize: this.searchCriteria.pageSize
+        }
+      }));
+      this.store.dispatch(CustomerActions.getPreviousCustomerListStart());
+    }
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+  }
+
+  onSearch() {
+    if (this.searchCustomer.value === this.searchCriteria.searchValue) return
+
     this.store.dispatch(CustomerActions.updateSearchCriteria({
       criteria: {
         searchValue: this.searchCustomer.value || '',
-        pagination:{
-          page: event.pageIndex,
-          pageSize: event.pageSize
-        }
+        pageSize: this.searchCriteria.pageSize,
       }
     }));
-    this.store.dispatch(CustomerActions.getCustomerListStart());
+    this.store.dispatch(CustomerActions.resetLastCustomer());
+    this.store.dispatch(CustomerActions.getNextCustomerListStart());
   }
 
 }

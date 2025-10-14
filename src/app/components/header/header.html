@@ -24,7 +24,7 @@
     </div>
 </div>
 <div *ngIf="isMobile" class="dropdown-menu" [class.open]="mobileMainMenu">
-    <button mat-menu-item routerLink="/main/customers" (click)="toggleMobileMainMenu()">Customers</button>
+    <button mat-menu-item routerLink="/main/customer" (click)="toggleMobileMainMenu()">Customers</button>
     <button mat-menu-item routerLink="/main/book" (click)="toggleMobileMainMenu()">Bookings</button>
     <button mat-menu-item routerLink="/main/report/book" (click)="toggleMobileMainMenu()">Book Reports</button>
 </div>

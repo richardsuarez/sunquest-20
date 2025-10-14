@@ -129,7 +129,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
     // only show the popup if the user modifies any fields AND DISCREPANCY VIEW MODAL IN STATE IS NOT NULL 
     // when discrepancyViewModel is null means user SUBMITS form for add/edit discrepancy and we won't show popup message when submit
-    if (this.customerForm && !this.customerForm.pristine) {
+    if (this.customerForm && !this.customerForm.pristine && this.currentCustomer) {
       const dialogRef = this.matDialog.open(
         PopupComponent,
         {
@@ -170,8 +170,6 @@ export class CustomerEdit implements OnInit, OnDestroy {
       else if (this.crud === 'new' && this.currentCustomer) {
         this.store.dispatch(addCustomerStart({customer: this.customerForm.getRawValue()}))
       }
-      this.customerForm.reset();
-      this.router.navigate(['main/customer/'])
     } else {
       this.customerForm.markAllAsTouched();
     }

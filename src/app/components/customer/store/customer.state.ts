@@ -5,8 +5,9 @@ export interface CustomerState{
     customerList: Customer[];
     customerViewModel: Partial<Customer> | null;
     searchCriteria: SearchCriteria;
-    lastCustomer: Customer | null;
+    firstCustomerViewed: Customer | null;
+    lastCustomerViewed: Customer | null;
     savingCustomer: boolean;
-
+    totalPagination: number;
     appError: Error | null
 }
