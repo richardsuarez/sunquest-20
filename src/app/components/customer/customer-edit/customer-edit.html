@@ -47,11 +47,12 @@
                 </mat-form-field>
                 <mat-form-field floatLabel="always" appearance="outline">
                     <mat-label>Telephone</mat-label>
-                    <input type="text" matInput formControlName="telephone" placeholder="##########" appAllowOnlyNumbers>
+                    <input type="text" matInput formControlName="telephone" placeholder="##########"
+                        appAllowOnlyNumbers>
                 </mat-form-field>
             </div>
 
-            <div class="secondary-customer">
+            <div class="information-region">
                 <h3>Secondary Customer</h3>
                 <div style="display: flex; justify-content: space-between; gap: 20px !important">
                     <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
@@ -79,46 +80,85 @@
                         </mat-select>
                     </mat-form-field>
                 </div>
-
             </div>
 
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100% !important">
-                <mat-label>Address 1</mat-label>
-                <input type="text" matInput required formControlName="address1">
-            </mat-form-field>
+            <div class="information-region">
+                <h3>Florida Address</h3>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                        <mat-label>Address 1</mat-label>
+                        <input type="text" matInput required
+                            [formControl]="customerForm.controls.floridaAddress.controls.address1">
+                    </mat-form-field>
 
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100% !important">
-                <mat-label>Address 2</mat-label>
-                <input type="text" matInput formControlName="address2">
-            </mat-form-field>
-
-            <div style="display: flex; justify-content: space-between; gap: 20px !important">
-                <mat-form-field floatLabel="always" appearance="outline">
-                    <mat-label>Building</mat-label>
-                    <input type="text" matInput formControlName="bldg" appAllowAlphanumeric>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline">
-                    <mat-label>Apartment</mat-label>
-                    <input type="text" matInput formControlName="apt" appAllowAlphanumeric>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline">
-                    <mat-label>City</mat-label>
-                    <input type="text" matInput formControlName="city" appAllowAlphaAndSpecificChar>
-                </mat-form-field>
-
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                        <mat-label>Address 2</mat-label>
+                        <input type="text" matInput
+                            [formControl]="customerForm.controls.floridaAddress.controls.address2">
+                    </mat-form-field>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Building</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.bldg"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Apartment</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.apt"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>City</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.city"
+                            appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Zip Code</mat-label>
+                        <input type="text" matInput
+                            [formControl]="customerForm.controls.floridaAddress.controls.zipCode" appAllowOnlyNumbers>
+                    </mat-form-field>
+                </div>
             </div>
-            <div style="display: flex; justify-content: space-between; gap: 20px !important">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                    <mat-label>State</mat-label>
-                    <mat-select formControlName="state">
-                        <mat-option value="FL">FL</mat-option>
-                        <mat-option value="NY">NY</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                    <mat-label>Zip Code</mat-label>
-                    <input type="text" matInput formControlName="zipCode" appAllowOnlyNumbers>
-                </mat-form-field>
+
+            <div class="information-region">
+                <h3>New York Address</h3>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                        <mat-label>Address 1</mat-label>
+                        <input type="text" matInput required
+                            [formControl]="customerForm.controls.newYorkAddress.controls.address1">
+                    </mat-form-field>
+
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                        <mat-label>Address 2</mat-label>
+                        <input type="text" matInput
+                            [formControl]="customerForm.controls.newYorkAddress.controls.address2">
+                    </mat-form-field>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Building</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.bldg"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Apartment</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.apt"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>City</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.city"
+                            appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Zip Code</mat-label>
+                        <input type="text" matInput
+                            [formControl]="customerForm.controls.newYorkAddress.controls.zipCode" appAllowOnlyNumbers>
+                    </mat-form-field>
+                </div>
             </div>
         </form>
 
@@ -160,7 +200,8 @@
                 </mat-form-field>
                 <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
                     <mat-label>Telephone</mat-label>
-                    <input type="text" matInput formControlName="telephone" placeholder="##########" appAllowOnlyNumbers>
+                    <input type="text" matInput formControlName="telephone" placeholder="##########"
+                        appAllowOnlyNumbers>
                 </mat-form-field>
             </div>
 
@@ -191,42 +232,80 @@
                 </mat-form-field>
             </div>
 
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100% !important">
-                <mat-label>Address 1</mat-label>
-                <input type="text" matInput required formControlName="address1">
-            </mat-form-field>
-
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100% !important">
-                <mat-label>Address 2</mat-label>
-                <input type="text" matInput formControlName="address2">
-            </mat-form-field>
-
-            <div style="display: flex; justify-content: space-between; width: 100%">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%;">
-                    <mat-label>Building</mat-label>
-                    <input type="text" matInput formControlName="bldg" appAllowAlphanumeric>
+            <div class="information-region">
+                <h3>Florida Address</h3>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>Address 1</mat-label>
+                    <input type="text" matInput required
+                        [formControl]="customerForm.controls.floridaAddress.controls.address1">
                 </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%;">
-                    <mat-label>Apartment</mat-label>
-                    <input type="text" matInput formControlName="apt" appAllowAlphanumeric>
+
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>Address 2</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.address2">
                 </mat-form-field>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Building</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.bldg"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Apartment</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.apt"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>City</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.city"
+                            appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Zip Code</mat-label>
+                        <input type="text" matInput
+                            [formControl]="customerForm.controls.floridaAddress.controls.zipCode" appAllowOnlyNumbers>
+                    </mat-form-field>
+                </div>
             </div>
-            <div style="display: flex; justify-content: space-between; gap: 20px !important; width: 100%">
-                <mat-form-field floatLabel="always" appearance="outline">
-                    <mat-label>City</mat-label>
-                    <input type="text" matInput formControlName="city" appAllowAlphaAndSpecificChar>
+
+            <div class="information-region">
+                <h3>New York Address</h3>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>Address 1</mat-label>
+                    <input type="text" matInput required
+                        [formControl]="customerForm.controls.newYorkAddress.controls.address1">
                 </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline">
-                    <mat-label>State</mat-label>
-                    <mat-select formControlName="state">
-                        <mat-option value="FL">FL</mat-option>
-                        <mat-option value="NY">NY</mat-option>
-                    </mat-select>
+
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>Address 2</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.address2">
                 </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline">
-                    <mat-label>Zip Code</mat-label>
-                    <input type="text" matInput formControlName="zipCode" appAllowOnlyNumbers>
-                </mat-form-field>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Building</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.bldg"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Apartment</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.apt"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>City</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.city"
+                            appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Zip Code</mat-label>
+                        <input type="text" matInput
+                            [formControl]="customerForm.controls.newYorkAddress.controls.zipCode" appAllowOnlyNumbers>
+                    </mat-form-field>
+                </div>
             </div>
         </form>
         <div [class.form-actions-desktop]="!isMobile" [class.form-actions-mobile]="isMobile">

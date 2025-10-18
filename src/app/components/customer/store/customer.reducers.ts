@@ -97,12 +97,7 @@ export const customerReducer = createReducer(
             email: '',
             telephone: '',
             phone: '',
-            address1: '',
-            address2: '',
-            bldg: '',
-            apt: '',
-            city: '',
-            state: '',
+            adresses: [],
             zipCode: '',
         }
     })),

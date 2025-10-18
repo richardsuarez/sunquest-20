@@ -11,6 +11,16 @@ export interface Customer {
     email: string | null;
     telephone: string | null;
     phone: string | null;
+    addresses: Address[];
+    joinedOn: Date | null;
+}
+
+export interface SearchCriteria {
+    searchValue: string;
+    pageSize: number
+}
+
+export interface Address{
     address1: string | null;
     address2: string | null;
     bldg: string | null;
@@ -18,10 +28,4 @@ export interface Customer {
     city: string | null;
     state: string | null;
     zipCode: string | null;
-    joinedOn: Date | null;
-}
-
-export interface SearchCriteria {
-    searchValue: string;
-    pageSize: number
 }
