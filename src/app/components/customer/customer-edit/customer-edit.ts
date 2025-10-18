@@ -17,7 +17,7 @@ import { AllowAlphaAndSpecificCharDirective } from "../../../shared/directives/a
 import { AllowOnlyNumbersDirective } from "../../../shared/directives/allow-only-numbers.directive";
 import { Store } from '@ngrx/store';
 import { customerViewModel, savingCustomer } from '../store/customer.selectors';
-import { Customer } from '../model/customer.model';
+import { Address, Customer } from '../model/customer.model';
 import { updateCustomerStart, addCustomerStart } from '../store/customer.actions';
 
 @Component({
@@ -50,6 +50,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   savingCustomer$!: Observable<boolean>;
   customerVM$!: Observable<Partial<Customer> | null>;
   currentCustomer!: Partial<Customer> | null;
+  customerAddresses: Address[] = [];;
 
   customerForm: FormGroup<{
     primaryFirstName: FormControl<string | null>;
@@ -63,13 +64,24 @@ export class CustomerEdit implements OnInit, OnDestroy {
     email: FormControl<string | null>;
     telephone: FormControl<string | null>;
     phone: FormControl<string | null>;
-    address1: FormControl<string | null>;
-    address2: FormControl<string | null>;
-    bldg: FormControl<string | null>;
-    apt: FormControl<string | null>;
-    city: FormControl<string | null>;
-    state: FormControl<string | null>;
-    zipCode: FormControl<string | null>;
+    floridaAddress: FormGroup<{
+      address1: FormControl<string | null>;
+      address2: FormControl<string | null>;
+      bldg: FormControl<string | null>;
+      apt: FormControl<string | null>;
+      city: FormControl<string | null>;
+      state: FormControl<string | null>;
+      zipCode: FormControl<string | null>;
+    }>;
+    newYorkAddress: FormGroup<{
+      address1: FormControl<string | null>;
+      address2: FormControl<string | null>;
+      bldg: FormControl<string | null>;
+      apt: FormControl<string | null>;
+      city: FormControl<string | null>;
+      state: FormControl<string | null>;
+      zipCode: FormControl<string | null>;
+    }>;
   }> = new FormGroup({
     primaryFirstName: new FormControl<string | null>('', Validators.required),
     primaryLastName: new FormControl<string | null>('', Validators.required),
@@ -82,13 +94,24 @@ export class CustomerEdit implements OnInit, OnDestroy {
     email: new FormControl<string | null>('', Validators.email),
     telephone: new FormControl<string | null>(''),
     phone: new FormControl<string | null>('', Validators.required),
-    address1: new FormControl<string | null>('', Validators.required),
-    address2: new FormControl<string | null>(''),
-    bldg: new FormControl<string | null>(''),
-    apt: new FormControl<string | null>(''),
-    city: new FormControl<string | null>('', Validators.required),
-    state: new FormControl<string | null>('', Validators.required),
-    zipCode: new FormControl<string | null>(''),
+    floridaAddress: new FormGroup({
+      address1: new FormControl<string | null>('', Validators.required),
+      address2: new FormControl<string | null>(''),
+      bldg: new FormControl<string | null>(''),
+      apt: new FormControl<string | null>(''),
+      city: new FormControl<string | null>('', Validators.required),
+      state: new FormControl<string | null>('FL'),
+      zipCode: new FormControl<string | null>(''),
+    }),
+    newYorkAddress: new FormGroup({
+      address1: new FormControl<string | null>('', Validators.required),
+      address2: new FormControl<string | null>(''),
+      bldg: new FormControl<string | null>(''),
+      apt: new FormControl<string | null>(''),
+      city: new FormControl<string | null>('', Validators.required),
+      state: new FormControl<string | null>('NY'),
+      zipCode: new FormControl<string | null>(''),
+    }),
   })
 
   private store = inject(Store)
@@ -165,10 +188,10 @@ export class CustomerEdit implements OnInit, OnDestroy {
   onSubmit() {
     if (this.customerForm.valid && !this.customerForm.pristine) {
       if (this.crud === 'edit' && this.currentCustomer) {
-        this.store.dispatch(updateCustomerStart({customer: this.customerForm.getRawValue()}))
+        this.store.dispatch(updateCustomerStart({ customer: this.customerForm.getRawValue() }))
       }
       else if (this.crud === 'new' && this.currentCustomer) {
-        this.store.dispatch(addCustomerStart({customer: this.customerForm.getRawValue()}))
+        this.store.dispatch(addCustomerStart({ customer: this.customerForm.getRawValue() }))
       }
     } else {
       this.customerForm.markAllAsTouched();

@@ -58,14 +58,12 @@
             </section>
 
             <mat-divider></mat-divider>
-
             <section class="info-section">
-                <h4>Address</h4>
-                <div style="display: flex; gap: 5px">
+                <h4>Addresses</h4>
+                <div *ngFor="let address of customer.addresses" style="display: flex; gap: 5px">
                     <mat-icon>location_on</mat-icon>
                     <div style="display: block">
-                        <div>{{ customer.address1 }} {{ customer.address2 }}</div>
-                        <div>{{ customer.city }}, {{ customer.state }} {{ customer.zipCode }}</div>
+                        <div >{{ address.address1 }} {{ address.address2 }} {{ address.city }}, {{ address.state }} {{ address.zipCode }}</div>
                     </div>
                 </div>
             </section>
