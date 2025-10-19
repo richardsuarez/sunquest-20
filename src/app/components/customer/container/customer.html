@@ -60,10 +60,20 @@
             <mat-divider></mat-divider>
             <section class="info-section">
                 <h4>Addresses</h4>
-                <div *ngFor="let address of customer.addresses" style="display: flex; gap: 5px">
+                <div *ngIf="customer.floridaAddress" style="display: flex; gap: 5px">
                     <mat-icon>location_on</mat-icon>
                     <div style="display: block">
-                        <div >{{ address.address1 }} {{ address.address2 }} {{ address.city }}, {{ address.state }} {{ address.zipCode }}</div>
+                        <div>{{ customer.floridaAddress.address1 }} {{ customer.floridaAddress.address2 }} {{
+                            customer.floridaAddress.city }}, {{ customer.floridaAddress.state }} {{
+                            customer.floridaAddress.zipCode }}</div>
+                    </div>
+                </div>
+                <div *ngIf="customer.newYorkAddress" style="display: flex; gap: 5px">
+                    <mat-icon>location_on</mat-icon>
+                    <div style="display: block">
+                        <div>{{ customer.newYorkAddress.address1 }} {{ customer.newYorkAddress.address2 }} {{
+                            customer.newYorkAddress.city }}, {{ customer.newYorkAddress.state }} {{
+                            customer.newYorkAddress.zipCode }}</div>
                     </div>
                 </div>
             </section>
@@ -75,7 +85,8 @@
         </mat-card-actions>
     </mat-card>
 
-    <div *ngIf="!customerList$" style="text-align: center; margin-top: 20px">
+    <div *ngIf="!(customerList$ | async) || (customerList$ | async)?.length === 0"
+        style="text-align: center; margin-top: 20px">
         <h2>No customers found.</h2>
     </div>
 </div>

@@ -50,7 +50,7 @@ export const deleteCustomerStart = createAction(
 );
 
 export const deleteCustomerEnd = createAction(
-    '[Customer] End add new customer',
+    '[Customer] End delete customer',
 );
 
 export const createCustomer = createAction(
