@@ -205,7 +205,7 @@
                 </mat-form-field>
             </div>
 
-            <div class="secondary-customer">
+            <div class="information-region">
                 <h3>Secondary Customer</h3>
 
                 <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
@@ -218,18 +218,20 @@
                     <input type="text" matInput formControlName="secondaryLastName" appAllowAlphaAndSpecificChar>
                 </mat-form-field>
 
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                    <mat-label>Middle Name</mat-label>
-                    <input type="text" matInput formControlName="secondaryMiddleName" appAllowAlphaAndSpecificChar>
-                </mat-form-field>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Middle Name</mat-label>
+                        <input type="text" matInput formControlName="secondaryMiddleName" appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
 
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                    <mat-label>Title</mat-label>
-                    <mat-select formControlName="secondaryTitle">
-                        <mat-option value="Mr.">Mr.</mat-option>
-                        <mat-option value="Mrs.">Mrs.</mat-option>
-                    </mat-select>
-                </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Title</mat-label>
+                        <mat-select formControlName="secondaryTitle">
+                            <mat-option value="Mr.">Mr.</mat-option>
+                            <mat-option value="Mrs.">Mrs.</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
             </div>
 
             <div class="information-region">
@@ -310,13 +312,23 @@
         </form>
         <div [class.form-actions-desktop]="!isMobile" [class.form-actions-mobile]="isMobile">
             <button mat-raised-button (click)="navigateBack()" style="color: black">Back</button>
-            <button mat-raised-button type="submit" (click)="onSubmit()" style="background-color: #ED2D89; color: white"
-                [disabled]="savingCustomer$ | async">
-                <mat-icon *ngIf="savingCustomer$ | async">
-                    <mat-spinner diameter="18"></mat-spinner>
-                </mat-icon>
-                <p *ngIf="!(savingCustomer$ | async)">Save</p>
-                <p *ngIf="savingCustomer$ | async">Saving...</p>
+            <div *ngIf="customerForm.dirty">
+                <button *ngIf="!(savingCustomer$ | async)" mat-raised-button type="submit" (click)="onSubmit()"
+                    style="background-color: #ED2D89; color: white">
+                    Save
+                </button>
+                <button *ngIf="savingCustomer$ | async" mat-raised-button disabled
+                    style="background-color: gray; color: white">
+                    <mat-icon *ngIf="savingCustomer$">
+                        <mat-spinner diameter="18"></mat-spinner>
+                    </mat-icon>
+                    Saving...
+                </button>
+            </div>
+
+            <button *ngIf="customerForm.pristine" mat-raised-button
+                style="background-color: gray; color: white" disabled>
+                Save
             </button>
         </div>
     </div>

@@ -11,7 +11,8 @@ export interface Customer {
     email: string | null;
     telephone: string | null;
     phone: string | null;
-    addresses: Address[];
+    floridaAddress: Address;
+    newYorkAddress: Address;
     joinedOn: Date | null;
 }
 

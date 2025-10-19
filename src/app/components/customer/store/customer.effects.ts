@@ -16,7 +16,8 @@ export class CustomerEffects {
     readonly getPreviousCustomerList$;
     readonly addCustomerStart$;
     readonly addCustomerEnd$;
-    readonly deleteCustomer$; 
+    readonly deleteCustomerStart$; 
+    readonly deleteCustomerEnd$; 
     readonly updateCustomerStart$; 
     readonly updateCustomerEnd$;
 
@@ -107,7 +108,7 @@ export class CustomerEffects {
             { dispatch: false }
         );
 
-        this.deleteCustomer$ = createEffect(() =>
+        this.deleteCustomerStart$ = createEffect(() =>
             this.actions$.pipe(
                 ofType(CustomerActions.deleteCustomerStart),
                 switchMap((action) =>
@@ -120,6 +121,19 @@ export class CustomerEffects {
                 )
             )
         );
+
+        // When a customer is deleted, reset the search criteria and reload the next customer list
+        this.deleteCustomerEnd$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(CustomerActions.deleteCustomerEnd),
+                concatMap(() => [
+                    CustomerActions.resetSearchCriteria(),
+                    CustomerActions.getNextCustomerListStart(),
+                ])
+            )
+        );
+
+        
 
         this.updateCustomerStart$ = createEffect(() =>
             this.actions$.pipe(
