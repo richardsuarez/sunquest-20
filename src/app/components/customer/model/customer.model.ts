@@ -14,6 +14,7 @@ export interface Customer {
     floridaAddress: Address;
     newYorkAddress: Address;
     joinedOn: Date | null;
+    vehicles?: Vehicle[];
 }
 
 export interface SearchCriteria {
@@ -29,4 +30,17 @@ export interface Address{
     city: string | null;
     state: string | null;
     zipCode: string | null;
+}
+
+export interface Vehicle {
+    id?: string;
+    make: string | null;
+    model: string | null;
+    year: number | null;
+    plate: string | null;
+    state: string | null;
+    vin: string | null;
+    color: string | null;
+    weight: number | null;
+    createdAt?: any;
 }

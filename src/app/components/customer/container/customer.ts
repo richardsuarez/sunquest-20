@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
 import { MatFormField, MatSuffix } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
@@ -19,6 +20,7 @@ import { Router } from '@angular/router';
 import { SearchCriteria } from '../model/customer.model';
 import { Store } from '@ngrx/store';
 import * as CustomerActions from '../store/customer.actions'
+import { CustomerService } from '../service/customer.service';
 
 @Component({
   selector: 'app-customer',
@@ -31,6 +33,7 @@ import * as CustomerActions from '../store/customer.actions'
     MatInput,
     MatButtonModule,
     MatDividerModule,
+    MatListModule,
     MatPaginatorModule,
     MatProgressBar,
     MatSuffix
@@ -55,6 +58,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
     private readonly breakpoints: BreakpointObserver,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
+    private readonly customerService: CustomerService,
   ) {
     this.loading$ = this.store.select(loading)
     this.customerList$ = this.store.select(customerList)

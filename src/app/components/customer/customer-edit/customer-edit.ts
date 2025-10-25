@@ -18,7 +18,12 @@ import { AllowOnlyNumbersDirective } from "../../../shared/directives/allow-only
 import { Store } from '@ngrx/store';
 import { customerViewModel, savingCustomer } from '../store/customer.selectors';
 import { Address, Customer } from '../model/customer.model';
+import { Vehicle } from '../model/customer.model';
+import { CustomerService } from '../service/customer.service';
+import { MatListModule } from '@angular/material/list';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { updateCustomerStart, addCustomerStart } from '../store/customer.actions';
+import * as CustomerActions from '../store/customer.actions';
 
 @Component({
   selector: 'app-customer-edit',
@@ -34,6 +39,8 @@ import { updateCustomerStart, addCustomerStart } from '../store/customer.actions
     MatIconModule,
     MatProgressSpinnerModule,
     MatSelect,
+    MatListModule,
+    MatCheckboxModule,
     AllowAlphanumericDirective,
     AllowAlphaAndSpecificCharDirective,
     AllowOnlyNumbersDirective,
@@ -51,38 +58,22 @@ export class CustomerEdit implements OnInit, OnDestroy {
   customerVM$!: Observable<Partial<Customer> | null>;
   currentCustomer!: Partial<Customer> | null;
   customerAddresses: Address[] = [];;
+  vehicles$!: Observable<Vehicle[]>;
+  // temporary vehicles list stored until the user clicks Save
+  tempVehicles: Partial<Vehicle>[] = [];
 
-  customerForm: FormGroup<{
-    primaryFirstName: FormControl<string | null>;
-    primaryLastName: FormControl<string | null>;
-    primaryMiddleName: FormControl<string | null>;
-    primaryTitle: FormControl<string | null>;
-    secondaryFirstName: FormControl<string | null>;
-    secondaryLastName: FormControl<string | null>;
-    secondaryMiddleName: FormControl<string | null>;
-    secondaryTitle: FormControl<string | null>;
-    email: FormControl<string | null>;
-    telephone: FormControl<string | null>;
-    phone: FormControl<string | null>;
-    floridaAddress: FormGroup<{
-      address1: FormControl<string | null>;
-      address2: FormControl<string | null>;
-      bldg: FormControl<string | null>;
-      apt: FormControl<string | null>;
-      city: FormControl<string | null>;
-      state: FormControl<string | null>;
-      zipCode: FormControl<string | null>;
-    }>;
-    newYorkAddress: FormGroup<{
-      address1: FormControl<string | null>;
-      address2: FormControl<string | null>;
-      bldg: FormControl<string | null>;
-      apt: FormControl<string | null>;
-      city: FormControl<string | null>;
-      state: FormControl<string | null>;
-      zipCode: FormControl<string | null>;
-    }>;
-  }> = new FormGroup({
+  vehicleForm = new FormGroup({
+    make: new FormControl<string | null>('', Validators.required),
+    model: new FormControl<string | null>('', Validators.required),
+    year: new FormControl<number | null>(null, Validators.required),
+    plate: new FormControl<string | null>(''),
+    state: new FormControl<string | null>(''),
+    vin: new FormControl<string | null>(''),
+    color: new FormControl<string | null>(''),
+    weight: new FormControl<number | null>(null),
+  })
+
+  customerForm = new FormGroup({
     primaryFirstName: new FormControl<string | null>('', Validators.required),
     primaryLastName: new FormControl<string | null>('', Validators.required),
     primaryMiddleName: new FormControl<string | null>(''),
@@ -121,6 +112,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
+    private readonly customerService: CustomerService,
   ) {
     this.savingCustomer$ = this.store.select(savingCustomer)
     this.customerVM$ = this.store.select(customerViewModel)
@@ -139,6 +131,11 @@ export class CustomerEdit implements OnInit, OnDestroy {
       this.currentCustomer = customer;
       if (customer) {
         this.customerForm.patchValue(customer);
+        // subscribe to vehicles for this customer
+        if (customer.DocumentID && !customer.vehicles) {
+          // load vehicles into state so they can be displayed and managed
+          this.store.dispatch(CustomerActions.getVehiclesStart({ customerId: customer.DocumentID }));
+        }
       }
     })
   }
@@ -180,22 +177,40 @@ export class CustomerEdit implements OnInit, OnDestroy {
   crudTitle() {
     return this.crud === 'new' ? 'New' : 'Edit';
   }
-
   navigateBack() {
     this.router.navigate(['main/customer/'])
   }
 
   onSubmit() {
-    if (this.customerForm.valid && !this.customerForm.pristine) {
+    if (this.customerForm.valid && (!this.customerForm.pristine || (this.tempVehicles && this.tempVehicles.length > 0))) {
       if (this.crud === 'edit' && this.currentCustomer) {
-        this.store.dispatch(updateCustomerStart({ customer: this.customerForm.getRawValue() }))
+        this.store.dispatch(updateCustomerStart({ customer: this.customerForm.getRawValue(), vehicles: this.tempVehicles }));
       }
-      else if (this.crud === 'new' && this.currentCustomer) {
-        this.store.dispatch(addCustomerStart({ customer: this.customerForm.getRawValue() }))
+      else if (this.crud === 'new') {
+        this.store.dispatch(addCustomerStart({ customer: this.customerForm.getRawValue(), vehicles: this.tempVehicles }));
       }
     } else {
       this.customerForm.markAllAsTouched();
     }
+  }
+
+  addVehicle() {
+    if (this.vehicleForm.valid) {
+      const vehicle: Partial<Vehicle> = this.vehicleForm.getRawValue();
+      this.tempVehicles.push(vehicle);
+      this.vehicleForm.reset();
+    } else {
+      this.vehicleForm.markAllAsTouched();
+    }
+  }
+
+  deleteVehicle(vehicleId?: string) {
+    if (!this.currentCustomer || !this.currentCustomer.DocumentID || !vehicleId) return;
+    this.store.dispatch(CustomerActions.deleteVehicleStart({ customerId: this.currentCustomer.DocumentID, vehicleId }));
+  }
+
+  removeTempVehicle(vehicle: Partial<Vehicle>) {
+    this.tempVehicles = this.tempVehicles.filter((tempVeh) => tempVeh !== vehicle);
   }
 }
 

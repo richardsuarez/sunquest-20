@@ -3,6 +3,8 @@ import { Firestore, collection, query, orderBy, limit, startAfter, doc, addDoc, 
 import { collectionData } from '@angular/fire/firestore';
 import { from, Observable, of } from 'rxjs';
 import { Customer, SearchCriteria } from '../model/customer.model';
+import { Vehicle } from '../model/customer.model';
+import { collection as collectionRef, doc as docRef, addDoc as addDocument, deleteDoc as deleteDocument, collectionData as collectionDataFn } from '@angular/fire/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
@@ -218,4 +220,36 @@ export class CustomerService {
   }
 
   // #endregion Customer
+
+  // #region Vehicle (subcollection under customer)
+
+  addVehicle(customerId: string, vehicle: Partial<Vehicle>): Observable<any> {
+    return runInInjectionContext(this.injector, () => {
+      const vehiclesRef = collection(this.firestore, `${this.collectionName}/${customerId}/vehicles`);
+      return from(addDoc(vehiclesRef, { ...vehicle, createdAt: new Date() }));
+    });
+  }
+
+  getVehicles(customerId: string): Observable<Vehicle[]> {
+    return runInInjectionContext(this.injector, () => {
+      const vehiclesRef = collection(this.firestore, `${this.collectionName}/${customerId}/vehicles`);
+      const p = getDocsFromServer(vehiclesRef)
+        .then(snapshot => snapshot.docs.map(doc => ({ ...(doc.data() as Vehicle), id: doc.id } as Vehicle)))
+        .catch(async () => {
+          const snapshot = await getDocsFromCache(vehiclesRef);
+          return snapshot.docs.map(doc => ({ ...(doc.data() as Vehicle), id: doc.id } as Vehicle));
+        });
+
+      return from(p) as Observable<Vehicle[]>;
+    });
+  }
+
+  deleteVehicle(customerId: string, vehicleId: string): Observable<any> {
+    return runInInjectionContext(this.injector, () => {
+      const vehicleDocRef = doc(this.firestore, `${this.collectionName}/${customerId}/vehicles/${vehicleId}`);
+      return from(deleteDoc(vehicleDocRef));
+    });
+  }
+
+  // #endregion Vehicle
 }

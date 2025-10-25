@@ -1,5 +1,5 @@
 import { createAction, props } from "@ngrx/store";
-import { Customer, SearchCriteria } from "../model/customer.model";
+import { Customer, SearchCriteria, Vehicle } from "../model/customer.model";
 
 export const getNextCustomerListStart = createAction(
     '[Customer] Start retrieving the next customer list'
@@ -26,7 +26,7 @@ export const failure = createAction(
 
 export const addCustomerStart = createAction(
     '[Customer] Start adding new customer',
-    props<{customer: Partial<Customer>}>()
+    props<{customer: Partial<Customer>, vehicles?: Partial<Vehicle>[]}>()
 );
 
 export const addCustomerEnd = createAction(
@@ -36,7 +36,7 @@ export const addCustomerEnd = createAction(
 
 export const updateCustomerStart = createAction(
     '[Customer] Start updating customer',
-    props<{customer: Partial<Customer>}>()
+    props<{customer: Partial<Customer>, vehicles?: Partial<Vehicle>[]}>()
 );
 
 export const updateCustomerEnd = createAction(
@@ -78,6 +78,34 @@ export const resetCustomerViewModel = createAction(
 export const resetSearchCriteria = createAction(
     '[Customer] Reset search criteria'
 )
+
+export const addVehicleStart = createAction(
+    '[Customer] Start adding vehicle',
+    props<{ customerId: string, vehicle: Partial<Vehicle>}>()
+);
+
+export const addVehicleEnd = createAction(
+    '[Customer] End adding vehicle'
+);
+
+export const getVehiclesStart = createAction(
+    '[Customer] Start loading vehicles',
+    props<{ customerId: string }>()
+);
+
+export const getVehiclesEnd = createAction(
+    '[Customer] End loading vehicles',
+    props<{ customerId: string, vehicles: Vehicle[] }>()
+);
+
+export const deleteVehicleStart = createAction(
+    '[Customer] Start deleting vehicle',
+    props<{ customerId: string, vehicleId: string }>()
+);
+
+export const deleteVehicleEnd = createAction(
+    '[Customer] End deleting vehicle'
+);
 
 
 

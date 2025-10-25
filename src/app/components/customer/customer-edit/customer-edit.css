@@ -100,3 +100,15 @@
 ::ng-deep mat-form-field{
   max-width: 100% !important
 }
+
+th{
+    text-align: left;
+    padding: 8px;
+    border: 1px solid black;
+}
+
+td{
+    text-align: left;
+    padding: 8px;
+    border: 1px solid gray;
+}

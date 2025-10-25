@@ -162,6 +162,105 @@
             </div>
         </form>
 
+        <!-- Vehicles section -->
+        <div class="information-region">
+            <h3>Vehicles</h3>
+
+            <div *ngIf="customerVM$ | async as customerVM">
+                <div *ngIf="customerVM.vehicles && customerVM.vehicles.length">
+                    <div style="display: flex; align-items: center; margin: 10px" *ngFor="let v of customerVM.vehicles">
+                        <div>
+                            ({{v.year}}) {{v.make}} {{v.model}} - {{v.plate}} {{v.state}}
+                        </div>
+                        <button mat-icon-button color="primary" (click)="vehicleForm.patchValue(v)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="deleteVehicle(v.id)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+                <div *ngIf="customerVM.DocumentID && (!customerVM.vehicles || customerVM.vehicles.length === 0)"
+                    style="margin-bottom: 20px">
+                    <div style="margin: 10px">No register vehicles for this customer</div>
+                </div>
+            </div>
+
+            <!-- temporary vehicles (not yet persisted) -->
+            <div *ngIf="tempVehicles && tempVehicles.length" style="margin-bottom: 20px" >
+                <h4 style="margin-bottom: 0px !important">Pending Vehicles</h4>
+                <table style="width: 100%">
+                    <thead style="border: 1px solid black">
+                        <tr style="background-color: rgb(195, 195, 195); padding: 10px;">
+                            <th>Year</th>
+                            <th>Make/Model</th>
+                            <th>VIN</th>
+                            <th>Plate</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let tv of tempVehicles">
+                            <td>{{tv.year}}</td>
+                            <td>{{tv.make}} {{tv.model}}</td>
+                            <td>{{tv.vin}}</td>
+                            <td>{{tv.plate}}</td>
+                            <td>
+                                <button mat-icon-button color="warn" (click)="removeTempVehicle(tv)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- inline add vehicle form -->
+            <form [formGroup]="vehicleForm" class="vehicle-form">
+                <div style="display:flex; justify-content: space-between; gap: 5px">
+                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                        <mat-label>Make</mat-label>
+                        <input matInput formControlName="make">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                        <mat-label>Model</mat-label>
+                        <input matInput formControlName="model">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                        <mat-label>Year</mat-label>
+                        <input matInput type="number" formControlName="year">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                        <mat-label>Plate</mat-label>
+                        <input matInput formControlName="plate">
+                    </mat-form-field>
+                </div>
+                <div style="display:flex; justify-content: space-between; margin-top:8px; gap: 5px">
+                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                        <mat-label>State</mat-label>
+                        <input matInput formControlName="state">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                        <mat-label>VIN</mat-label>
+                        <input matInput formControlName="vin">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                        <mat-label>Color</mat-label>
+                        <input matInput formControlName="color">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                        <mat-label>Weight (pounds)</mat-label>
+                        <input matInput type="number" formControlName="weight">
+                    </mat-form-field>
+
+                </div>
+                <div style="display:flex; justify-content: end; align-items:center; margin-bottom: 15px">
+                    <button mat-raised-button color="primary" type="button" (click)="addVehicle()">Add Vehicle</button>
+                </div>
+            </form>
+
+        </div>
+
         <form *ngIf="isMobile" [formGroup]="customerForm" class="form-mobile">
             <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
                 <mat-label>First Name</mat-label>
@@ -312,7 +411,7 @@
         </form>
         <div [class.form-actions-desktop]="!isMobile" [class.form-actions-mobile]="isMobile">
             <button mat-raised-button (click)="navigateBack()" style="color: black">Back</button>
-            <div *ngIf="customerForm.dirty">
+            <div *ngIf="customerForm.dirty || (tempVehicles && tempVehicles.length > 0)">
                 <button *ngIf="!(savingCustomer$ | async)" mat-raised-button type="submit" (click)="onSubmit()"
                     style="background-color: #ED2D89; color: white">
                     Save
@@ -326,7 +425,7 @@
                 </button>
             </div>
 
-            <button *ngIf="customerForm.pristine" mat-raised-button
+            <button *ngIf="customerForm.pristine && (tempVehicles && tempVehicles.length === 0) " mat-raised-button
                 style="background-color: gray; color: white" disabled>
                 Save
             </button>

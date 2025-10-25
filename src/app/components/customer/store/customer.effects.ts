@@ -16,6 +16,9 @@ export class CustomerEffects {
     readonly getPreviousCustomerList$;
     readonly addCustomerStart$;
     readonly addCustomerEnd$;
+    readonly addVehicleStart$;
+    readonly getVehicles$;
+    readonly deleteVehicleStart$;
     readonly deleteCustomerStart$; 
     readonly deleteCustomerEnd$; 
     readonly updateCustomerStart$; 
@@ -82,10 +85,24 @@ export class CustomerEffects {
                 switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
                         this.customerService.addCustomer(action.customer).pipe(
-                            concatMap(() => [
-                                CustomerActions.resetCustomerViewModel(),
-                                CustomerActions.addCustomerEnd({ customer: action.customer }),
-                            ]),
+                            concatMap((docRef: any) => {
+                                // docRef is the DocumentReference returned by addDoc
+                                const newCustomerId = docRef?.DocumentID;
+                                const baseActions: any[] = [
+                                    CustomerActions.resetCustomerViewModel(),
+                                    CustomerActions.addCustomerEnd({ customer: action.customer }),
+                                ];
+
+                                // If the action included vehicles, dispatch addVehicleStart for each one
+                                if (action.vehicles && action.vehicles.length && newCustomerId) {
+                                    const vehicleActions = action.vehicles.map((v: any) =>
+                                        CustomerActions.addVehicleStart({ customerId: newCustomerId, vehicle: v })
+                                    );
+                                    return [...baseActions, ...vehicleActions];
+                                }
+
+                                return baseActions;
+                            }),
                             catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )
                     )
@@ -122,6 +139,51 @@ export class CustomerEffects {
             )
         );
 
+        this.addVehicleStart$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(CustomerActions.addVehicleStart),
+                switchMap((action) =>
+                    runInInjectionContext(this.injector, () =>
+                        this.customerService.addVehicle(action.customerId, action.vehicle).pipe(
+                            map(() => CustomerActions.addVehicleEnd()),
+                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
+                        )
+                    )
+                )
+            )
+        );
+
+        this.getVehicles$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(CustomerActions.getVehiclesStart),
+                switchMap((action) =>
+                    runInInjectionContext(this.injector, () =>
+                        this.customerService.getVehicles(action.customerId).pipe(
+                            map((vehicles) => CustomerActions.getVehiclesEnd({ customerId: action.customerId, vehicles })),
+                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
+                        )
+                    )
+                )
+            )
+        );
+
+        this.deleteVehicleStart$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(CustomerActions.deleteVehicleStart),
+                switchMap((action) =>
+                    runInInjectionContext(this.injector, () =>
+                        this.customerService.deleteVehicle(action.customerId, action.vehicleId).pipe(
+                            switchMap(() => [
+                                CustomerActions.deleteVehicleEnd(),
+                                CustomerActions.getVehiclesStart({ customerId: action.customerId }),
+                            ]),
+                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
+                        )
+                    )
+                )
+            )
+        );
+
         // When a customer is deleted, reset the search criteria and reload the next customer list
         this.deleteCustomerEnd$ = createEffect(() =>
             this.actions$.pipe(
@@ -144,10 +206,22 @@ export class CustomerEffects {
                         this.customerService
                             .updateCustomer({ ...action.customer, DocumentID: customerVM?.DocumentID })
                             .pipe(
-                                concatMap(() =>[
-                                    CustomerActions.resetCustomerViewModel(),
-                                    CustomerActions.updateCustomerEnd({ customer: action.customer })
-                                ]),
+                                concatMap(() => {
+                                    const baseActions: any[] = [
+                                        CustomerActions.resetCustomerViewModel(),
+                                        CustomerActions.updateCustomerEnd({ customer: action.customer })
+                                    ];
+
+                                    // if vehicles are provided, dispatch addVehicleStart for each
+                                    if (action.vehicles && action.vehicles.length && customerVM?.DocumentID) {
+                                        const vehicleActions = action.vehicles.map((v: any) =>
+                                            CustomerActions.addVehicleStart({ customerId: customerVM.DocumentID!, vehicle: v })
+                                        );
+                                        return [...baseActions, ...vehicleActions];
+                                    }
+
+                                    return baseActions;
+                                }),
                                 catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                             )
                     )
