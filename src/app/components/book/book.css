@@ -1,0 +1,153 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0px 20px;
+    margin-bottom: 20px;
+}
+
+.header{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    padding: 20px;
+    width: 100%;
+    max-width: 1500px;
+}
+
+.body{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    padding-bottom: 20px;
+
+    h1{
+        margin: 0px !important
+    }
+}
+
+.desktop{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    gap: 50px;
+}
+
+.form-actions-desktop{
+    display: flex;
+    justify-content: end;
+    gap: 20px;
+    align-items: center;
+
+    button{
+        width: 120px
+    }
+}
+
+.form-actions-mobile{
+    display: flex;
+    justify-content: space-between;
+    flex-grow: 1;
+    gap: 20px;
+    align-items: center;
+
+
+    button{
+        width: 45%
+    }
+}
+
+mat-card-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+mat-card-subtitle {
+  font-size: 1rem;
+  color: #666;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.info-section {
+  margin: 1rem 0;
+}
+
+.info-section mat-icon {
+  vertical-align: middle;
+  margin-right: 8px;
+  color: #555;
+}
+
+.information-region {
+  border: 1px solid lightgray;
+  padding: 0px 10px;
+  border-radius: 5px;
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* reusable row used where you had display:flex inline */
+.row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start; /* keep items top-aligned */
+  flex-wrap: nowrap; /* default; we'll let children shrink via min-width:0 */
+}
+
+/* allow each child (mat-form-field etc.) to shrink and take equal share */
+.row > * {
+  flex: 1 1 0;  /* grow, shrink, base 0 */
+  min-width: 0;  /* critical: permits shrinking instead of overflowing */
+  box-sizing: border-box;
+}
+
+/* For very small screens make rows wrap so fields stack */
+@media (max-width: 600px) {
+  .row {
+    flex-wrap: wrap;
+  }
+  .row > * {
+    flex-basis: 100%;
+  }
+}
+
+::ng-deep mat-form-field{
+  max-width: 100% !important
+}
+
+.customer-card-desktop {
+  width: 400px;
+  margin: 1rem auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.customer-card-mobile {
+  width: 90%;
+  margin: 1rem auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.female-customer-avatar {
+  background-color: #e91e63;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.male-customer-avatar {
+  background-color: #1e7de9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}

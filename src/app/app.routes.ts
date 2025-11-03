@@ -4,6 +4,8 @@ import { provideState } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { CUSTOMER_FEATURE_KEY, customerReducer } from './components/customer/store/customer.reducers';
 import { CustomerEffects } from './components/customer/store/customer.effects';
+import { bookReducer } from './components/book/store/book.reducers';
+import { BookEffects } from './components/book/store/book.effects';
 
 export const routes: Routes = [
     {
@@ -50,6 +52,11 @@ export const routes: Routes = [
             },
             {
                 path: 'book',
+                providers: [
+                    // provide book feature state and effects when /main/book is active
+                    provideState('book', bookReducer),
+                    provideEffects([BookEffects]),
+                ],
                 loadComponent() {
                     return import('./components/book/book').then(m => m.Book);
                 }

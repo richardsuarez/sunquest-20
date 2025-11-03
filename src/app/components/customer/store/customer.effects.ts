@@ -87,7 +87,7 @@ export class CustomerEffects {
                         this.customerService.addCustomer(action.customer).pipe(
                             concatMap((docRef: any) => {
                                 // docRef is the DocumentReference returned by addDoc
-                                const newCustomerId = docRef?.DocumentID;
+                                const newCustomerId = docRef?._key.path.segments[1];
                                 const baseActions: any[] = [
                                     CustomerActions.resetCustomerViewModel(),
                                     CustomerActions.addCustomerEnd({ customer: action.customer }),

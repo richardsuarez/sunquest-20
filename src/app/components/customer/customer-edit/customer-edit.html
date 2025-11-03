@@ -8,50 +8,53 @@
     <div class="body">
         <h1>{{ crudTitle() }} Customer</h1>
         <form *ngIf="!isMobile" [formGroup]="customerForm" class="form-desktop">
-            <div style="display: flex; justify-content: space-between; gap: 20px !important">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
-                    <mat-label>First Name</mat-label>
-                    <input type="text" matInput required formControlName="primaryFirstName"
-                        appAllowAlphaAndSpecificChar>
-                </mat-form-field>
+            <div class="information-region">
+                <h3>Primary Customer</h3>
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
+                        <mat-label>First Name</mat-label>
+                        <input type="text" matInput required formControlName="primaryFirstName"
+                            appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
 
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
-                    <mat-label>Last Name</mat-label>
-                    <input type="text" matInput required formControlName="primaryLastName" appAllowAlphaAndSpecificChar>
-                </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
+                        <mat-label>Last Name</mat-label>
+                        <input type="text" matInput required formControlName="primaryLastName"
+                            appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
+                        <mat-label>Middle Name</mat-label>
+                        <input type="text" matInput formControlName="primaryMiddleName" appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
+                        <mat-label>Email</mat-label>
+                        <input type="email" matInput formControlName="email">
+                    </mat-form-field>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; gap: 20px !important">
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Title</mat-label>
+                        <mat-select matInput formControlName="primaryTitle">
+                            <mat-option value="Mr.">Mr.</mat-option>
+                            <mat-option value="Mrs.">Mrs.</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Phone</mat-label>
+                        <input type="text" matInput formControlName="phone" required placeholder="##########"
+                            appAllowOnlyNumbers>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label>Telephone</mat-label>
+                        <input type="text" matInput formControlName="telephone" placeholder="##########"
+                            appAllowOnlyNumbers>
+                    </mat-form-field>
+                </div>
             </div>
-
-            <div style="display: flex; justify-content: space-between; gap: 20px !important">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
-                    <mat-label>Middle Name</mat-label>
-                    <input type="text" matInput formControlName="primaryMiddleName" appAllowAlphaAndSpecificChar>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
-                    <mat-label>Email</mat-label>
-                    <input type="email" matInput formControlName="email">
-                </mat-form-field>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; gap: 20px !important">
-                <mat-form-field floatLabel="always" appearance="outline">
-                    <mat-label>Title</mat-label>
-                    <mat-select matInput formControlName="primaryTitle">
-                        <mat-option value="Mr.">Mr.</mat-option>
-                        <mat-option value="Mrs.">Mrs.</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline">
-                    <mat-label>Phone</mat-label>
-                    <input type="text" matInput formControlName="phone" required placeholder="##########"
-                        appAllowOnlyNumbers>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline">
-                    <mat-label>Telephone</mat-label>
-                    <input type="text" matInput formControlName="telephone" placeholder="##########"
-                        appAllowOnlyNumbers>
-                </mat-form-field>
-            </div>
-
             <div class="information-region">
                 <h3>Secondary Customer</h3>
                 <div style="display: flex; justify-content: space-between; gap: 20px !important">
@@ -160,106 +163,161 @@
                     </mat-form-field>
                 </div>
             </div>
-        </form>
+            <div class="information-region">
+                <h3>Vehicles</h3>
 
-        <!-- Vehicles section -->
-        <div class="information-region">
-            <h3>Vehicles</h3>
+                <div *ngIf="customerVM$ | async as customerVM">
+                    <div *ngIf="customerVM.vehicles && customerVM.vehicles.length">
+                        <table mat-table [dataSource]="customerVM.vehicles" class="mat-elevation-z8"
+                            style="border: 1px solid gray; margin-bottom: 20px">
+                            <ng-container matColumnDef="year">
+                                <th mat-header-cell *matHeaderCellDef> Year </th>
+                                <td mat-cell *matCellDef="let element"> {{element.year}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="make">
+                                <th mat-header-cell *matHeaderCellDef> Make </th>
+                                <td mat-cell *matCellDef="let element"> {{element.make}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="model">
+                                <th mat-header-cell *matHeaderCellDef> Model </th>
+                                <td mat-cell *matCellDef="let element"> {{element.model}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="vin">
+                                <th mat-header-cell *matHeaderCellDef> VIN </th>
+                                <td mat-cell *matCellDef="let element"> {{element.vin}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="plate">
+                                <th mat-header-cell *matHeaderCellDef> Plate </th>
+                                <td mat-cell *matCellDef="let element"> {{element.plate}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="state">
+                                <th mat-header-cell *matHeaderCellDef> State </th>
+                                <td mat-cell *matCellDef="let element"> {{element.state}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="weight">
+                                <th mat-header-cell *matHeaderCellDef> Weight (lbs) </th>
+                                <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
+                            </ng-container>
 
-            <div *ngIf="customerVM$ | async as customerVM">
-                <div *ngIf="customerVM.vehicles && customerVM.vehicles.length">
-                    <div style="display: flex; align-items: center; margin: 10px" *ngFor="let v of customerVM.vehicles">
-                        <div>
-                            ({{v.year}}) {{v.make}} {{v.model}} - {{v.plate}} {{v.state}}
-                        </div>
-                        <button mat-icon-button color="primary" (click)="vehicleForm.patchValue(v)">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button mat-icon-button color="warn" (click)="deleteVehicle(v.id)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                                <td mat-cell *matCellDef="let element">
+                                    <button mat-icon-button color="primary" (click)="vehicleForm.patchValue(element)">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="warn" (click)="deleteVehicle(element.id)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="vehiclesProperties"></tr>
+                            <tr mat-row *matRowDef="let row; columns: vehiclesProperties;"></tr>
+                        </table>
+                    </div>
+                    <div *ngIf="customerVM.DocumentID && (!customerVM.vehicles || customerVM.vehicles.length === 0)"
+                        style="margin-bottom: 20px">
+                        <div style="margin: 10px">No register vehicles for this customer</div>
                     </div>
                 </div>
-                <div *ngIf="customerVM.DocumentID && (!customerVM.vehicles || customerVM.vehicles.length === 0)"
-                    style="margin-bottom: 20px">
-                    <div style="margin: 10px">No register vehicles for this customer</div>
-                </div>
-            </div>
 
-            <!-- temporary vehicles (not yet persisted) -->
-            <div *ngIf="tempVehicles && tempVehicles.length" style="margin-bottom: 20px" >
-                <h4 style="margin-bottom: 0px !important">Pending Vehicles</h4>
-                <table style="width: 100%">
-                    <thead style="border: 1px solid black">
-                        <tr style="background-color: rgb(195, 195, 195); padding: 10px;">
-                            <th>Year</th>
-                            <th>Make/Model</th>
-                            <th>VIN</th>
-                            <th>Plate</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let tv of tempVehicles">
-                            <td>{{tv.year}}</td>
-                            <td>{{tv.make}} {{tv.model}}</td>
-                            <td>{{tv.vin}}</td>
-                            <td>{{tv.plate}}</td>
-                            <td>
-                                <button mat-icon-button color="warn" (click)="removeTempVehicle(tv)">
+                <!-- temporary vehicles (not yet persisted) -->
+                <div *ngIf="tempVehicles && tempVehicles.length" style="margin-bottom: 20px">
+                    <h4 style="margin-bottom: 0px !important">Pending Vehicles</h4>
+                    <table mat-table [dataSource]="tempVehicles" class="mat-elevation-z8"
+                        style="border: 1px solid gray; margin-bottom: 20px">
+                        <ng-container matColumnDef="year">
+                            <th mat-header-cell *matHeaderCellDef> Year </th>
+                            <td mat-cell *matCellDef="let element"> {{element.year}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="make">
+                            <th mat-header-cell *matHeaderCellDef> Make </th>
+                            <td mat-cell *matCellDef="let element"> {{element.make}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="model">
+                            <th mat-header-cell *matHeaderCellDef> Model </th>
+                            <td mat-cell *matCellDef="let element"> {{element.model}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="vin">
+                            <th mat-header-cell *matHeaderCellDef> VIN </th>
+                            <td mat-cell *matCellDef="let element"> {{element.vin}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="plate">
+                            <th mat-header-cell *matHeaderCellDef> Plate </th>
+                            <td mat-cell *matCellDef="let element"> {{element.plate}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="state">
+                            <th mat-header-cell *matHeaderCellDef> State </th>
+                            <td mat-cell *matCellDef="let element"> {{element.state}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="weight">
+                            <th mat-header-cell *matHeaderCellDef> Weight (lbs) </th>
+                            <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef>Actions</th>
+                            <td mat-cell *matCellDef="let element">
+                                <button mat-icon-button color="primary" (click)="vehicleForm.patchValue(element)">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                                <button mat-icon-button color="warn" (click)="deleteTempVehicle(element.tempId)">
                                     <mat-icon>delete</mat-icon>
                                 </button>
                             </td>
-                        </tr>
-                    </tbody>
-                </table>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="vehiclesProperties"></tr>
+                        <tr mat-row *matRowDef="let row; columns: vehiclesProperties;"></tr>
+                    </table>
+                </div>
+
+                <!-- inline add vehicle form -->
+                <form [formGroup]="vehicleForm" class="vehicle-form">
+                    <div style="display:flex; justify-content: space-between; gap: 5px">
+                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                            <mat-label>Make</mat-label>
+                            <input matInput formControlName="make">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                            <mat-label>Model</mat-label>
+                            <input matInput formControlName="model">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                            <mat-label>Year</mat-label>
+                            <input matInput type="number" formControlName="year">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                            <mat-label>Plate</mat-label>
+                            <input matInput formControlName="plate">
+                        </mat-form-field>
+                    </div>
+                    <div style="display:flex; justify-content: space-between; margin-top:8px; gap: 5px">
+                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                            <mat-label>State</mat-label>
+                            <input matInput formControlName="state">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                            <mat-label>VIN</mat-label>
+                            <input matInput formControlName="vin">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                            <mat-label>Color</mat-label>
+                            <input matInput formControlName="color">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                            <mat-label>Weight (lbs)</mat-label>
+                            <input matInput type="number" formControlName="weight">
+                        </mat-form-field>
+
+                    </div>
+                    <div style="display:flex; justify-content: end; align-items:center; margin-bottom: 15px">
+                        <button mat-raised-button color="primary" type="button" (click)="addVehicle()">Add
+                            Vehicle</button>
+                    </div>
+                </form>
             </div>
+        </form>
 
-            <!-- inline add vehicle form -->
-            <form [formGroup]="vehicleForm" class="vehicle-form">
-                <div style="display:flex; justify-content: space-between; gap: 5px">
-                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
-                        <mat-label>Make</mat-label>
-                        <input matInput formControlName="make">
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
-                        <mat-label>Model</mat-label>
-                        <input matInput formControlName="model">
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
-                        <mat-label>Year</mat-label>
-                        <input matInput type="number" formControlName="year">
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
-                        <mat-label>Plate</mat-label>
-                        <input matInput formControlName="plate">
-                    </mat-form-field>
-                </div>
-                <div style="display:flex; justify-content: space-between; margin-top:8px; gap: 5px">
-                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
-                        <mat-label>State</mat-label>
-                        <input matInput formControlName="state">
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
-                        <mat-label>VIN</mat-label>
-                        <input matInput formControlName="vin">
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
-                        <mat-label>Color</mat-label>
-                        <input matInput formControlName="color">
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
-                        <mat-label>Weight (pounds)</mat-label>
-                        <input matInput type="number" formControlName="weight">
-                    </mat-form-field>
+        <!-- Vehicles section -->
 
-                </div>
-                <div style="display:flex; justify-content: end; align-items:center; margin-bottom: 15px">
-                    <button mat-raised-button color="primary" type="button" (click)="addVehicle()">Add Vehicle</button>
-                </div>
-            </form>
-
-        </div>
 
         <form *ngIf="isMobile" [formGroup]="customerForm" class="form-mobile">
             <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
@@ -304,110 +362,198 @@
                 </mat-form-field>
             </div>
 
-            <div class="information-region">
-                <h3>Secondary Customer</h3>
+            <h3>Secondary Customer</h3>
 
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                    <mat-label>First Name</mat-label>
-                    <input type="text" matInput formControlName="secondaryFirstName" appAllowAlphaAndSpecificChar>
+            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                <mat-label>First Name</mat-label>
+                <input type="text" matInput formControlName="secondaryFirstName" appAllowAlphaAndSpecificChar>
+            </mat-form-field>
+
+            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                <mat-label>Last Name</mat-label>
+                <input type="text" matInput formControlName="secondaryLastName" appAllowAlphaAndSpecificChar>
+            </mat-form-field>
+
+            <div style="display: flex; justify-content: space-between; width: 100%">
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>Middle Name</mat-label>
+                    <input type="text" matInput formControlName="secondaryMiddleName" appAllowAlphaAndSpecificChar>
                 </mat-form-field>
 
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                    <mat-label>Last Name</mat-label>
-                    <input type="text" matInput formControlName="secondaryLastName" appAllowAlphaAndSpecificChar>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>Title</mat-label>
+                    <mat-select formControlName="secondaryTitle">
+                        <mat-option value="Mr.">Mr.</mat-option>
+                        <mat-option value="Mrs.">Mrs.</mat-option>
+                    </mat-select>
                 </mat-form-field>
-
-                <div style="display: flex; justify-content: space-between; gap: 20px !important">
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>Middle Name</mat-label>
-                        <input type="text" matInput formControlName="secondaryMiddleName" appAllowAlphaAndSpecificChar>
-                    </mat-form-field>
-
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>Title</mat-label>
-                        <mat-select formControlName="secondaryTitle">
-                            <mat-option value="Mr.">Mr.</mat-option>
-                            <mat-option value="Mrs.">Mrs.</mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                </div>
             </div>
 
-            <div class="information-region">
-                <h3>Florida Address</h3>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                    <mat-label>Address 1</mat-label>
-                    <input type="text" matInput required
-                        [formControl]="customerForm.controls.floridaAddress.controls.address1">
-                </mat-form-field>
+            <h3>Florida Address</h3>
+            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                <mat-label>Address 1</mat-label>
+                <input type="text" matInput required
+                    [formControl]="customerForm.controls.floridaAddress.controls.address1">
+            </mat-form-field>
 
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                    <mat-label>Address 2</mat-label>
-                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.address2">
+            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                <mat-label>Address 2</mat-label>
+                <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.address2">
+            </mat-form-field>
+            <div style="display: flex; justify-content: space-between; width: 100%">
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>Building</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.bldg"
+                        appAllowAlphanumeric>
                 </mat-form-field>
-                <div style="display: flex; justify-content: space-between; gap: 20px !important">
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>Building</mat-label>
-                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.bldg"
-                            appAllowAlphanumeric>
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>Apartment</mat-label>
-                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.apt"
-                            appAllowAlphanumeric>
-                    </mat-form-field>
-                </div>
-                <div style="display: flex; justify-content: space-between; gap: 20px !important">
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>City</mat-label>
-                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.city"
-                            appAllowAlphaAndSpecificChar>
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>Zip Code</mat-label>
-                        <input type="text" matInput
-                            [formControl]="customerForm.controls.floridaAddress.controls.zipCode" appAllowOnlyNumbers>
-                    </mat-form-field>
-                </div>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>Apartment</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.apt"
+                        appAllowAlphanumeric>
+                </mat-form-field>
+            </div>
+            <div style="display: flex; justify-content: space-between; width: 100%">
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>City</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.city"
+                        appAllowAlphaAndSpecificChar>
+                </mat-form-field>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>Zip Code</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.zipCode"
+                        appAllowOnlyNumbers>
+                </mat-form-field>
             </div>
 
-            <div class="information-region">
-                <h3>New York Address</h3>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                    <mat-label>Address 1</mat-label>
-                    <input type="text" matInput required
-                        [formControl]="customerForm.controls.newYorkAddress.controls.address1">
-                </mat-form-field>
+            <h3>New York Address</h3>
+            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                <mat-label>Address 1</mat-label>
+                <input type="text" matInput required
+                    [formControl]="customerForm.controls.newYorkAddress.controls.address1">
+            </mat-form-field>
 
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                    <mat-label>Address 2</mat-label>
-                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.address2">
+            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                <mat-label>Address 2</mat-label>
+                <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.address2">
+            </mat-form-field>
+            <div style="display: flex; justify-content: space-between; width: 100%">
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>Building</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.bldg"
+                        appAllowAlphanumeric>
                 </mat-form-field>
-                <div style="display: flex; justify-content: space-between; gap: 20px !important">
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>Building</mat-label>
-                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.bldg"
-                            appAllowAlphanumeric>
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>Apartment</mat-label>
-                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.apt"
-                            appAllowAlphanumeric>
-                    </mat-form-field>
-                </div>
-                <div style="display: flex; justify-content: space-between; gap: 20px !important">
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>City</mat-label>
-                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.city"
-                            appAllowAlphaAndSpecificChar>
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>Zip Code</mat-label>
-                        <input type="text" matInput
-                            [formControl]="customerForm.controls.newYorkAddress.controls.zipCode" appAllowOnlyNumbers>
-                    </mat-form-field>
-                </div>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>Apartment</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.apt"
+                        appAllowAlphanumeric>
+                </mat-form-field>
             </div>
+            <div style="display: flex; justify-content: space-between; width: 100%">
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>City</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.city"
+                        appAllowAlphaAndSpecificChar>
+                </mat-form-field>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>Zip Code</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.zipCode"
+                        appAllowOnlyNumbers>
+                </mat-form-field>
+            </div>
+
+            <h3>Vehicles</h3>
+
+            <mat-card *ngFor="let v of currentCustomer?.vehicles"
+                style="width: 100%; margin-bottom: 20px; padding: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>{{v.year}} {{v.make}} {{v.model}}</strong><br>
+                        VIN: {{v.vin}}<br>
+                        Plate: {{v.plate}} ({{v.state}})<br>
+                        Weight: {{v.weight}} lbs
+                    </div>
+                    <div>
+                        <button mat-icon-button color="primary" (click)="vehicleForm.patchValue(v)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="deleteVehicle(v.id)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </mat-card>
+            <div *ngIf="currentCustomer && (!currentCustomer.vehicles || currentCustomer.vehicles.length === 0)" style="margin-bottom: 20px">
+                <div style="margin: 10px">No register vehicles for this customer</div>
+            </div>
+            <!-- temporary vehicles (not yet persisted) -->
+             <h3 *ngIf="tempVehicles && tempVehicles.length > 0">Pending vehicles</h3>
+             <mat-card *ngFor="let v of tempVehicles"
+                style="width: 100%; margin-bottom: 20px; padding: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>{{v.year}} {{v.make}} {{v.model}}</strong><br>
+                        VIN: {{v.vin}}<br>
+                        Plate: {{v.plate}} ({{v.state}})<br>
+                        Weight: {{v.weight}} lbs
+                    </div>
+                    <div>
+                        <button mat-icon-button color="primary" (click)="vehicleForm.patchValue(v)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="deleteTempVehicle(v)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </mat-card>
+
+            <form [formGroup]="vehicleForm" style="width: 100%">
+                <div style="display: flex; justify-content: space-between; width: 100%">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Make</mat-label>
+                        <input matInput formControlName="make">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Model</mat-label>
+                        <input matInput formControlName="model">
+                    </mat-form-field>
+                </div>
+                <div style="display: flex; justify-content: space-between; width: 100%">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Year</mat-label>
+                        <input matInput type="number" formControlName="year">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Plate</mat-label>
+                        <input matInput formControlName="plate">
+                    </mat-form-field>
+                </div>
+                <div style="display: flex; justify-content: space-between; width: 100%">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>State</mat-label>
+                        <input matInput formControlName="state">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>VIN</mat-label>
+                        <input matInput formControlName="vin">
+                    </mat-form-field>
+                </div>
+                <div style="display: flex; justify-content: space-between; width: 100%">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Color</mat-label>
+                        <input matInput formControlName="color">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Weight (lbs)</mat-label>
+                        <input matInput type="number" formControlName="weight">
+                    </mat-form-field>
+
+                </div>
+                <div style="display:flex; justify-content: end; align-items:center; margin-bottom: 15px">
+                    <button mat-raised-button color="primary" type="button" (click)="addVehicle()">Add
+                        Vehicle</button>
+                </div>
+            </form>
         </form>
         <div [class.form-actions-desktop]="!isMobile" [class.form-actions-mobile]="isMobile">
             <button mat-raised-button (click)="navigateBack()" style="color: black">Back</button>

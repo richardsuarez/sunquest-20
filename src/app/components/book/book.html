@@ -1,1 +1,146 @@
-<p>book works!</p>
+<div class="container">
+  <div class="header">
+    <div style="display: flex; align-items: center; cursor: pointer; color: #005CBB;" (click)="navigateBack()">
+      <mat-icon color="primary">arrow_back_ios</mat-icon>
+      <h2>Customers</h2>
+    </div>
+  </div>
+  <div *ngIf="customer$ | async as customer" class="body">
+    <div *ngIf="!isMobile" class="desktop">
+      <mat-card [class.customer-card-desktop]="!isMobile" [class.customer-card-mobile]="isMobile">
+        <mat-card-header>
+          <div mat-card-avatar [class.male-customer-avatar]="customer.primaryTitle === 'Mr.'"
+            [class.female-customer-avatar]="customer.primaryTitle === 'Mrs.'">
+            <mat-icon>person</mat-icon>
+          </div>
+          <mat-card-title>{{ customer.primaryTitle }} {{ customer.primaryLastName }}, {{ customer.primaryFirstName }}
+            {{ customer.primaryMiddleName }}</mat-card-title>
+          <mat-card-subtitle *ngIf="customer.secondaryFirstName">
+            {{ customer.secondaryTitle }} {{ customer.secondaryLastName }}, {{ customer.secondaryFirstName }} {{
+            customer.secondaryMiddleName }}
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <section class="info-section">
+            <h4>Contact Information</h4>
+            <p>
+              <mat-icon>email</mat-icon>
+              <a *ngIf="customer.email" [href]="'mailto:' + customer.email">{{ customer.email }}</a>
+              <span *ngIf="!customer.email">No provided</span>
+            </p>
+            <div style="display: flex; gap: 25px">
+              <p>
+                <mat-icon>phone</mat-icon>
+                <a *ngIf="customer.phone" [href]="'tel:' + customer.phone">{{ customer.phone }}</a>
+                <span *ngIf="!customer.phone">No provided</span>
+              </p>
+              <p *ngIf="customer.telephone">
+                <mat-icon>phone</mat-icon>
+                <a *ngIf="!customer.telephone" [href]="'tel:' + customer.telephone">{{ customer.telephone }}</a>
+                <span *ngIf="!customer.telephone">No provided</span>
+            </div>
+
+          </section>
+
+          <mat-divider></mat-divider>
+          <section class="info-section">
+            <h4>Addresses</h4>
+            <div *ngIf="customer.floridaAddress" style="display: flex; gap: 5px">
+              <mat-icon>location_on</mat-icon>
+              <div style="display: block">
+                <div>{{ customer.floridaAddress.address1 }} {{ customer.floridaAddress.address2 }} {{
+                  customer.floridaAddress.city }}, {{ customer.floridaAddress.state }} {{
+                  customer.floridaAddress.zipCode }}</div>
+              </div>
+            </div>
+            <div *ngIf="customer.newYorkAddress" style="display: flex; gap: 5px">
+              <mat-icon>location_on</mat-icon>
+              <div style="display: block">
+                <div>{{ customer.newYorkAddress.address1 }} {{ customer.newYorkAddress.address2 }} {{
+                  customer.newYorkAddress.city }}, {{ customer.newYorkAddress.state }} {{
+                  customer.newYorkAddress.zipCode }}</div>
+              </div>
+            </div>
+          </section>
+        </mat-card-content>
+      </mat-card>
+      <div>
+        <section class="vehicles">
+          <h3>Select Vehicles to book</h3>
+          <div *ngIf="customer.vehicles && customer.vehicles.length; else noVeh">
+            <div *ngFor="let v of customer.vehicles">
+              <mat-checkbox (change)="toggleVehicle(v.id || '')">{{v.make}} {{v.model}} ({{v.year}}) -
+                {{v.plate}}</mat-checkbox>
+            </div>
+          </div>
+          <ng-template #noVeh>
+            <div>No vehicles found for this customer</div>
+          </ng-template>
+        </section>
+
+        <section class="paycheck">
+          <h3>Paycheck</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Check number</mat-label>
+            <input matInput [formControl]="form.controls.checkNumber">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Bank name</mat-label>
+            <input matInput [formControl]="form.controls.bankName">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Amount</mat-label>
+            <input type="number" matInput [formControl]="form.controls.amount">
+          </mat-form-field>
+        </section>
+
+        <section class="arrival">
+          <h3>Customer Arrival</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Arrival (date & time)</mat-label>
+            <input type="datetime-local" matInput [formControl]="form.controls.arrivalAt">
+          </mat-form-field>
+          <div *ngIf="form.controls.arrivalAt.value">Week #: {{ weekNumber(form.controls.arrivalAt.value) }}</div>
+        </section>
+
+        <section class="route">
+          <h3>Route</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Origin</mat-label>
+            <input matInput [formControl]="form.controls.origin">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Destination</mat-label>
+            <input matInput [formControl]="form.controls.destination">
+          </mat-form-field>
+        </section>
+
+        <section class="truck">
+          <h3>Truck & Schedule</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Select Truck</mat-label>
+            <mat-select [formControl]="form.controls.truckId">
+              <ng-container *ngIf="trucks$ | async as trucks">
+                <mat-option *ngFor="let t of trucks" [value]="t.id">{{t.truckNumber}} - {{t.companyName}}</mat-option>
+              </ng-container>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Departure date</mat-label>
+            <input type="date" matInput [formControl]="form.controls.truckDeparture">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Arrival date</mat-label>
+            <input type="date" matInput [formControl]="form.controls.truckArrival">
+          </mat-form-field>
+        </section>
+      </div>
+    </div>
+
+  </div>
+  <div style="display: flex; justify-content: end; width: 100%; margin-top:16px">
+    <button mat-raised-button color="primary" (click)="save()">Save Booking</button>
+    <button mat-button (click)="router.navigate(['/main/customer'])">Cancel</button>
+  </div>
+</div>

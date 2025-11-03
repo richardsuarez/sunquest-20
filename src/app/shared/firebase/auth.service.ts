@@ -15,7 +15,7 @@ export class AuthService {
   async login(email: string, password: string){
     await this.fireAuth.signInWithEmailAndPassword(email, password).then( () => {
       localStorage.setItem('token', 'true');
-      this.router.navigate(['/main'])
+      this.router.navigate(['/main/customer'])
     }, error => {
       console.error(error);
       this.router.navigate(['/'])

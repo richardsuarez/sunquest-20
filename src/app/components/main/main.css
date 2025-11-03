@@ -1,10 +1,11 @@
 .wrapper{
     display: flex;
     justify-content: center;
-    max-width: 1000px;
+    max-width: 1500px;
     margin: 0 auto;
     position: relative;
-    top: 95px
+    top: 90px;
+    background-color: #f5f5f5;
 }
 
 .container{

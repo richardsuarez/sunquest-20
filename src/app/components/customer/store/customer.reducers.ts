@@ -11,7 +11,7 @@ const initialState: CustomerState = {
     customerViewModel: null,
     searchCriteria: {
         searchValue: '',
-        pageSize: 4,
+        pageSize: 20,
     },
     firstCustomerViewed: null,
     lastCustomerViewed: null,
@@ -121,7 +121,7 @@ export const customerReducer = createReducer(
         ...state,
         searchCriteria: {
             searchValue: '',
-            pageSize: 4,
+            pageSize: 20,
         },
     }))
     ,
