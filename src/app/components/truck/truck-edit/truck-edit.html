@@ -1,0 +1,48 @@
+<div class="container">
+  <div class="header">
+    <div style="display:flex; align-items:center; cursor: pointer; color: #005CBB; margin-bottom: 20px">
+      <h2>{{ data }} Truck</h2>
+    </div>
+  </div>
+
+  <div class="body">
+    <form [formGroup]="form">
+      <div *ngIf="selectedTruck?.createdAt" style="margin-bottom:12px; color: #666; font-size:0.9rem">
+        Joined: {{ selectedTruck?.createdAt | date }}
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline" floatLabel="always">
+          <mat-label>Truck Number</mat-label>
+          <input matInput formControlName="truckNumber">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always">
+          <mat-label>Company Name</mat-label>
+          <input matInput formControlName="companyName">
+        </mat-form-field>
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline" floatLabel="always">
+          <mat-label>Load Capacity (lbs)</mat-label>
+          <input type="number" matInput formControlName="loadCapacity">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always">
+          <mat-label>Car Capacity</mat-label>
+          <input type="number" matInput formControlName="carCapacity">
+        </mat-form-field>
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px">
+        <button mat-button (click)="cancel()">Cancel</button>
+        <button *ngIf="(saving$ | async) === null" mat-raised-button style="background-color: #ED2D89; color: white" (click)="save()">Save</button>
+        <button *ngIf="(saving$ | async) === true" mat-raised-button disabled style="background-color: gray; color: white">
+          <mat-icon *ngIf="saving$">
+            <mat-spinner diameter="18"></mat-spinner>
+          </mat-icon>
+          Saving...
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

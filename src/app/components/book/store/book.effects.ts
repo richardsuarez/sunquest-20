@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map, switchMap, catchError } from 'rxjs/operators';
 import { of, from } from 'rxjs';
 import * as BookActions from './book.actions';
-import { TruckService } from '../service/truck.service';
+import { TruckService } from '../../truck/services/truck.service';
 import { BookingService } from '../service/booking.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -16,24 +16,9 @@ export class BookEffects {
     private snackBar = inject(MatSnackBar);
     private router = inject(Router);
 
-    readonly loadTrucks$;
     readonly addBooking$;
 
     constructor(private actions$: Actions) {
-
-        this.loadTrucks$ = createEffect(() =>
-            this.actions$.pipe(
-                ofType(BookActions.getTrucksStart),
-                switchMap(() =>
-                    runInInjectionContext(this.injector, () =>
-                        this.truckService.getTrucks().pipe(
-                            map((t) => BookActions.getTrucksEnd({ trucks: t })),
-                            catchError((err: Error) => of(BookActions.getTrucksFail({ error: err })))
-                        )
-                    )
-                )
-            )
-        );
 
         this.addBooking$ = createEffect(() =>
             this.actions$.pipe(

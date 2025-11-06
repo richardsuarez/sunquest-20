@@ -1,9 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators, FormsModule } from '@angular/forms';
+import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatSelect } from '@angular/material/select';
+import { MatSelectModule } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -16,10 +16,16 @@ import * as BookActions from './store/book.actions';
 import { getVehiclesStart } from '../customer/store/customer.actions';
 import { trucks as trucksSelector, savingBooking as savingBookingSelector } from './store/book.selectors';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { Truck } from './model/truck.model';
+import { Truck } from '../truck/model/truck.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MatTableModule } from '@angular/material/table';
+import { MatDatepickerModule, MatDatepickerToggle } from '@angular/material/datepicker';
+import { MatTimepickerModule, MatTimepickerToggle } from '@angular/material/timepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { Vehicle } from '../customer/model/customer.model';
+import { getTruckListStart } from '../truck/store/truck.actions';
 
 @Component({
   selector: 'app-book',
@@ -27,21 +33,28 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormField,
+    MatFormFieldModule,
+    FormsModule,
     MatLabel,
     MatInput,
-    MatSelect,
+    MatSelectModule,
     MatOption,
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
+    MatDatepickerModule,
+    MatDatepickerToggle,
     MatListModule,
     MatIconModule,
+    MatTableModule,
+    MatTimepickerModule,
+    MatTimepickerToggle
   ],
   templateUrl: './book.html',
-  styleUrls: ['./book.css']
+  styleUrls: ['./book.css'],
+  providers: [provideNativeDateAdapter()],
 })
-export class Book implements OnInit{
+export class Book implements OnInit {
   private store = inject(Store);
   public router = inject(Router);
   private snackBar = inject(MatSnackBar);
@@ -50,8 +63,10 @@ export class Book implements OnInit{
   trucks$!: Observable<Truck[]>;
   savingBooking$!: Observable<boolean>;
   destroy$ = new Subject<void>()
+  weekOfYear: number = 0;
 
   vehicleSelection: { [id: string]: boolean } = {};
+  vehiclesProperties = ['checkbox', 'year', 'make', 'model', 'plate', 'state', 'weight'];
 
   form = new FormGroup({
     floridaInstructions: new FormControl<string | null>(null),
@@ -59,7 +74,7 @@ export class Book implements OnInit{
     checkNumber: new FormControl<string | null>(null),
     bankName: new FormControl<string | null>(null),
     amount: new FormControl<number | null>(1200, [Validators.required]),
-    arrivalAt: new FormControl<string | null>(null, [Validators.required]), // ISO datetime
+    arrivalAt: new FormControl<Date | null>(null, [Validators.required]), // ISO datetime
     origin: new FormControl<string | null>(null),
     destination: new FormControl<string | null>(null),
     truckId: new FormControl<string | null>(null),
@@ -73,10 +88,10 @@ export class Book implements OnInit{
     // load trucks via actions/effects
     this.trucks$ = this.store.select(trucksSelector as any);
     this.savingBooking$ = this.store.select(savingBookingSelector as any);
-    this.store.dispatch(BookActions.getTrucksStart());
+  this.store.dispatch(getTruckListStart());
   }
 
-  ngOnInit(){
+  ngOnInit() {
     this.breakpoints.observe([
       Breakpoints.HandsetPortrait,
       Breakpoints.HandsetLandscape
@@ -85,39 +100,40 @@ export class Book implements OnInit{
     });
 
     this.customer$.pipe(takeUntil(this.destroy$)).subscribe(customer => {
-      if(customer && customer.DocumentID){
+      if (customer && customer.DocumentID && !customer.vehicles) {
         this.store.dispatch(getVehiclesStart({ customerId: customer.DocumentID }));
         // initialize vehicle selection
-        if (customer.vehicles) {
-          customer.vehicles.forEach(v => {
-            if(v.id){
-              this.vehicleSelection[v.id] = false;
-            }
-          });
-        }
       }
-    })
+      if (customer && customer.vehicles) {
+        customer.vehicles.forEach(v => {
+          if (v.id) {
+            this.vehicleSelection[v.id] = false;
+          }
+        });
+      }
+      if(!customer){
+        this.router.navigate(['main/customer/']);
+      }
+    });
+
+    this.form.controls.arrivalAt.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(date => {
+      if (date) {
+        this.weekOfYear = this.weekNumber(date);
+        // we could set a form control for weekOfYear if needed
+      } 
+    });
   }
 
   toggleVehicle(id: string) {
     this.vehicleSelection[id] = !this.vehicleSelection[id];
   }
 
-  public weekNumber(dateString: string | null): number {
-    if (!dateString) return 0;
-    const d = new Date(dateString);
-    // Copy date so don't modify original
-    const target = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    // ISO week date weeks start on Monday
-    const dayNr = (target.getUTCDay() + 6) % 7;
-    target.setUTCDate(target.getUTCDate() - dayNr + 3);
-    const firstThursday = target.valueOf();
-    target.setUTCMonth(0, 1);
-    if (target.getUTCDay() !== 4) {
-      target.setUTCMonth(0, 1 + ((4 - target.getUTCDay()) + 7) % 7);
+  public weekNumber(date: Date | null): number {
+    if(!date){
+      return 0;
     }
-    const week = 1 + Math.round((firstThursday - target.valueOf()) /  (7 * 24 * 60 * 60 * 1000));
-    return week;
+    const yearStart = new Date(date.getFullYear(), 0, 1); // Jan 1st, of the year given
+    return Math.ceil(((date.getTime() - yearStart.getTime()) / 604800000));
   }
 
   async save() {
@@ -126,7 +142,7 @@ export class Book implements OnInit{
       return;
     }
 
-  const customer = await this.customer$.pipe().toPromise();
+    const customer = await this.customer$.pipe().toPromise();
     if (!customer || !customer.DocumentID) {
       this.snackBar.open('No customer selected', 'Close', { duration: 3000 });
       return;
@@ -134,7 +150,7 @@ export class Book implements OnInit{
 
     const selectedVehicleIds = Object.keys(this.vehicleSelection).filter(k => this.vehicleSelection[k]);
 
-    const arrivalAt = this.form.controls.arrivalAt.value || new Date().toISOString();
+    const arrivalAt = this.form.controls.arrivalAt.value || new Date();
     const booking = {
       customerId: customer.DocumentID,
       customerSnapshot: customer,
@@ -167,5 +183,21 @@ export class Book implements OnInit{
   navigateBack() {
     this.router.navigate(['main/customer/'])
   }
+
+  updateOrigin(event?: any){
+    if(this.form.controls.destination.value === 'Florida'){
+      this.form.controls.origin.setValue('New York');
+    } else if(this.form.controls.destination.value === 'New York'){
+      this.form.controls.origin.setValue('Florida');
+    }
+  }
+
+  updateDestination(event: any){
+    if(this.form.controls.origin.value === 'Florida'){
+      this.form.controls.destination.setValue('New York');
+    } else if(this.form.controls.origin.value === 'New York'){
+      this.form.controls.destination.setValue('Florida');
+    }
+  }
 }
- 
+

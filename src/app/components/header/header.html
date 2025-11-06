@@ -5,6 +5,7 @@
         </div>
         <nav *ngIf="!isMobile" class="menu">
             <div class="shortcut" routerLink="/main/customer">Customers</div>
+            <div class="shortcut" routerLink="/main/truck">Trucks</div>
             <div class="shortcut" routerLink="/main/book">Bookings</div>
             <div class="shortcut" routerLink="/main/report/book">Book Report</div>
             <button mat-raised-button style="display: flex; align-items: center; gap: 5px" (click)="logout()">
@@ -25,6 +26,7 @@
 </div>
 <div *ngIf="isMobile" class="dropdown-menu" [class.open]="mobileMainMenu">
     <button mat-menu-item routerLink="/main/customer" (click)="toggleMobileMainMenu()">Customers</button>
+    <button mat-menu-item routerLink="/main/truck" (click)="toggleMobileMainMenu()">Trucks</button>
     <button mat-menu-item routerLink="/main/book" (click)="toggleMobileMainMenu()">Bookings</button>
     <button mat-menu-item routerLink="/main/report/book" (click)="toggleMobileMainMenu()">Book Reports</button>
 </div>

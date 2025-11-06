@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Header } from '../header/header';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-main',
@@ -11,5 +11,9 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './main.css'
 })
 export class Main {
-
+  constructor(
+    private router: Router
+  ){
+    router.navigate(['/main/customer'])
+  }
 }

@@ -1,4 +1,4 @@
-import { Truck } from '../model/truck.model';
+import { Truck } from '../../truck/model/truck.model';
 
 export interface BookState {
   loadingTrucks: boolean;

@@ -6,6 +6,8 @@ import { CUSTOMER_FEATURE_KEY, customerReducer } from './components/customer/sto
 import { CustomerEffects } from './components/customer/store/customer.effects';
 import { bookReducer } from './components/book/store/book.reducers';
 import { BookEffects } from './components/book/store/book.effects';
+import { truckReducer, TRUCK_FEATURE_KEY } from './components/truck/store/truck.reducers';
+import { TruckEffects } from './components/truck/store/truck.effects';
 
 export const routes: Routes = [
     {
@@ -59,6 +61,17 @@ export const routes: Routes = [
                 ],
                 loadComponent() {
                     return import('./components/book/book').then(m => m.Book);
+                }
+            }
+            ,
+            {
+                path: 'truck',
+                providers: [
+                    provideState(TRUCK_FEATURE_KEY, truckReducer),
+                    provideEffects([TruckEffects]),
+                ],
+                loadComponent() {
+                    return import('./components/truck/container/truck').then(m => m.TruckList);
                 }
             }
         ]

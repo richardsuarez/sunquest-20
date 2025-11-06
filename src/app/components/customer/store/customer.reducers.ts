@@ -127,6 +127,9 @@ export const customerReducer = createReducer(
     ,
     on(CustomerActions.getVehiclesEnd, (state, action) => ({
         ...state,
-        customerViewModel: state.customerViewModel && state.customerViewModel.DocumentID === action.customerId ? { ...state.customerViewModel, vehicles: action.vehicles } : state.customerViewModel,
+        customerViewModel: { 
+            ...state.customerViewModel, 
+            vehicles: action.vehicles 
+        },
     }))
 )

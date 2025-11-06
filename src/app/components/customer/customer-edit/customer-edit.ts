@@ -140,6 +140,8 @@ export class CustomerEdit implements OnInit, OnDestroy {
           // load vehicles into state so they can be displayed and managed
           this.store.dispatch(CustomerActions.getVehiclesStart({ customerId: customer.DocumentID }));
         }
+      } else {
+        this.router.navigate(['main/customer/']);
       }
     })
   }

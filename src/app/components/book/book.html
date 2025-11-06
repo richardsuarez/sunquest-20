@@ -6,7 +6,7 @@
     </div>
   </div>
   <div *ngIf="customer$ | async as customer" class="body">
-    <div *ngIf="!isMobile" class="desktop">
+    <div class="desktop">
       <mat-card [class.customer-card-desktop]="!isMobile" [class.customer-card-mobile]="isMobile">
         <mat-card-header>
           <div mat-card-avatar [class.male-customer-avatar]="customer.primaryTitle === 'Mr.'"
@@ -67,12 +67,51 @@
       </mat-card>
       <div>
         <section class="vehicles">
-          <h3>Select Vehicles to book</h3>
+          <h3>Select vehicle(s) to book</h3>
           <div *ngIf="customer.vehicles && customer.vehicles.length; else noVeh">
-            <div *ngFor="let v of customer.vehicles">
-              <mat-checkbox (change)="toggleVehicle(v.id || '')">{{v.make}} {{v.model}} ({{v.year}}) -
-                {{v.plate}}</mat-checkbox>
-            </div>
+            <table mat-table [dataSource]="customer.vehicles" class="mat-elevation-z8"
+              style="border: 1px solid gray; margin-bottom: 20px">
+
+              <ng-container matColumnDef="checkbox">
+                <th mat-header-cell *matHeaderCellDef> </th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-checkbox [checked]="vehicleSelection[element.id]"
+                    (change)="vehicleSelection[element.id] = $event.checked"></mat-checkbox>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="year">
+                <th mat-header-cell *matHeaderCellDef> Year </th>
+                <td mat-cell *matCellDef="let element"> {{element.year}} </td>
+              </ng-container>
+              <ng-container matColumnDef="make">
+                <th mat-header-cell *matHeaderCellDef> Make </th>
+                <td mat-cell *matCellDef="let element"> {{element.make}} </td>
+              </ng-container>
+              <ng-container matColumnDef="model">
+                <th mat-header-cell *matHeaderCellDef> Model </th>
+                <td mat-cell *matCellDef="let element"> {{element.model}} </td>
+              </ng-container>
+              <ng-container matColumnDef="vin">
+                <th mat-header-cell *matHeaderCellDef> VIN </th>
+                <td mat-cell *matCellDef="let element"> {{element.vin}} </td>
+              </ng-container>
+              <ng-container matColumnDef="plate">
+                <th mat-header-cell *matHeaderCellDef> Plate </th>
+                <td mat-cell *matCellDef="let element"> {{element.plate}} </td>
+              </ng-container>
+              <ng-container matColumnDef="state">
+                <th mat-header-cell *matHeaderCellDef> State </th>
+                <td mat-cell *matCellDef="let element"> {{element.state}} </td>
+              </ng-container>
+              <ng-container matColumnDef="weight">
+                <th mat-header-cell *matHeaderCellDef> Weight (lbs) </th>
+                <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="vehiclesProperties"></tr>
+              <tr mat-row *matRowDef="let row; columns: vehiclesProperties;"></tr>
+            </table>
           </div>
           <ng-template #noVeh>
             <div>No vehicles found for this customer</div>
@@ -81,43 +120,109 @@
 
         <section class="paycheck">
           <h3>Paycheck</h3>
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Check number</mat-label>
             <input matInput [formControl]="form.controls.checkNumber">
           </mat-form-field>
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Bank name</mat-label>
             <input matInput [formControl]="form.controls.bankName">
           </mat-form-field>
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Amount</mat-label>
             <input type="number" matInput [formControl]="form.controls.amount">
           </mat-form-field>
         </section>
 
-        <section class="arrival">
+        <section>
           <h3>Customer Arrival</h3>
-          <mat-form-field appearance="outline">
-            <mat-label>Arrival (date & time)</mat-label>
-            <input type="datetime-local" matInput [formControl]="form.controls.arrivalAt">
-          </mat-form-field>
-          <div *ngIf="form.controls.arrivalAt.value">Week #: {{ weekNumber(form.controls.arrivalAt.value) }}</div>
+          <div class="info">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Arrival (date & time)</mat-label>
+              <input required matInput [matDatepicker]="picker" [formControl]="form.controls.arrivalAt">
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Pick a time</mat-label>
+              <input required matInput [matTimepicker]="timePicker" [formControl]="form.controls.arrivalAt">
+              <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+              <mat-timepicker #timePicker />
+            </mat-form-field>
+            <div>Week #: {{ weekOfYear }}</div>
+          </div>
+
         </section>
 
-        <section class="route">
+        <section>
           <h3>Route</h3>
-          <mat-form-field appearance="outline">
-            <mat-label>Origin</mat-label>
-            <input matInput [formControl]="form.controls.origin">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Destination</mat-label>
-            <input matInput [formControl]="form.controls.destination">
-          </mat-form-field>
+          <div class="info">
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Origin</mat-label>
+              <mat-select [formControl]="form.controls.origin" (selectionChange)="updateDestination($event)">
+                <mat-option value="Florida">Florida</mat-option>
+                <mat-option value="New York">New York</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always">
+              <mat-label>Destination</mat-label>
+              <mat-select [formControl]="form.controls.destination" (selectionChange)="updateOrigin($event)">
+                <mat-option value="Florida">Florida</mat-option>
+                <mat-option value="New York">New York</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
         </section>
 
         <section class="truck">
           <h3>Truck & Schedule</h3>
+          <div *ngIf="trucks$ | async as trucks">
+            <table mat-table [dataSource]="trucks" class="mat-elevation-z8"
+              style="border: 1px solid gray; margin-bottom: 20px">
+
+              <ng-container matColumnDef="checkbox">
+                <th mat-header-cell *matHeaderCellDef> </th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-checkbox [checked]="vehicleSelection[element.id]"
+                    (change)="vehicleSelection[element.id] = $event.checked"></mat-checkbox>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="year">
+                <th mat-header-cell *matHeaderCellDef> Year </th>
+                <td mat-cell *matCellDef="let element"> {{element.year}} </td>
+              </ng-container>
+              <ng-container matColumnDef="make">
+                <th mat-header-cell *matHeaderCellDef> Make </th>
+                <td mat-cell *matCellDef="let element"> {{element.make}} </td>
+              </ng-container>
+              <ng-container matColumnDef="model">
+                <th mat-header-cell *matHeaderCellDef> Model </th>
+                <td mat-cell *matCellDef="let element"> {{element.model}} </td>
+              </ng-container>
+              <ng-container matColumnDef="vin">
+                <th mat-header-cell *matHeaderCellDef> VIN </th>
+                <td mat-cell *matCellDef="let element"> {{element.vin}} </td>
+              </ng-container>
+              <ng-container matColumnDef="plate">
+                <th mat-header-cell *matHeaderCellDef> Plate </th>
+                <td mat-cell *matCellDef="let element"> {{element.plate}} </td>
+              </ng-container>
+              <ng-container matColumnDef="state">
+                <th mat-header-cell *matHeaderCellDef> State </th>
+                <td mat-cell *matCellDef="let element"> {{element.state}} </td>
+              </ng-container>
+              <ng-container matColumnDef="weight">
+                <th mat-header-cell *matHeaderCellDef> Weight (lbs) </th>
+                <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="vehiclesProperties"></tr>
+              <tr mat-row *matRowDef="let row; columns: vehiclesProperties;"></tr>
+            </table>
+          </div>
+          
           <mat-form-field appearance="outline">
             <mat-label>Select Truck</mat-label>
             <mat-select [formControl]="form.controls.truckId">

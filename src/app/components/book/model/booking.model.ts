@@ -26,7 +26,7 @@ export interface Booking {
   floridaInstructions?: string | null;
   newYorkInstructions?: string | null;
   paycheck: Paycheck;
-  arrivalAt: string; // ISO datetime
+  arrivalAt: Date; // ISO datetime
   arrivalWeekOfYear: number;
   route: RouteInfo;
   truck: TruckBookingInfo;
