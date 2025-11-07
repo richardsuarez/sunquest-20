@@ -11,12 +11,12 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { customerViewModel } from '../customer/store/customer.selectors';
-import * as BookActions from './store/book.actions';
-import { getVehiclesStart } from '../customer/store/customer.actions';
-import { trucks as trucksSelector, savingBooking as savingBookingSelector } from './store/book.selectors';
+import { customerViewModel } from '../../customer/store/customer.selectors';
+import * as BookActions from '../store/book.actions';
+import { getVehiclesStart } from '../../customer/store/customer.actions';
+import { trucks as trucksSelector, savingBooking as savingBookingSelector } from '../store/book.selectors';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { Truck } from '../truck/model/truck.model';
+import { Truck } from '../../truck/model/truck.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -24,8 +24,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDatepickerModule, MatDatepickerToggle } from '@angular/material/datepicker';
 import { MatTimepickerModule, MatTimepickerToggle } from '@angular/material/timepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { Vehicle } from '../customer/model/customer.model';
-import { getTruckListStart } from '../truck/store/truck.actions';
+import { Customer, Vehicle } from '../../customer/model/customer.model';
+import { getTruckListStart } from '../../truck/store/truck.actions';
+import { trucks } from '../../truck/store/truck.selectors';
 
 @Component({
   selector: 'app-book',
@@ -58,15 +59,32 @@ export class Book implements OnInit {
   private store = inject(Store);
   public router = inject(Router);
   private snackBar = inject(MatSnackBar);
+  customer$!: Observable<Partial<Customer> | null>;
+  truckList$!: Observable<Truck[]>;
   isMobile!: boolean;
-  customer$ = this.store.select(customerViewModel);
-  trucks$!: Observable<Truck[]>;
   savingBooking$!: Observable<boolean>;
   destroy$ = new Subject<void>()
   weekOfYear: number = 0;
+  currentSelectedTruckId: string | null = null;
 
   vehicleSelection: { [id: string]: boolean } = {};
+  truckSelection: { [id: string]: boolean } = {};
   vehiclesProperties = ['checkbox', 'year', 'make', 'model', 'plate', 'state', 'weight'];
+  
+  // Schedule table column definitions
+  truckColumns = ['truckNumber', 'schedules'];
+  scheduleColumns = ['loadNumber', 'departureDate', 'origin', 'destination', 'remLoadCap', 'remCarCap'];
+
+  // Form for adding new schedules
+  scheduleForm = new FormGroup({
+    truckId: new FormControl<string>('', [Validators.required]),
+    loadNumber: new FormControl<string>('', [Validators.required]),
+    departureDate: new FormControl<Date | null>(null, [Validators.required]),
+    origin: new FormControl<string>('', [Validators.required]),
+    destination: new FormControl<string>('', [Validators.required]),
+    remLoadCap: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
+    remCarCap: new FormControl<number>(0, [Validators.required, Validators.min(0)])
+  });
 
   form = new FormGroup({
     floridaInstructions: new FormControl<string | null>(null),
@@ -85,10 +103,39 @@ export class Book implements OnInit {
   constructor(
     private readonly breakpoints: BreakpointObserver,
   ) {
-    // load trucks via actions/effects
-    this.trucks$ = this.store.select(trucksSelector as any);
+    this.customer$ = this.store.select(customerViewModel);
+    this.truckList$ = this.store.select(trucks);
     this.savingBooking$ = this.store.select(savingBookingSelector as any);
-  this.store.dispatch(getTruckListStart());
+    
+  }
+
+  addSchedule() {
+    if (this.scheduleForm.invalid) {
+      this.scheduleForm.markAllAsTouched();
+      return;
+    }
+
+    const scheduleData = this.scheduleForm.value;
+    if (!scheduleData.truckId) {
+      this.snackBar.open('Please select a truck', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.store.dispatch(BookActions.addScheduleStart({
+      truckId: scheduleData.truckId,
+      schedule: {
+        truckId: scheduleData.truckId,
+        loadNumber: scheduleData.loadNumber || '',
+        departureDate: scheduleData.departureDate || new Date(),
+        origin: scheduleData.origin || '',
+        destination: scheduleData.destination || '',
+        remLoadCap: scheduleData.remLoadCap || 0,
+        remCarCap: scheduleData.remCarCap || 0
+      }
+    }));
+
+    // Reset form after submission
+    this.scheduleForm.reset();
   }
 
   ngOnInit() {
@@ -98,6 +145,8 @@ export class Book implements OnInit {
     ]).subscribe(res => {
       this.isMobile = res.matches
     });
+
+    this.store.dispatch(getTruckListStart());
 
     this.customer$.pipe(takeUntil(this.destroy$)).subscribe(customer => {
       if (customer && customer.DocumentID && !customer.vehicles) {
@@ -114,6 +163,14 @@ export class Book implements OnInit {
       if(!customer){
         this.router.navigate(['main/customer/']);
       }
+    });
+
+    this.truckList$.pipe(takeUntil(this.destroy$)).subscribe(trucks => {
+      trucks.forEach(t => {
+        if (t.id) {
+          this.truckSelection[t.id] = false;
+        }
+      });
     });
 
     this.form.controls.arrivalAt.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(date => {
@@ -180,8 +237,14 @@ export class Book implements OnInit {
     this.store.dispatch(BookActions.addBookingStart({ booking }));
   }
 
+  selectTruck(id: string) {
+    this.truckSelection[id] = true;
+    this.truckSelection[this.currentSelectedTruckId as string] = false;
+    this.currentSelectedTruckId = id;
+  }
+
   navigateBack() {
-    this.router.navigate(['main/customer/'])
+    this.router.navigate(['main/'])
   }
 
   updateOrigin(event?: any){

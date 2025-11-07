@@ -1,3 +1,5 @@
+import { Schedule } from "../../schedule/model/schedule.model";
+
 export interface Truck {
   id?: string;
   truckNumber: string;
@@ -6,4 +8,7 @@ export interface Truck {
   carCapacity: number | null; // number of cars
   loadNumber?: string | null;
   createdAt?: Date | null;
+  schedules?: Schedule[];
 }
+
+

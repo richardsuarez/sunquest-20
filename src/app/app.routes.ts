@@ -25,7 +25,7 @@ export const routes: Routes = [
             {
                 path: '',
                 loadComponent() {
-                    return import('./components/dashboard/dashboard').then(m => m.Dashboard);
+                    return import('./components/schedule/schedule').then(m => m.schedule);
                 }
             },
             {
@@ -57,10 +57,11 @@ export const routes: Routes = [
                 providers: [
                     // provide book feature state and effects when /main/book is active
                     provideState('book', bookReducer),
-                    provideEffects([BookEffects]),
+                    provideState(TRUCK_FEATURE_KEY, truckReducer),
+                    provideEffects([BookEffects, TruckEffects]),
                 ],
                 loadComponent() {
-                    return import('./components/book/book').then(m => m.Book);
+                    return import('./components/book/container/book').then(m => m.Book);
                 }
             }
             ,

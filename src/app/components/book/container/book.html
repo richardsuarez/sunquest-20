@@ -65,8 +65,8 @@
           </section>
         </mat-card-content>
       </mat-card>
-      <div>
-        <section class="vehicles">
+      <div style="display: block">
+        <section>
           <h3>Select vehicle(s) to book</h3>
           <div *ngIf="customer.vehicles && customer.vehicles.length; else noVeh">
             <table mat-table [dataSource]="customer.vehicles" class="mat-elevation-z8"
@@ -175,70 +175,117 @@
 
         </section>
 
-        <section class="truck">
+        <section>
           <h3>Truck & Schedule</h3>
-          <div *ngIf="trucks$ | async as trucks">
-            <table mat-table [dataSource]="trucks" class="mat-elevation-z8"
-              style="border: 1px solid gray; margin-bottom: 20px">
+          <div *ngIf="truckList$ | async as trucks">
+            <table mat-table [dataSource]="trucks" class="mat-elevation-z8 schedule-table">
+              <ng-container matColumnDef="truckNumber">
+                <th mat-header-cell *matHeaderCellDef>Truck #</th>
+                <td mat-cell *matCellDef="let truck">{{truck.truckNumber}}</td>
+              </ng-container>
 
-              <ng-container matColumnDef="checkbox">
-                <th mat-header-cell *matHeaderCellDef> </th>
-                <td mat-cell *matCellDef="let element">
-                  <mat-checkbox [checked]="vehicleSelection[element.id]"
-                    (change)="vehicleSelection[element.id] = $event.checked"></mat-checkbox>
+              <ng-container matColumnDef="schedules">
+                <th mat-header-cell *matHeaderCellDef>Schedules</th>
+                <td mat-cell *matCellDef="let truck">
+                  <ng-container *ngIf="truck.schedules && truck.schedules.length > 0">
+                    <table mat-table [dataSource]="truck.schedules" class="nested-table">
+                      <ng-container matColumnDef="loadNumber">
+                        <th mat-header-cell *matHeaderCellDef>Load #</th>
+                        <td mat-cell *matCellDef="let schedule">{{schedule.loadNumber}}</td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="departureDate">
+                        <th mat-header-cell *matHeaderCellDef>Departure</th>
+                        <td mat-cell *matCellDef="let schedule">{{schedule.departureDate | date:'short'}}</td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="origin">
+                        <th mat-header-cell *matHeaderCellDef>From</th>
+                        <td mat-cell *matCellDef="let schedule">{{schedule.origin}}</td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="destination">
+                        <th mat-header-cell *matHeaderCellDef>To</th>
+                        <td mat-cell *matCellDef="let schedule">{{schedule.destination}}</td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="remLoadCap">
+                        <th mat-header-cell *matHeaderCellDef>Rem. Load</th>
+                        <td mat-cell *matCellDef="let schedule">{{schedule.remLoadCap}}</td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="remCarCap">
+                        <th mat-header-cell *matHeaderCellDef>Rem. Cars</th>
+                        <td mat-cell *matCellDef="let schedule">{{schedule.remCarCap}}</td>
+                      </ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="scheduleColumns"></tr>
+                      <tr mat-row *matRowDef="let schedule; columns: scheduleColumns;"
+                          [ngClass]="'truck-schedule-row-' + (truck.id % 5)"></tr>
+                    </table>
+                  </ng-container>
+                  <div *ngIf="!truck.schedules || truck.schedules.length === 0" class="no-schedules">
+                    No schedules available
+                  </div>
                 </td>
               </ng-container>
 
-              <ng-container matColumnDef="year">
-                <th mat-header-cell *matHeaderCellDef> Year </th>
-                <td mat-cell *matCellDef="let element"> {{element.year}} </td>
-              </ng-container>
-              <ng-container matColumnDef="make">
-                <th mat-header-cell *matHeaderCellDef> Make </th>
-                <td mat-cell *matCellDef="let element"> {{element.make}} </td>
-              </ng-container>
-              <ng-container matColumnDef="model">
-                <th mat-header-cell *matHeaderCellDef> Model </th>
-                <td mat-cell *matCellDef="let element"> {{element.model}} </td>
-              </ng-container>
-              <ng-container matColumnDef="vin">
-                <th mat-header-cell *matHeaderCellDef> VIN </th>
-                <td mat-cell *matCellDef="let element"> {{element.vin}} </td>
-              </ng-container>
-              <ng-container matColumnDef="plate">
-                <th mat-header-cell *matHeaderCellDef> Plate </th>
-                <td mat-cell *matCellDef="let element"> {{element.plate}} </td>
-              </ng-container>
-              <ng-container matColumnDef="state">
-                <th mat-header-cell *matHeaderCellDef> State </th>
-                <td mat-cell *matCellDef="let element"> {{element.state}} </td>
-              </ng-container>
-              <ng-container matColumnDef="weight">
-                <th mat-header-cell *matHeaderCellDef> Weight (lbs) </th>
-                <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="vehiclesProperties"></tr>
-              <tr mat-row *matRowDef="let row; columns: vehiclesProperties;"></tr>
+              <tr mat-header-row *matHeaderRowDef="truckColumns"></tr>
+              <tr mat-row *matRowDef="let truck; columns: truckColumns;"></tr>
             </table>
+
+            <!-- Schedule Form -->
+            <form [formGroup]="scheduleForm" class="schedule-form" (ngSubmit)="addSchedule()">
+              <mat-form-field appearance="outline">
+                <mat-label>Truck</mat-label>
+                <mat-select formControlName="truckId">
+                  <mat-option *ngFor="let truck of trucks" [value]="truck.id">
+                    Truck #{{truck.truckNumber}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Load Number</mat-label>
+                <input matInput formControlName="loadNumber" type="text">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Departure Date</mat-label>
+                <input matInput [matDatepicker]="depPicker" formControlName="departureDate">
+                <mat-datepicker-toggle matSuffix [for]="depPicker"></mat-datepicker-toggle>
+                <mat-datepicker #depPicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Origin</mat-label>
+                <mat-select formControlName="origin">
+                  <mat-option value="Florida">Florida</mat-option>
+                  <mat-option value="New York">New York</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Destination</mat-label>
+                <mat-select formControlName="destination">
+                  <mat-option value="Florida">Florida</mat-option>
+                  <mat-option value="New York">New York</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Remaining Load Capacity</mat-label>
+                <input matInput formControlName="remLoadCap" type="number">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Remaining Car Capacity</mat-label>
+                <input matInput formControlName="remCarCap" type="number">
+              </mat-form-field>
+
+              <button mat-raised-button color="primary" type="submit">Add Schedule</button>
+            </form>
           </div>
-          
-          <mat-form-field appearance="outline">
-            <mat-label>Select Truck</mat-label>
-            <mat-select [formControl]="form.controls.truckId">
-              <ng-container *ngIf="trucks$ | async as trucks">
-                <mat-option *ngFor="let t of trucks" [value]="t.id">{{t.truckNumber}} - {{t.companyName}}</mat-option>
-              </ng-container>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Departure date</mat-label>
-            <input type="date" matInput [formControl]="form.controls.truckDeparture">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Arrival date</mat-label>
-            <input type="date" matInput [formControl]="form.controls.truckArrival">
-          </mat-form-field>
         </section>
       </div>
     </div>

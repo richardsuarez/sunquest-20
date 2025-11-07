@@ -19,8 +19,8 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    width: 100%;
-    max-width: 100%;
+    /* width: 100%;
+    max-width: 100%; */
     padding-bottom: 20px;
 
     h1{
@@ -30,7 +30,6 @@
 
 .desktop{
     display: flex;
-    flex-wrap: wrap;
     margin-top: 20px;
     gap: 50px;
 }
@@ -85,15 +84,6 @@ mat-card-actions {
   color: #555;
 }
 
-.information-region {
-  border: 1px solid lightgray;
-  padding: 0px 10px;
-  border-radius: 5px;
-  box-sizing: border-box;
-  width: 100%;
-  margin-bottom: 20px;
-}
-
 /* reusable row used where you had display:flex inline */
 .row {
   display: flex;
@@ -125,14 +115,12 @@ mat-card-actions {
 
 .customer-card-desktop {
   width: 400px;
-  margin: 1rem auto;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .customer-card-mobile {
   width: 90%;
-  margin: 1rem auto;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
@@ -163,4 +151,40 @@ mat-card-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 20px
+}
+
+/* Schedule styles */
+.schedule-table {
+    margin-bottom: 20px;
+}
+
+.schedule-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 20px;
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.schedule-form mat-form-field {
+    flex: 1 1 200px;
+}
+
+.schedule-form button {
+    align-self: flex-end;
+    margin-bottom: 1.34375em; /* Aligns with mat-form-field */
+}
+
+/* Truck schedule row colors - base colors */
+.truck-schedule-row-0 { background-color: #f0f7ff; }
+.truck-schedule-row-1 { background-color: #fff0f0; }
+.truck-schedule-row-2 { background-color: #f0fff7; }
+.truck-schedule-row-3 { background-color: #fff7f0; }
+.truck-schedule-row-4 { background-color: #f7f0ff; }
+
+/* Hover effect for schedule rows */
+.mat-mdc-row:hover {
+    background-color: rgba(0, 0, 0, 0.04);
 }
