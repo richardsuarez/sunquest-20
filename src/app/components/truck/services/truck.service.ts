@@ -13,15 +13,21 @@ export class TruckService {
   getTrucks(): Observable<Truck[]> {
     return runInInjectionContext(this.injector, () => {
       const trucksRef = collection(this.firestore, this.collectionName);
+      console.debug('[TruckService] getTrucks() - requesting from server for collection:', this.collectionName);
       const p = getDocsFromServer(trucksRef)
-        .then(snapshot => snapshot.docs.map(d => {
-          const data = d.data() as any;
-          // normalize Firestore Timestamps to JS Date
-          const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
-          return ({ ...data, id: d.id, createdAt } as Truck);
-        }))
-        .catch(async () => {
+        .then(snapshot => {
+          console.debug('[TruckService] getTrucks() - server response, docs:', snapshot.docs.length);
+          return snapshot.docs.map(d => {
+            const data = d.data() as any;
+            // normalize Firestore Timestamps to JS Date
+            const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+            return ({ ...data, id: d.id, createdAt } as Truck);
+          });
+        })
+        .catch(async (err) => {
+          console.warn('[TruckService] getTrucks() - getDocsFromServer failed, falling back to cache. Error:', err);
           const snapshot = await getDocsFromCache(trucksRef);
+          console.debug('[TruckService] getTrucks() - cache response, docs:', snapshot.docs.length);
           return snapshot.docs.map(d => {
             const data = d.data() as any;
             const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;

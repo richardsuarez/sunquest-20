@@ -1,40 +1,60 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, switchMap, catchError } from 'rxjs/operators';
+import { map, switchMap, catchError, take } from 'rxjs/operators';
+import { mergeMap, tap } from 'rxjs/operators';
 import { of, from } from 'rxjs';
 import * as BookActions from './book.actions';
-import { TruckService } from '../../truck/services/truck.service';
 import { BookingService } from '../service/booking.service';
-import { ScheduleService } from '../../schedule/services/schedule.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
 @Injectable()
 export class BookEffects {
     private injector = inject(EnvironmentInjector);
-    private truckService = inject(TruckService);
     private bookingService = inject(BookingService);
     private snackBar = inject(MatSnackBar);
     private router = inject(Router);
-    private scheduleService = inject(ScheduleService);
 
-    readonly addBooking$;
-    readonly addSchedule$;
-    readonly loadSchedules$;
+    readonly addBookingStart$;
+    readonly addBookingEnd$;
+    readonly addTrip$;
+    readonly loadTrips$;
 
     constructor(private actions$: Actions) {
         // Add Booking effect
-        this.addBooking$ = createEffect(() =>
+        this.addBookingStart$ = createEffect(() =>
             this.actions$.pipe(
                 ofType(BookActions.addBookingStart),
                 switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
                         this.bookingService.addBooking(action.booking).pipe(
-                            map(() => {
-                                this.snackBar.open('Booking saved', 'Close', { duration: 3000 });
-                                this.router.navigate(['/main/customer']);
-                                return BookActions.addBookingEnd();
-                            }),
+                            switchMap(() => {
+                                const carsBooked = action.booking.vehicleIds || [];
+                                let totalWeight = 0
+                                for(let carId of carsBooked){
+                                    const vehicle = action.booking.customer?.vehicles?.find(v => v.id === carId);
+                                    if(vehicle && vehicle.weight){
+                                        totalWeight = totalWeight + vehicle.weight;
+                                    }
+                                }
+                                const remCarCapDelta = action.trip?.remCarCap ? action.trip.remCarCap - carsBooked.length : 0;
+                                const remWeightCapDelta = action.trip?.remLoadCap ? action.trip.remLoadCap - totalWeight : 0;
+                                const updatedTrip = {
+                                    ...action.trip,
+                                    remCarCap: remCarCapDelta,
+                                    remLoadCap: remWeightCapDelta
+                                }
+                                return runInInjectionContext(this.injector, () =>
+                                    this.bookingService.updateTrip(action.booking.truckId, updatedTrip).pipe(
+                                        map(() => {
+                                            return BookActions.addBookingEnd();
+                                        }),
+                                        catchError((err: Error) => of(BookActions.addBookingFail({ error: err })))
+                                    )
+                                )
+                            }
+                                
+                            ),
                             catchError((err: Error) => of(BookActions.addBookingFail({ error: err })))
                         )
                     )
@@ -42,23 +62,34 @@ export class BookEffects {
             )
         );
 
-        // Add Schedule effect
-        this.addSchedule$ = createEffect(() =>
+        this.addBookingEnd$ = createEffect(() =>
             this.actions$.pipe(
-                ofType(BookActions.addScheduleStart),
+                ofType(BookActions.addBookingEnd),
+                tap(() => {
+                    this.snackBar.open('Booking saved', 'Close', { duration: 3000 });
+                    this.router.navigate(['/main/customer']);
+                })
+            ),
+            { dispatch: false }
+        );
+
+        // Add Trip effect
+        this.addTrip$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(BookActions.addTripStart),
                 switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
-                        from(this.scheduleService.addSchedule(action.truckId, action.schedule)).pipe(
-                            map((schedule) => {
-                                this.snackBar.open('Schedule added', 'Close', { duration: 3000 });
-                                return BookActions.addScheduleSuccess({ 
-                                    truckId: action.truckId, 
-                                    schedule: schedule 
+                        from(this.bookingService.addTrip(action.truckId, action.trip)).pipe(
+                            map((trip) => {
+                                this.snackBar.open('Trip added', 'Close', { duration: 3000 });
+                                return BookActions.addTripSuccess({
+                                    truckId: action.truckId,
+                                    trip: trip
                                 });
                             }),
                             catchError((err: Error) => {
-                                this.snackBar.open('Failed to add schedule', 'Close', { duration: 3000 });
-                                return of(BookActions.addScheduleFail({ error: err }));
+                                this.snackBar.open('Failed to add trip', 'Close', { duration: 3000 });
+                                return of(BookActions.addTripFail({ error: err }));
                             })
                         )
                     )
@@ -66,19 +97,17 @@ export class BookEffects {
             )
         );
 
-        // Load Schedules effect
-        this.loadSchedules$ = createEffect(() =>
+        // Load Trips effect
+        this.loadTrips$ = createEffect(() =>
             this.actions$.pipe(
-                ofType(BookActions.loadSchedulesStart),
-                switchMap((action) =>
-                    runInInjectionContext(this.injector, () =>
-                        this.scheduleService.getTruckSchedules(action.truckId).pipe(
-                            map((schedules) => BookActions.loadSchedulesSuccess({ 
-                                truckId: action.truckId, 
-                                schedules: schedules 
-                            })),
-                            catchError((err: Error) => of(BookActions.loadSchedulesFail({ error: err })))
-                        )
+                ofType(BookActions.loadTripsStart),
+                mergeMap((action) =>
+                    this.bookingService.getTruckTrips(action.truckId).pipe(
+                        map((trips) => BookActions.loadTripsSuccess({ truckId: action.truckId, trips: trips })),
+                        catchError((err: Error) => {
+                            console.error('Failed to load trips:', err);
+                            return of(BookActions.loadTripsFail({ error: err }));
+                        })
                     )
                 )
             )

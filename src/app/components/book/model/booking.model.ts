@@ -1,4 +1,5 @@
-import { Vehicle } from '../../customer/model/customer.model';
+import { Customer, Vehicle } from '../../customer/model/customer.model';
+import { Trip } from '../../trip/model/trip.model';
 
 export interface Paycheck {
   checkNumber: string | null;
@@ -6,29 +7,19 @@ export interface Paycheck {
   amount: number;
 }
 
-export interface RouteInfo {
-  origin: string | null;
-  destination: string | null;
-}
-
-export interface TruckBookingInfo {
-  truckId: string | null;
-  departureDate: string | null; // ISO
-  arrivalDate: string | null; // ISO
-}
-
 export interface Booking {
   id?: string;
-  customerId: string;
-  customerSnapshot: any;
+  customer: Customer | null;
   vehicleIds: string[];
-  vehiclesSnapshot?: Vehicle[];
-  floridaInstructions?: string | null;
-  newYorkInstructions?: string | null;
   paycheck: Paycheck;
-  arrivalAt: Date; // ISO datetime
-  arrivalWeekOfYear: number;
-  route: RouteInfo;
-  truck: TruckBookingInfo;
-  createdAt?: any;
+  arrivalAt: Date | null; // ISO datetime
+  arrivalWeekOfYear: number | null;
+  pickupAt: Date | null; // ISO datetime
+  pickupWeekOfYear: number | null;
+  from: string | null;
+  to: string | null;
+  truckId: string | null;
+  tripId: string | null;
+  notes: string | null;
+  createdAt?: Date;
 }

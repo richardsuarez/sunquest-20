@@ -85,7 +85,7 @@ export const customerReducer = createReducer(
     on(CustomerActions.createCustomer, (state) => ({
         ...state,
         customerViewModel: {
-            id: new Date().toISOString(),
+            DocumentID: new Date().toISOString(),
             primaryFirstName: '',
             primaryLastName: '',
             primaryMiddleName: '',
@@ -97,7 +97,25 @@ export const customerReducer = createReducer(
             email: '',
             telephone: '',
             phone: '',
-            adresses: [],
+            floridaAddress: {
+                address1: '',
+                address2: '',
+                bldg: '',
+                apt: '',
+                city: '',
+                state: '',
+                zipCode: '',
+            },
+            newYorkAddress: {
+                address1: '',
+                address2: '',
+                bldg: '',
+                apt: '',
+                city: '',
+                state: '',
+                zipCode: '',
+            },
+            joinedOn: null,
             zipCode: '',
         }
     })),
@@ -127,9 +145,11 @@ export const customerReducer = createReducer(
     ,
     on(CustomerActions.getVehiclesEnd, (state, action) => ({
         ...state,
-        customerViewModel: { 
-            ...state.customerViewModel, 
-            vehicles: action.vehicles 
-        },
+        customerViewModel: state.customerViewModel
+            ? { 
+                ...state.customerViewModel, 
+                vehicles: action.vehicles 
+              }
+            : state.customerViewModel,
     }))
 )

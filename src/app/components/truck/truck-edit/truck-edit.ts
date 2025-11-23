@@ -37,7 +37,7 @@ export class TruckEdit implements OnDestroy {
   public router = inject(Router);
   destroy$ = new Subject<void>();
 
-  saving$ = this.store.select(saving as any);
+  saving$ = this.store.select(saving);
 
   form = new FormGroup({
     truckNumber: new FormControl<string | null>(null, Validators.required),
@@ -60,7 +60,6 @@ export class TruckEdit implements OnDestroy {
           companyName: t.companyName,
           loadCapacity: t.loadCapacity,
           carCapacity: t.carCapacity,
-          loadNumber: t.loadNumber
         });
       }
     });

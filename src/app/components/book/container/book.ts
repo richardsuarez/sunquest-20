@@ -1,55 +1,60 @@
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { customerViewModel } from '../../customer/store/customer.selectors';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators, FormsModule } from '@angular/forms';
-import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
-import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { customerViewModel } from '../../customer/store/customer.selectors';
-import * as BookActions from '../store/book.actions';
+import { Customer } from '../../customer/model/customer.model';
+import { getTruckListStart } from '../store/book.actions';
 import { getVehiclesStart } from '../../customer/store/customer.actions';
-import { trucks as trucksSelector, savingBooking as savingBookingSelector } from '../store/book.selectors';
-import { Observable, Subject, takeUntil } from 'rxjs';
-import { Truck } from '../../truck/model/truck.model';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { MatTableModule } from '@angular/material/table';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule, MatDatepickerToggle } from '@angular/material/datepicker';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
+import { MatOption } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
 import { MatTimepickerModule, MatTimepickerToggle } from '@angular/material/timepicker';
+import { merge, Observable, Subject, takeUntil } from 'rxjs';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { Customer, Vehicle } from '../../customer/model/customer.model';
-import { getTruckListStart } from '../../truck/store/truck.actions';
-import { trucks } from '../../truck/store/truck.selectors';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators, FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { savingBooking, sortedTripsMap, trucks } from '../store/book.selectors';
+import { Trip } from '../../trip/model/trip.model';
+import { Store } from '@ngrx/store';
+import { Truck } from '../../truck/model/truck.model';
+
+import * as BookActions from '../store/book.actions';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-book',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
     FormsModule,
-    MatLabel,
-    MatInput,
-    MatSelectModule,
-    MatOption,
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
     MatDatepickerModule,
     MatDatepickerToggle,
-    MatListModule,
+    MatExpansionModule,
+    MatFormFieldModule,
     MatIconModule,
+    MatInput,
+    MatLabel,
+    MatListModule,
+    MatOption,
+    MatSelectModule,
+    MatProgressSpinner,
     MatTableModule,
     MatTimepickerModule,
-    MatTimepickerToggle
+    MatTimepickerToggle,
+    ReactiveFormsModule,
   ],
   templateUrl: './book.html',
   styleUrls: ['./book.css'],
@@ -59,96 +64,71 @@ export class Book implements OnInit {
   private store = inject(Store);
   public router = inject(Router);
   private snackBar = inject(MatSnackBar);
-  customer$!: Observable<Partial<Customer> | null>;
+  customer$!: Observable<Customer | null>;
   truckList$!: Observable<Truck[]>;
+  tripsMap$!: Observable<{ [truckId: string]: Trip[] }>;
+  truckList: Truck[] = [];
+  currentCustomer: Customer | null = null;
+  private requestedTrips = new Set<string>();
   isMobile!: boolean;
   savingBooking$!: Observable<boolean>;
   destroy$ = new Subject<void>()
-  weekOfYear: number = 0;
+  currentSelectedTrip: Trip | null = null;
   currentSelectedTruckId: string | null = null;
+  today = new Date();
+  tomorrow = new Date(this.today.getTime() + 86400000)
+  dayAfterTomorrow = new Date(this.today.getTime() + 172800000)
+  arrivalAt: Date = new Date();
+  pickupAt!:Date;
 
   vehicleSelection: { [id: string]: boolean } = {};
-  truckSelection: { [id: string]: boolean } = {};
   vehiclesProperties = ['checkbox', 'year', 'make', 'model', 'plate', 'state', 'weight'];
-  
-  // Schedule table column definitions
-  truckColumns = ['truckNumber', 'schedules'];
-  scheduleColumns = ['loadNumber', 'departureDate', 'origin', 'destination', 'remLoadCap', 'remCarCap'];
 
-  // Form for adding new schedules
-  scheduleForm = new FormGroup({
+  // Trip table column definitions
+  truckColumns = ['truckNumber', 'trips'];
+  tripColumns = ['checkbox', 'loadNumber', 'departureDate', 'delayDate', 'week', 'origin', 'destination', 'remLoadCap', 'remCarCap'];
+
+  // Form for adding new trips
+  tripForm = new FormGroup({
     truckId: new FormControl<string>('', [Validators.required]),
     loadNumber: new FormControl<string>('', [Validators.required]),
-    departureDate: new FormControl<Date | null>(null, [Validators.required]),
+    departureDate: new FormControl<Date | null>(this.tomorrow, [Validators.required]),
+    arrivalDate: new FormControl<Date | null>(this.dayAfterTomorrow, [Validators.required]),
     origin: new FormControl<string>('', [Validators.required]),
     destination: new FormControl<string>('', [Validators.required]),
-    remLoadCap: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
-    remCarCap: new FormControl<number>(0, [Validators.required, Validators.min(0)])
   });
 
   form = new FormGroup({
-    floridaInstructions: new FormControl<string | null>(null),
-    newYorkInstructions: new FormControl<string | null>(null),
     checkNumber: new FormControl<string | null>(null),
     bankName: new FormControl<string | null>(null),
     amount: new FormControl<number | null>(1200, [Validators.required]),
-    arrivalAt: new FormControl<Date | null>(null, [Validators.required]), // ISO datetime
     origin: new FormControl<string | null>(null),
     destination: new FormControl<string | null>(null),
-    truckId: new FormControl<string | null>(null),
-    truckDeparture: new FormControl<string | null>(null),
-    truckArrival: new FormControl<string | null>(null),
+    notes: new FormControl<string | null>(null),
   });
 
   constructor(
     private readonly breakpoints: BreakpointObserver,
   ) {
     this.customer$ = this.store.select(customerViewModel);
+    // select trucks from the truck feature (not the book feature)
     this.truckList$ = this.store.select(trucks);
-    this.savingBooking$ = this.store.select(savingBookingSelector as any);
-    
-  }
-
-  addSchedule() {
-    if (this.scheduleForm.invalid) {
-      this.scheduleForm.markAllAsTouched();
-      return;
-    }
-
-    const scheduleData = this.scheduleForm.value;
-    if (!scheduleData.truckId) {
-      this.snackBar.open('Please select a truck', 'Close', { duration: 3000 });
-      return;
-    }
-
-    this.store.dispatch(BookActions.addScheduleStart({
-      truckId: scheduleData.truckId,
-      schedule: {
-        truckId: scheduleData.truckId,
-        loadNumber: scheduleData.loadNumber || '',
-        departureDate: scheduleData.departureDate || new Date(),
-        origin: scheduleData.origin || '',
-        destination: scheduleData.destination || '',
-        remLoadCap: scheduleData.remLoadCap || 0,
-        remCarCap: scheduleData.remCarCap || 0
-      }
-    }));
-
-    // Reset form after submission
-    this.scheduleForm.reset();
+    this.savingBooking$ = this.store.select(savingBooking);
+    this.tripsMap$ = this.store.select(sortedTripsMap);
   }
 
   ngOnInit() {
     this.breakpoints.observe([
       Breakpoints.HandsetPortrait,
-      Breakpoints.HandsetLandscape
     ]).subscribe(res => {
       this.isMobile = res.matches
     });
 
+    // ask truck feature to load truck list
     this.store.dispatch(getTruckListStart());
 
     this.customer$.pipe(takeUntil(this.destroy$)).subscribe(customer => {
+      this.currentCustomer = customer;
       if (customer && customer.DocumentID && !customer.vehicles) {
         this.store.dispatch(getVehiclesStart({ customerId: customer.DocumentID }));
         // initialize vehicle selection
@@ -160,7 +140,7 @@ export class Book implements OnInit {
           }
         });
       }
-      if(!customer){
+      if (!customer) {
         this.router.navigate(['main/customer/']);
       }
     });
@@ -168,29 +148,88 @@ export class Book implements OnInit {
     this.truckList$.pipe(takeUntil(this.destroy$)).subscribe(trucks => {
       trucks.forEach(t => {
         if (t.id) {
-          this.truckSelection[t.id] = false;
+          // dispatch load trips for trucks that don't have trips yet
+          // and that we haven't already requested during this component lifecycle
+          if (!this.requestedTrips.has(t.id)) {
+            this.requestedTrips.add(t.id);
+            this.store.dispatch(BookActions.loadTripsStart({ truckId: t.id }));
+          }
         }
       });
+      // keep a local copy for helper lookups (used when adding trip)
+      this.truckList = trucks;
     });
 
-    this.form.controls.arrivalAt.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(date => {
-      if (date) {
-        this.weekOfYear = this.weekNumber(date);
-        // we could set a form control for weekOfYear if needed
-      } 
-    });
+    merge(this.tripForm.controls.departureDate.valueChanges, this.tripForm.controls.arrivalDate.valueChanges)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.checkDateValidation()
+      })
   }
 
-  toggleVehicle(id: string) {
-    this.vehicleSelection[id] = !this.vehicleSelection[id];
-  }
-
-  public weekNumber(date: Date | null): number {
-    if(!date){
-      return 0;
+  addTrip() {
+    if (this.tripForm.invalid) {
+      this.tripForm.markAllAsTouched();
+      return;
     }
-    const yearStart = new Date(date.getFullYear(), 0, 1); // Jan 1st, of the year given
-    return Math.ceil(((date.getTime() - yearStart.getTime()) / 604800000));
+
+    const tripData = this.tripForm.value;
+    if (!tripData.truckId) {
+      this.snackBar.open('Please select a truck', 'Close', { duration: 5000 });
+      return;
+    }
+    const truck = this.truckList.find(t => t.id === tripData.truckId);
+
+    this.store.dispatch(BookActions.addTripStart({
+      truckId: tripData.truckId,
+      trip: {
+        loadNumber: tripData.loadNumber || '',
+        departureDate: tripData.departureDate || new Date(),
+        arrivalDate: tripData.arrivalDate || new Date(),
+        origin: tripData.origin || '',
+        destination: tripData.destination || '',
+        remLoadCap: truck?.loadCapacity || 0,
+        remCarCap: truck?.carCapacity || 0,
+        delayDate: null,
+      }
+    }));
+
+    // Reset form after submission
+    this.tripForm.reset();
+  }
+
+  areSelectedVehicles(): boolean {
+    return Object.values(this.vehicleSelection).some(selected => selected);
+  }
+
+  private checkDateValidation() {
+    const depDate = this.tripForm.controls.departureDate.value
+    const arrDate = this.tripForm.controls.arrivalDate.value
+    if (depDate && arrDate) {
+      if (depDate > arrDate) {
+        this.tripForm.controls.departureDate.setErrors({ 'wrongDate': true })
+        this.tripForm.controls.departureDate.markAsTouched();
+        this.tripForm.controls.arrivalDate.setErrors({ 'wrongDate': true })
+        this.tripForm.controls.arrivalDate.markAsTouched();
+      } else {
+        this.tripForm.controls.departureDate.setErrors(null)
+        this.tripForm.controls.departureDate.markAsTouched();
+        this.tripForm.controls.arrivalDate.setErrors(null)
+        this.tripForm.controls.arrivalDate.markAsTouched();
+      }
+    }
+  }
+
+  clickOnDisabledCheckbox(trip: Trip) {
+    const routeOrigin = this.form.controls.origin.value
+    if (routeOrigin && routeOrigin !== trip.origin) {
+      this.snackBar.open(`Selected trip origin (${trip.origin}) does not match route origin (${routeOrigin})`, 'Close', { duration: 5000 });
+      return;
+    }
+  }
+
+  navigateBack() {
+    this.router.navigate(['main/customer'])
   }
 
   async save() {
@@ -199,22 +238,23 @@ export class Book implements OnInit {
       return;
     }
 
-    const customer = await this.customer$.pipe().toPromise();
-    if (!customer || !customer.DocumentID) {
-      this.snackBar.open('No customer selected', 'Close', { duration: 3000 });
+    const selectedVehicleIds = Object.keys(this.vehicleSelection).filter(k => this.vehicleSelection[k]);
+
+    if (selectedVehicleIds.length === 0) {
+      this.snackBar.open('Please select at least one vehicle to book', 'Close', { duration: 5000 });
       return;
     }
 
-    const selectedVehicleIds = Object.keys(this.vehicleSelection).filter(k => this.vehicleSelection[k]);
+    if(!this.currentSelectedTrip){
+      this.snackBar.open('Please select a trip to book', 'Close', { duration: 5000 });
+      return;
+    }
 
-    const arrivalAt = this.form.controls.arrivalAt.value || new Date();
+    const arrivalAt = this.arrivalAt || new Date();
+    const pickupAt = this.pickupAt || new Date();
     const booking = {
-      customerId: customer.DocumentID,
-      customerSnapshot: customer,
+      customer: this.currentCustomer,
       vehicleIds: selectedVehicleIds,
-      vehiclesSnapshot: customer.vehicles || [],
-      floridaInstructions: this.form.controls.floridaInstructions.value,
-      newYorkInstructions: this.form.controls.newYorkInstructions.value,
       paycheck: {
         checkNumber: this.form.controls.checkNumber.value,
         bankName: this.form.controls.bankName.value,
@@ -222,45 +262,71 @@ export class Book implements OnInit {
       },
       arrivalAt,
       arrivalWeekOfYear: this.weekNumber(arrivalAt),
-      route: {
-        origin: this.form.controls.origin.value,
-        destination: this.form.controls.destination.value,
-      },
-      truck: {
-        truckId: this.form.controls.truckId.value,
-        departureDate: this.form.controls.truckDeparture.value,
-        arrivalDate: this.form.controls.truckArrival.value,
-      },
-    };
+      pickupAt,
+      pickupWeekOfYear: this.weekNumber(pickupAt),
+      from: this.form.controls.origin.value,
+      to: this.form.controls.destination.value,
+      truckId: this.currentSelectedTruckId,
+      tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id : null,
+      notes: this.form.controls.notes.value,
+      createdAt: new Date()
+    };             
 
     // dispatch booking action — effect will persist and handle snackbar/navigation
-    this.store.dispatch(BookActions.addBookingStart({ booking }));
+    this.store.dispatch(BookActions.addBookingStart({ booking, trip: this.currentSelectedTrip }));
   }
 
-  selectTruck(id: string) {
-    this.truckSelection[id] = true;
-    this.truckSelection[this.currentSelectedTruckId as string] = false;
-    this.currentSelectedTruckId = id;
+  selectableTrip(trip: Trip): boolean {
+    if(this.form.controls.origin.value && trip.origin !== this.form.controls.origin.value){
+      return false;
+    }
+    if(this.arrivalAt && trip.departureDate > this.arrivalAt ){
+      return false;
+    }
+    return true;
   }
 
-  navigateBack() {
-    this.router.navigate(['main/'])
+  toggleVehicle(id: string) {
+    this.vehicleSelection[id] = !this.vehicleSelection[id];
   }
 
-  updateOrigin(event?: any){
-    if(this.form.controls.destination.value === 'Florida'){
+  updateRouteOrigin(event?: any) {
+    if (this.form.controls.destination.value === 'Florida') {
       this.form.controls.origin.setValue('New York');
-    } else if(this.form.controls.destination.value === 'New York'){
+    } else if (this.form.controls.destination.value === 'New York') {
       this.form.controls.origin.setValue('Florida');
     }
   }
 
-  updateDestination(event: any){
-    if(this.form.controls.origin.value === 'Florida'){
+  updateRouteDestination(event: any) {
+    if (this.form.controls.origin.value === 'Florida') {
       this.form.controls.destination.setValue('New York');
-    } else if(this.form.controls.origin.value === 'New York'){
+    } else if (this.form.controls.origin.value === 'New York') {
       this.form.controls.destination.setValue('Florida');
     }
+  }
+
+  updateTripOrigin(event?: any) {
+    if (this.tripForm.controls.destination.value === 'Florida') {
+      this.tripForm.controls.origin.setValue('New York');
+    } else if (this.tripForm.controls.destination.value === 'New York') {
+      this.tripForm.controls.origin.setValue('Florida');
+    }
+  }
+
+  updateTripDestination(event: any) {
+    if (this.tripForm.controls.origin.value === 'Florida') {
+      this.tripForm.controls.destination.setValue('New York');
+    } else if (this.tripForm.controls.origin.value === 'New York') {
+      this.tripForm.controls.destination.setValue('Florida');
+    }
+  }
+  weekNumber(date: Date | null): number {
+    if (!date) {
+      return 0;
+    }
+    const yearStart = new Date(date.getFullYear(), 0, 1); // Jan 1st, of the year given
+    return Math.ceil(((date.getTime() - yearStart.getTime()) / 604800000));
   }
 }
 

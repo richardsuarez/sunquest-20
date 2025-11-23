@@ -1,11 +1,11 @@
-export interface Schedule {
+export interface Trip {
   id?: string;
-  truckId: string;
   loadNumber: string;
   departureDate: Date;
+  arrivalDate: Date;
   origin: string;
   destination: string;
   remLoadCap: number;  // remaining load capacity
   remCarCap: number;   // remaining car capacity
-  createdAt?: Date;
+  delayDate: Date | null;
 }

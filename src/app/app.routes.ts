@@ -25,7 +25,7 @@ export const routes: Routes = [
             {
                 path: '',
                 loadComponent() {
-                    return import('./components/schedule/schedule').then(m => m.schedule);
+                    return import('./components/trip/trip').then(m => m.trip);
                 }
             },
             {

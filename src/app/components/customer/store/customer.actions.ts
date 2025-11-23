@@ -59,7 +59,7 @@ export const createCustomer = createAction(
 
 export const loadCustomer = createAction(
     '[Customer] Load a customer in state',
-    props<{customer: Partial<Customer>}>()
+    props<{customer: Customer}>()
 );
 
 export const updateSearchCriteria = createAction(
@@ -95,7 +95,7 @@ export const getVehiclesStart = createAction(
 
 export const getVehiclesEnd = createAction(
     '[Customer] End loading vehicles',
-    props<{ customerId: string, vehicles: Vehicle[] }>()
+    props<{ vehicles: Vehicle[] }>()
 );
 
 export const deleteVehicleStart = createAction(

@@ -1,14 +1,12 @@
-import { Schedule } from "../../schedule/model/schedule.model";
+import { Trip } from "../../trip/model/trip.model";
 
 export interface Truck {
   id?: string;
-  truckNumber: string;
-  companyName: string;
+  truckNumber: string | null;
+  companyName: string | null;
   loadCapacity: number | null; // lbs
   carCapacity: number | null; // number of cars
-  loadNumber?: string | null;
   createdAt?: Date | null;
-  schedules?: Schedule[];
 }
 
 
