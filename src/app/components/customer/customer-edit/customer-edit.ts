@@ -23,7 +23,9 @@ import { CustomerService } from '../service/customer.service';
 import { MatListModule } from '@angular/material/list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { updateCustomerStart, addCustomerStart } from '../store/customer.actions';
+import { MatTableModule } from '@angular/material/table';
 import * as CustomerActions from '../store/customer.actions';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-customer-edit',
@@ -40,7 +42,9 @@ import * as CustomerActions from '../store/customer.actions';
     MatProgressSpinnerModule,
     MatSelect,
     MatListModule,
+    MatCardModule,
     MatCheckboxModule,
+    MatTableModule,
     AllowAlphanumericDirective,
     AllowAlphaAndSpecificCharDirective,
     AllowOnlyNumbersDirective,
@@ -61,6 +65,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   vehicles$!: Observable<Vehicle[]>;
   // temporary vehicles list stored until the user clicks Save
   tempVehicles: Partial<Vehicle>[] = [];
+  vehiclesProperties = ['year', 'make', 'model', 'plate', 'state', 'weight', 'actions'];
 
   vehicleForm = new FormGroup({
     make: new FormControl<string | null>('', Validators.required),
@@ -112,7 +117,6 @@ export class CustomerEdit implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
-    private readonly customerService: CustomerService,
   ) {
     this.savingCustomer$ = this.store.select(savingCustomer)
     this.customerVM$ = this.store.select(customerViewModel)
@@ -136,6 +140,8 @@ export class CustomerEdit implements OnInit, OnDestroy {
           // load vehicles into state so they can be displayed and managed
           this.store.dispatch(CustomerActions.getVehiclesStart({ customerId: customer.DocumentID }));
         }
+      } else {
+        this.router.navigate(['main/customer/']);
       }
     })
   }
@@ -209,7 +215,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
     this.store.dispatch(CustomerActions.deleteVehicleStart({ customerId: this.currentCustomer.DocumentID, vehicleId }));
   }
 
-  removeTempVehicle(vehicle: Partial<Vehicle>) {
+  deleteTempVehicle(vehicle: Partial<Vehicle>) {
     this.tempVehicles = this.tempVehicles.filter((tempVeh) => tempVeh !== vehicle);
   }
 }

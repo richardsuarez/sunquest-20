@@ -58,7 +58,6 @@ export class CustomerComponent implements OnInit, OnDestroy {
     private readonly breakpoints: BreakpointObserver,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
-    private readonly customerService: CustomerService,
   ) {
     this.loading$ = this.store.select(loading)
     this.customerList$ = this.store.select(customerList)
@@ -126,6 +125,13 @@ export class CustomerComponent implements OnInit, OnDestroy {
         })
       ).subscribe();
 
+    }
+  }
+
+  createBooking(customer: Customer | undefined) {
+    if (customer) {
+      this.store.dispatch(CustomerActions.loadCustomer({ customer }));
+      this.router.navigate(['main/book/new']);
     }
   }
 

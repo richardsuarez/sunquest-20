@@ -76,12 +76,18 @@
                             customer.newYorkAddress.zipCode }}</div>
                     </div>
                 </div>
-            </section>            
+            </section>
         </mat-card-content>
 
         <mat-card-actions>
-            <button mat-button color="primary" (click)="toEditCustomer(customer)">Edit</button>
-            <button mat-button style="color: red;" (click)="deleteCustomer(customer)">Delete</button>
+            <div style="display: flex; justify-content: start">
+                <button mat-button color="warn" (click)="createBooking(customer)">Book</button>
+            </div>
+            <div style="display: flex; justify-content: end; gap: 10px">
+                <button mat-button color="primary" (click)="toEditCustomer(customer)">Edit</button>
+                <button mat-button style="color: red;" (click)="deleteCustomer(customer)">Delete</button>
+            </div>
+
         </mat-card-actions>
     </mat-card>
 

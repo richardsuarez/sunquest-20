@@ -11,7 +11,7 @@ const initialState: CustomerState = {
     customerViewModel: null,
     searchCriteria: {
         searchValue: '',
-        pageSize: 4,
+        pageSize: 20,
     },
     firstCustomerViewed: null,
     lastCustomerViewed: null,
@@ -85,7 +85,7 @@ export const customerReducer = createReducer(
     on(CustomerActions.createCustomer, (state) => ({
         ...state,
         customerViewModel: {
-            id: new Date().toISOString(),
+            DocumentID: new Date().toISOString(),
             primaryFirstName: '',
             primaryLastName: '',
             primaryMiddleName: '',
@@ -97,7 +97,25 @@ export const customerReducer = createReducer(
             email: '',
             telephone: '',
             phone: '',
-            adresses: [],
+            floridaAddress: {
+                address1: '',
+                address2: '',
+                bldg: '',
+                apt: '',
+                city: '',
+                state: '',
+                zipCode: '',
+            },
+            newYorkAddress: {
+                address1: '',
+                address2: '',
+                bldg: '',
+                apt: '',
+                city: '',
+                state: '',
+                zipCode: '',
+            },
+            joinedOn: null,
             zipCode: '',
         }
     })),
@@ -121,12 +139,17 @@ export const customerReducer = createReducer(
         ...state,
         searchCriteria: {
             searchValue: '',
-            pageSize: 4,
+            pageSize: 20,
         },
     }))
     ,
     on(CustomerActions.getVehiclesEnd, (state, action) => ({
         ...state,
-        customerViewModel: state.customerViewModel && state.customerViewModel.DocumentID === action.customerId ? { ...state.customerViewModel, vehicles: action.vehicles } : state.customerViewModel,
+        customerViewModel: state.customerViewModel
+            ? { 
+                ...state.customerViewModel, 
+                vehicles: action.vehicles 
+              }
+            : state.customerViewModel,
     }))
 )

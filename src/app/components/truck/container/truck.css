@@ -1,0 +1,63 @@
+.container {
+  padding: 16px;
+}
+.headers{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1500px;
+    width: 100%;
+    
+    h1{
+        margin-left: 20px;
+    }
+    button{
+        margin-right: 20px;
+    }
+}
+
+.body{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+.truck-card-desktop {
+  width: 400px;
+  margin: 1rem auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.truck-card-mobile {
+  width: 90%;
+  margin: 1rem auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.truck-avatar { 
+  background: #E0E7FF; 
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+}
+.no-data { 
+  padding: 24px; 
+  color: gray;
+ }
+.muted { 
+  color: #666; 
+  font-size: 0.85rem; 
+  margin-top: 8px 
+}
+
+mat-card-content{
+  display: flex;
+  justify-content: space-between;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: end;
+  padding: 20px;
+}

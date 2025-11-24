@@ -1,0 +1,42 @@
+<div class="headers">
+  <h1>Trucks</h1>
+  <button mat-button mat-raised-button (click)="create()" style="background-color: #ED2D89; color: white">
+    Add Truck
+  </button>
+</div>
+<div *ngIf="loading$ | async">
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
+<div class="body">
+  <mat-card [class.truck-card-desktop]="!isMobile" [class.truck-card-mobile]="isMobile" *ngFor="let t of trucks$ |async">
+        <mat-card-header>
+          <div mat-card-avatar class="truck-avatar">
+            <mat-icon>local_shipping</mat-icon>
+          </div>
+          <mat-card-title>{{ t.companyName }}</mat-card-title>
+          <mat-card-subtitle>{{ t.truckNumber }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div style="display: block; text-align: center">
+            <span><strong>Load Capacity</strong></span>
+            <p> {{ t.loadCapacity ?? 'N/A' }} lbs</p>
+          </div>
+          <div style="display: block; text-align: center">
+            <span><strong>Car Capacity</strong></span>
+            <p> {{ t.carCapacity ?? 'N/A' }}</p>
+          </div>
+          <div style="display: block; text-align: center">
+            <span><strong>Joined us</strong></span>
+            <p> {{ t.createdAt | date : 'MMM dd, yyyy' }}</p>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="primary" (click)="edit(t)">Edit</button>
+          <button mat-button style="color:red" (click)="confirmDelete(t)">Delete</button>
+        </mat-card-actions>
+      </mat-card>
+
+  <div *ngIf="!((trucks$ | async)?.length)" style="text-align: center; margin-top: 20px">
+      <h2>No trucks found.</h2>
+    </div>
+</div>
