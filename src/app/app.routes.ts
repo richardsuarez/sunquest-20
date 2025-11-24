@@ -60,9 +60,21 @@ export const routes: Routes = [
                     provideState(TRUCK_FEATURE_KEY, truckReducer),
                     provideEffects([BookEffects, TruckEffects]),
                 ],
-                loadComponent() {
-                    return import('./components/book/container/book').then(m => m.Book);
-                }
+                children: [
+                    {
+                        path: '',
+                        loadComponent: () => import('./components/book/container/book').then(m => m.Book),
+                    },
+                    {
+                        path: ':crud',
+                        loadComponent(){
+                            return import('./components/book/book-edit/book-edit').then(m => m.BookEdit);
+                        },
+                        canDeactivate: [
+                            CanDeactivateGuard
+                        ]
+                    }
+                ]
             }
             ,
             {
