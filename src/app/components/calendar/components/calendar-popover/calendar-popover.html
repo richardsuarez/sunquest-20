@@ -1,0 +1,47 @@
+<div class="booking-popover" #popoverContainer [style.top.px]="adjustedPosition.top" [style.left.px]="adjustedPosition.left">
+  <div class="popover-header">
+    <h3>Bookings for this Trip</h3>
+    <button mat-icon-button (click)="closePopover()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="popover-content">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="loading">
+      <p>Loading bookings...</p>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="error && !loading" class="error">
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading && !error && tripBookings.length === 0" class="empty">
+      <p>No bookings for this trip</p>
+    </div>
+
+    <!-- Bookings list -->
+    <div *ngIf="!loading && tripBookings.length > 0" class="bookings-list">
+      <mat-card *ngFor="let booking of tripBookings" class="booking-card">
+        <mat-card-content>
+          <div class="booking-info">
+            <div class="info-row">
+              <strong>Customer:</strong>
+              <span>{{ getPrimaryCustomer(booking) }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Vehicles:</strong>
+              <span>{{ getVehicleInfo(booking) }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="primary" (click)="toEditBooking(booking)">Details</button>
+          <button mat-button style="color: red;" (click)="deleteBooking(booking)">Cancel</button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</div>

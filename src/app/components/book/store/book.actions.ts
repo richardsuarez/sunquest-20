@@ -1,4 +1,5 @@
 import { createAction, props } from '@ngrx/store';
+import { CalendarEvent } from '../../calendar/model/calendar-event.model';
 import { Booking } from '../model/booking.model';
 import { Trip } from '../../trip/model/trip.model';
 import { Truck } from '../../truck/model/truck.model';
@@ -24,3 +25,6 @@ export const getTruckListFail = createAction('[Truck] Load trucks fail', props<{
 export const loadTripsStart = createAction('[Book] Load trips start', props<{ truckId: string }>());
 export const loadTripsSuccess = createAction('[Book] Load trips success', props<{ truckId: string, trips: Trip[] }>());
 export const loadTripsFail = createAction('[Book] Load trips fail', props<{ error: Error }>());
+
+export const createEmptyBooking = createAction('[Book] Create empty booking');
+export const loadBooking = createAction('[Book] Load booking', props<{ booking: Booking }>());

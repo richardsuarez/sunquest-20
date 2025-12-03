@@ -1,0 +1,109 @@
+.booking-popover {
+  position: fixed;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 300px;
+  max-width: 400px;
+  max-height: 500px;
+  overflow-y: auto;
+  animation: slideIn 0.2s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  border-radius: 8px 8px 0 0;
+
+  h3{
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+}
+
+
+.popover-content {
+  padding: 12px;
+}
+
+.loading,
+.error,
+.empty {
+  padding: 16px;
+  text-align: center;
+  color: #666;
+}
+
+.error {
+  color: #e74c3c;
+  background: #fadbd8;
+  border-radius: 4px;
+}
+
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.booking-card {
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  padding: 12px;
+  background: #f9f9f9;
+}
+
+mat-card-content {
+  padding: 0px !important;
+  margin: 0px !important;
+}
+
+mat-card-actions{
+  display: flex;
+  justify-content: flex-end;
+  padding: 0px !important;
+  margin-top: 8px !important;
+  min-height: 0px !important;  
+}
+
+.booking-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.info-row strong {
+  color: #333;
+  min-width: 70px;
+}
+
+.info-row span {
+  color: #666;
+  flex: 1;
+  text-align: right;
+}
