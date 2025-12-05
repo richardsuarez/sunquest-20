@@ -314,9 +314,14 @@ export class Book implements OnInit {
       notes: this.form.controls.notes.value,
       createdAt: new Date()
     };             
-
+    
     // dispatch booking action — effect will persist and handle snackbar/navigation
     this.store.dispatch(BookActions.addBookingStart({ booking, trip: this.currentSelectedTrip }));
+
+    this.tripForm.reset();
+    this.form.reset();
+    this.currentSelectedTrip = null;
+    this.vehicleSelection = {};
   }
 
   selectableTrip(trip: Trip): boolean {

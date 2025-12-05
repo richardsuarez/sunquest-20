@@ -10,3 +10,4 @@ export const selectLoadingTrucks = createSelector(calendarFeatureSelector, (stat
 export const selectAppError = createSelector(calendarFeatureSelector, (state: CalendarState) => state.appError);
 export const selectCalendarEvents = createSelector(calendarFeatureSelector, (state: CalendarState) => state.calendarEvents);
 export const currentMonthBookings = createSelector(calendarFeatureSelector, (state: CalendarState) => state.currentMonthBookings);
+export const selectedTrip = createSelector(calendarFeatureSelector, (state: CalendarState) => state.selectedTrip);

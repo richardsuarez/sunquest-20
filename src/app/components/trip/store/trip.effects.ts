@@ -45,10 +45,9 @@ export class TripEffects {
       this.actions$.pipe(
         ofType(TripActions.updateTripStart),
         switchMap(action => runInInjectionContext(this.injector, () =>
-          this.tripService.updateTrip(action.truckId, action.trip.id || '', action.trip).pipe(
+          this.tripService.updateTrip(action.truckId, action.trip).pipe(
             map(() => TripActions.updateTripSuccess({ 
-              truckId: action.truckId, 
-              tripId: action.trip.id || '', 
+              truckId: action.truckId,
               trip: action.trip 
             })),
             catchError(err => of(TripActions.updateTripFail({ error: err })))

@@ -1,10 +1,9 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CalendarEvent } from '../../model/calendar-event.model';
-import { MatDialog } from '@angular/material/dialog';
 
 interface Day {
   date: Date;
@@ -38,8 +37,6 @@ export class CalendarViewComponent implements OnInit, OnChanges {
   @Output() eventClick = new EventEmitter<EventClickData>();
   @Output() dayClick = new EventEmitter<Date>();
   @Output() monthChanged = new EventEmitter<MonthChange>();
-
-  private matDialog = inject(MatDialog);
 
   currentMonth: Date = new Date();
   days: Day[] = [];
@@ -156,7 +153,6 @@ export class CalendarViewComponent implements OnInit, OnChanges {
       top: rect.bottom + 8,
       left: rect.left
     };
-    console.log('Event clicked - trigger rect:', { top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width, height: rect.height });
     this.eventClick.emit({ event, position });
   }
 

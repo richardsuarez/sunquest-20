@@ -1,27 +1,9 @@
 import { createReducer, on } from '@ngrx/store';
 import * as BookActions from './book.actions';
 import { initialBookState } from './book.state';
-import { CalendarEvent } from '../../calendar/model/calendar-event.model';
 import { Booking } from '../model/booking.model';
 
 export const BOOK_FEATURE_KEY = 'book';
-
-function formatDateKey(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function cleanCalendarEvents(events: { [key: string]: CalendarEvent[] }): { [key: string]: CalendarEvent[] } {
-  const cleaned: { [key: string]: CalendarEvent[] } = {};
-  Object.keys(events).forEach(key => {
-    if (events[key] && events[key].length > 0) {
-      cleaned[key] = events[key];
-    }
-  });
-  return cleaned;
-}
 
 export const bookReducer = createReducer(
   initialBookState,

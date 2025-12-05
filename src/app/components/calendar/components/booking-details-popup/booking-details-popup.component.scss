@@ -1,0 +1,231 @@
+.booking-details-dialog {
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  max-height: 85vh;
+  background: #ffffff;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+}
+
+.dialog-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+
+    &:hover {
+      background: #555;
+    }
+  }
+}
+
+.section {
+  margin-bottom: 24px;
+
+  &.booking-id-section {
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+}
+
+.booking-id {
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.section-title {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .label {
+    font-size: 12px;
+    color: #888;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+
+    &.amount {
+      font-size: 16px;
+      color: #667eea;
+      font-weight: 600;
+    }
+  }
+}
+
+.vehicle-item {
+  background: #f9f9f9;
+  border-left: 4px solid #667eea;
+  padding: 14px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.vehicle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+
+  .vehicle-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .vehicle-plate {
+    font-size: 12px;
+    font-weight: 600;
+    color: #667eea;
+    background: #f0f0ff;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+}
+
+.vehicle-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+
+  .detail-label {
+    color: #888;
+    font-weight: 500;
+  }
+
+  .detail-value {
+    color: #333;
+    font-weight: 500;
+  }
+}
+
+.empty-message {
+  color: #999;
+  font-size: 13px;
+  font-style: italic;
+  margin: 0;
+}
+
+.route-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.route-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .route-label {
+    font-size: 11px;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .route-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+}
+
+.route-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #667eea;
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.notes-box {
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 4px solid #667eea;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+}

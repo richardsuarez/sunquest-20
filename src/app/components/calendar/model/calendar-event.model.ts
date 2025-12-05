@@ -1,4 +1,5 @@
 import { Booking } from "../../book/model/booking.model";
+import { Trip } from "../../trip/model/trip.model";
 
 export interface CalendarEvent {
   id: string;
@@ -7,7 +8,7 @@ export interface CalendarEvent {
   startDate: Date;
   endDate?: Date;
   color?: string; // hex color for event display
-  tripId?: string; // reference to trip if type is 'trip'
+  trip?: Trip; // reference to trip if type is 'trip'
   truckId?: string; // truck associated with event
   bookings: Booking[]; // associated bookings
 }

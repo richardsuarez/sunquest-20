@@ -1,20 +1,28 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map, switchMap, catchError, mergeMap, tap } from 'rxjs/operators';
-import { of, combineLatest } from 'rxjs';
+import { of, combineLatest, from } from 'rxjs';
 import * as CalendarActions from './calendar.actions';
 import { CalendarService } from '../service/calendar.service';
 import { TruckService } from '../../truck/services/truck.service';
+import { BookingService } from '../../book/service/booking.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { TripService } from '../../trip/services/trip.service';
 
 @Injectable()
 export class CalendarEffects {
   private injector = inject(EnvironmentInjector);
   private calendarService = inject(CalendarService);
-    private truckService = inject(TruckService);
+  private truckService = inject(TruckService);
+  private bookingService = inject(BookingService);
+  private snackBar = inject(MatSnackBar);
+  private tripService = inject(TripService)
 
   readonly loadTrucksAndTrips$;
   readonly loadBookingsForMonth$;
   readonly deleteBooking$;
+  readonly addTrip$;
+  readonly updateTrip$;
 
   constructor(private actions$: Actions) {
     this.loadBookingsForMonth$ = createEffect(() =>
@@ -94,18 +102,95 @@ export class CalendarEffects {
       this.actions$.pipe(
         ofType(CalendarActions.deleteBookingStart),
         mergeMap(action =>
-          runInInjectionContext(this.injector, () =>
-            this.calendarService.deleteBooking(action.id).pipe(
-              map(() => {
-                return CalendarActions.deleteBookingEnd();
+          runInInjectionContext(this.injector, () => {
+            // First delete the booking
+            return this.calendarService.deleteBooking(action.booking.id!).pipe(
+              switchMap(() => {
+                // After booking is deleted, update the trip with restored capacity
+                const booking = action.booking;
+                const trip = action.trip;
+                const vehicleIds = booking.vehicleIds || [];
+
+                // Calculate the capacity to restore
+                let totalWeight = trip.remLoadCap;
+                let totalCars = trip.remCarCap;
+                const vehicles = booking.customer?.vehicles || [];
+                for (let vehicleId of vehicleIds) {
+                  const vehicle = vehicles.find(v => v.id === vehicleId);
+                  if (vehicle && vehicle.weight) {
+                    totalWeight += vehicle.weight;
+                  }
+                }
+
+                const remCarCapDelta = totalCars + vehicleIds.length; // Add back the cars
+                const remLoadCapDelta = totalWeight; // Add back the weight
+                const updatedTrip = {
+                  ...trip,
+                  remCarCap: remCarCapDelta,
+                  remLoadCap: remLoadCapDelta
+                };
+
+                // Update the trip with the restored capacity
+                if (booking.tripId && booking.truckId) {
+                  return this.bookingService.updateTrip(
+                    booking.truckId,
+                    updatedTrip
+                  ).pipe(
+                    map(() => CalendarActions.deleteBookingEnd({ bookingId: action.booking.id!, trip: updatedTrip })),
+                    catchError((err: Error) => {
+                      console.error('[CalendarEffects] Failed to update trip after booking deletion:', err);
+                      return of(CalendarActions.loadBookingsForMonthFail({ error: err }));
+                    })
+                  );
+                } else {
+                  return of(CalendarActions.deleteBookingEnd({ bookingId: action.booking.id!, trip: updatedTrip }));
+                }
               }),
               catchError((err: Error) => {
                 console.error('[CalendarEffects] Failed to delete booking:', err);
                 return of(CalendarActions.loadBookingsForMonthFail({ error: err }));
               })
+            );
+          })
+        )
+      )
+    );
+
+    this.addTrip$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(CalendarActions.addTripStart),
+        switchMap((action) =>
+          runInInjectionContext(this.injector, () =>
+            from(this.bookingService.addTrip(action.truckId, action.trip)).pipe(
+              map((trip) => {
+                this.snackBar.open('Trip added', 'Close', { duration: 3000 });
+                return CalendarActions.addTripSuccess({
+                  truckId: action.truckId,
+                  trip: trip
+                });
+              }),
+              catchError((err: Error) => {
+                this.snackBar.open('Failed to add trip', 'Close', { duration: 3000 });
+                return of(CalendarActions.addTripFail({ error: err }));
+              })
             )
           )
         )
+      )
+    );
+
+    this.updateTrip$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(CalendarActions.updateTripStart),
+        switchMap(action => runInInjectionContext(this.injector, () =>
+          this.tripService.updateTrip(action.truckId, action.trip).pipe(
+            map(() => CalendarActions.updateTripSuccess({
+              truckId: action.truckId,
+              trip: action.trip
+            })),
+            catchError(err => of(CalendarActions.updateTripFail({ error: err })))
+          )
+        ))
       )
     );
   }

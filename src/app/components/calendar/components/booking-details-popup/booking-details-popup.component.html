@@ -1,0 +1,121 @@
+<div class="booking-details-dialog">
+  <div class="dialog-header">
+    <h2>Booking Details</h2>
+    <button mat-icon-button (click)="onClose()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content">
+    <!-- Booking ID -->
+    <div class="section booking-id-section">
+      <span class="booking-id">ID: {{ booking.id }}</span>
+    </div>
+
+    <!-- Customer Info -->
+    <div class="section">
+      <h3 class="section-title">Customer Information</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Name</span>
+          <span class="value">{{ getPrimaryCustomer() }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Email</span>
+          <span class="value">{{ getCustomerContact().email || 'Not provided' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Phone</span>
+          <span class="value">{{ getCustomerContact().phone || getCustomerContact().telephone || 'Not provided' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vehicle Info -->
+    <div class="section">
+      <h3 class="section-title">Vehicle Information</h3>
+      <div *ngIf="getVehicles().length > 0; else noVehicles">
+        <div *ngFor="let vehicle of getVehicles()" class="vehicle-item">
+          <div class="vehicle-header">
+            <span class="vehicle-title">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</span>
+            <span class="vehicle-plate">{{ vehicle.plate }}</span>
+          </div>
+          <div class="vehicle-details">
+            <div class="detail-row">
+              <span class="detail-label">VIN:</span>
+              <span class="detail-value">{{ vehicle.vin || 'Not provided' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Color:</span>
+              <span class="detail-value">{{ vehicle.color || 'Not provided' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Weight:</span>
+              <span class="detail-value">{{ vehicle.weight || 'Not provided' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template #noVehicles>
+        <p class="empty-message">No vehicles assigned to this booking</p>
+      </ng-template>
+    </div>
+
+    <!-- Trip Dates -->
+    <div class="section">
+      <h3 class="section-title">Trip Dates</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Pickup Date</span>
+          <span class="value">{{ formatDate(booking.pickupAt) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Arrival Date</span>
+          <span class="value">{{ formatDate(booking.arrivalAt) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Route Info -->
+    <div class="section">
+      <h3 class="section-title">Route</h3>
+      <div class="route-container">
+        <div class="route-item">
+          <span class="route-label">From</span>
+          <span class="route-value">{{ booking.from || 'Not set' }}</span>
+        </div>
+        <div class="route-item">
+          <span class="route-label">To</span>
+          <span class="route-value">{{ booking.to || 'Not set' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Info -->
+    <div class="section">
+      <h3 class="section-title">Payment Information</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Check Number</span>
+          <span class="value">{{ booking.paycheck.checkNumber || 'Not provided' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Bank</span>
+          <span class="value">{{ booking.paycheck.bankName || 'Not provided' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Amount</span>
+          <span class="value amount">{{ booking.paycheck.amount ? ('$' + booking.paycheck.amount.toFixed(2)) : '$0.00' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="section" *ngIf="booking.notes">
+      <h3 class="section-title">Notes</h3>
+      <div class="notes-box">
+        {{ booking.notes }}
+      </div>
+    </div>
+  </div>
+</div>

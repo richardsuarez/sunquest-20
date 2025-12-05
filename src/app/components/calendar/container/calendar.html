@@ -1,5 +1,5 @@
 <div class="headers">
-    <button mat-button mat-raised-button (click)="newBooking()" style="background-color: #ED2D89; color: white">
+    <button mat-button mat-raised-button (click)="newTrip()" style="background-color: #ED2D89; color: white">
         Add Trip
     </button>
 </div>
@@ -15,8 +15,8 @@
 
     <!-- Booking Popover -->
     <app-calendar-popover
-        *ngIf="showPopover && selectedTrip"
-        [tripId]="selectedTrip.tripId || ''"
+        *ngIf="showPopover"
+        [truckId]="selectedTruck"
         [startDate]="currentMonthStart"
         [endDate]="currentMonthEnd"
         [position]="popoverPosition"

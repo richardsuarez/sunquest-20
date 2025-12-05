@@ -38,7 +38,7 @@ export const updateTripStart = createAction(
 
 export const updateTripSuccess = createAction(
   '[Trip] Update trip success',
-  props<{ truckId: string; tripId: string; trip: Partial<Trip> }>()
+  props<{ truckId: string; trip: Partial<Trip> }>()
 );
 
 export const updateTripFail = createAction(

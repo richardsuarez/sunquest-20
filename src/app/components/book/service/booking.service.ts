@@ -98,17 +98,6 @@ export class BookingService {
     });
   }
 
-  updateTripWithDeltas(truckId: string, tripId: string, remCarDelta: number, remLoadDelta: number): Observable<void> {
-    return runInInjectionContext(this.injector, () => {
-      const dref = doc(this.firestore, `trucks/${truckId}/trips`, tripId);
-      const p = updateDoc(dref, {
-        remCarCap: increment(-Math.abs(remCarDelta || 0)),
-        remLoadCap: increment(-Math.abs(remLoadDelta || 0))
-      } as any);
-      return from(p) as Observable<void>;
-    });
-  }
-
   // Get bookings for a specific date range (for calendar)
   getBookingsForDateRange(startDate: Date, endDate: Date): Observable<Booking[]> {
     return runInInjectionContext(this.injector, () => {

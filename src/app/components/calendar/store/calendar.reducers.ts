@@ -2,6 +2,7 @@ import { createReducer, on } from '@ngrx/store';
 import * as CalendarActions from './calendar.actions';
 import { initialCalendarState } from './calendar.state';
 import { CalendarEvent } from '../model/calendar-event.model';
+import { Calendar } from '../container/calendar';
 
 export const CALENDAR_FEATURE_KEY = 'calendar';
 
@@ -142,8 +143,8 @@ export const calendarReducer = createReducer(
           description: `${trip.origin || 'N/A'} → ${trip.destination || 'N/A'}`,
           startDate: trip.delayDate ? new Date(trip.delayedDate) : new Date(trip.departureDate),
           endDate: new Date(trip.arrivalDate), // +1 day to include arrival date,
-          color: trip.delayDate ? '#f04539ff' : '#3a89f0ff' , // red for delayed trips, yellow otherwise
-          tripId: trip.id,
+          color: trip.delayDate ? '#f04539ff' : '#3a89f0ff', // red for delayed trips, yellow otherwise
+          trip,
           truckId: truckId,
           bookings: bookings
         };
@@ -166,5 +167,132 @@ export const calendarReducer = createReducer(
     ...state,
     loading: false,
     appError: error
-  }))
+  })),
+
+  on(CalendarActions.deleteBookingEnd, (state, { bookingId, trip }) => {
+    // Remove the deleted booking from currentMonthBookings
+    const updatedBookings = state.currentMonthBookings.filter(b => b.id !== bookingId);
+
+    // Update calendar events - rebuild with updated bookings
+    const updatedEvents: { [key: string]: CalendarEvent[] } = { ...state.calendarEvents };
+    Object.keys(updatedEvents).forEach(dateKey => {
+      const eventsForDate = updatedEvents[dateKey] || [];
+      // Update trip events to remove deleted booking from their bookings list
+      updatedEvents[dateKey] = eventsForDate.map((event: CalendarEvent) => {
+        if (event.bookings && event.id?.startsWith('trip-')) {
+          return {
+            ...event,
+            bookings: event.bookings.filter(b => b.id !== bookingId)
+          };
+        }
+        return event;
+      });
+    });
+
+    return {
+      ...state,
+      currentMonthBookings: updatedBookings,
+      calendarEvents: cleanCalendarEvents(updatedEvents),
+      selectedTrip: trip,
+      loading: false
+    };
+  }),
+
+  on(CalendarActions.loadSelectedTrip, (state, { trip }) => ({
+    ...state,
+    selectedTrip: trip
+  })),
+
+  on(CalendarActions.addTripSuccess, (state, { truckId, trip }) => {
+    // Add trip to the trips list
+    const updatedTrips = {
+      ...state.trips,
+      [truckId]: [
+        ...((state.trips && state.trips[truckId]) || []),
+        trip
+      ]
+    };
+
+    // Create a calendar event for the new trip
+    const dateKey = formatDateKey(new Date(trip.departureDate));
+    const tripEvent: CalendarEvent = {
+      id: `trip-${trip.id}`,
+      title: `Truck: ${state.trucks.find(t => t.id === truckId)?.truckNumber || 'N/A'}`,
+      description: `${trip.origin || 'N/A'} → ${trip.destination || 'N/A'}`,
+      startDate: trip.delayDate ? new Date(trip.delayDate) : new Date(trip.departureDate),
+      endDate: new Date(trip.arrivalDate),
+      color: trip.delayDate ? '#f04539ff' : '#3a89f0ff',
+      trip,
+      truckId: truckId,
+      bookings: []
+    };
+
+    // Add the event to calendar events
+    const updatedEvents: { [key: string]: CalendarEvent[] } = { ...state.calendarEvents };
+    const existingEvents = updatedEvents[dateKey] || [];
+    updatedEvents[dateKey] = [...existingEvents.filter((e: CalendarEvent) => e.id !== tripEvent.id), tripEvent];
+
+    return {
+      ...state,
+      trips: updatedTrips,
+      calendarEvents: cleanCalendarEvents(updatedEvents)
+    };
+  }),
+
+  on(CalendarActions.updateTripSuccess, (state, { truckId, trip }) => {
+    // Find the old trip to get its date for event removal
+    const oldTrips = state.trips[truckId] || [];
+    const oldTripIndex = oldTrips.findIndex(t => t.id === trip.id);
+    
+    if (oldTripIndex === -1) {
+      return state; // Trip not found, no update needed
+    }
+
+    // Update the trip in the trips list
+    const oldTrip = oldTrips[oldTripIndex];
+    const updatedTrips = {
+      ...state.trips,
+      [truckId]: oldTrips.map((t, index) => index === oldTripIndex ? { ...t, ...trip } : t)
+    };
+
+    // Update calendar events
+    const updatedEvents: { [key: string]: CalendarEvent[] } = { ...state.calendarEvents };
+    const oldDateKey = formatDateKey(new Date(oldTrip.departureDate));
+    const newDateKey = formatDateKey(new Date(trip.departureDate || oldTrip.departureDate));
+
+    // Remove old event from the old date
+    if (oldDateKey !== newDateKey) {
+      const oldDateEvents = updatedEvents[oldDateKey] || [];
+      updatedEvents[oldDateKey] = oldDateEvents.filter(e => e.id !== `trip-${trip.id}`);
+      if (updatedEvents[oldDateKey].length === 0) {
+        delete updatedEvents[oldDateKey];
+      }
+    }
+
+    // Create updated calendar event
+    const updatedTripEvent: CalendarEvent = {
+      id: `trip-${trip.id}`,
+      title: `Truck: ${state.trucks.find(t => t.id === truckId)?.truckNumber || 'N/A'}`,
+      description: `${trip.origin || oldTrip.origin || 'N/A'} → ${trip.destination || oldTrip.destination || 'N/A'}`,
+      startDate: trip.delayDate ? new Date(trip.delayDate) : new Date(trip.departureDate || oldTrip.departureDate),
+      endDate: new Date(trip.arrivalDate || oldTrip.arrivalDate),
+      color: trip.delayDate ? '#f04539ff' : '#3a89f0ff',
+      trip: { ...oldTrip, ...trip },
+      truckId: truckId,
+      bookings: oldTrip.bookings || []
+    };
+
+    // Add updated event to the new date
+    const newDateEvents = updatedEvents[newDateKey] || [];
+    updatedEvents[newDateKey] = [
+      ...newDateEvents.filter(e => e.id !== `trip-${trip.id}`),
+      updatedTripEvent
+    ];
+
+    return {
+      ...state,
+      trips: updatedTrips,
+      calendarEvents: cleanCalendarEvents(updatedEvents)
+    };
+  }),
 );

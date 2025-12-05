@@ -1,13 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule} from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
 import { CalendarViewComponent, MonthChange, EventClickData } from '../components/calendar-view/calendar-view';
 import { CalendarPopoverComponent } from '../components/calendar-popover/calendar-popover';
+import { TripPopoverComponent } from '../components/trip-popover/trip-popover.component';
 import { CalendarEvent } from '../model/calendar-event.model';
 import * as CalendarActions from '../store/calendar.actions';
 import * as CalendarSelectors from '../store/calendar.selectors';
@@ -26,22 +28,27 @@ import * as CalendarSelectors from '../store/calendar.selectors';
   templateUrl: './calendar.html',
   styleUrl: './calendar.css',
 })
-export class Calendar implements OnInit {
+export class Calendar implements OnInit, OnDestroy {
   private store = inject(Store);
   private readonly route = inject(Router);
+  private matDialog = inject(MatDialog);
+  private destroy$ = new Subject<void>();
 
   selectedDate: Date = new Date();
   calendarEvents$: Observable<{ [dateKey: string]: CalendarEvent[] }>;
   calendarEvents: { [dateKey: string]: CalendarEvent[] } = {};
+  truckList$: Observable<any[]>;
+  truckList: any[] = [];
 
-  selectedTrip: CalendarEvent | null = null;
   popoverPosition: { top: number; left: number } = { top: 0, left: 0 };
   showPopover = false;
   currentMonthStart: Date = new Date();
   currentMonthEnd: Date = new Date();
+  selectedTruck: string | null = null;
 
   constructor() {
     this.calendarEvents$ = this.store.select(CalendarSelectors.selectCalendarEvents);
+    this.truckList$ = this.store.select(CalendarSelectors.selectTrucks);
   }
 
   ngOnInit() {
@@ -49,6 +56,11 @@ export class Calendar implements OnInit {
     const now = new Date();
     this.currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     this.currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    // Load trucks for the add trip form
+    this.truckList$.pipe(takeUntil(this.destroy$)).subscribe(trucks => {
+      this.truckList = trucks || [];
+    });
 
     this.store.dispatch(CalendarActions.loadBookingsForMonth({ startDate: this.currentMonthStart, endDate: this.currentMonthEnd }));
     this.store.dispatch(CalendarActions.loadTrucksAndTrips({ monthStart: this.currentMonthStart, monthEnd: this.currentMonthEnd }));
@@ -77,8 +89,26 @@ export class Calendar implements OnInit {
     }));
   }
 
-  newBooking() {
-    this.route.navigate(['main/book/new']);
+  newTrip() {
+    this.matDialog.open(TripPopoverComponent, {
+      data: {
+        trucks: this.truckList,
+        trip: {
+          loadNumber: '',
+          departureDate: new Date(),
+          arrivalDate: new Date(),
+          origin: '',
+          destination: '',
+          remLoadCap: 0,
+          remCarCap: 0,
+          delayDate: new Date(),
+        },
+        truckTrip: null,
+      },
+      maxWidth: '500px',
+      width: '90vw',
+
+    });
   }
 
   onDateSelected(date: Date) {
@@ -87,20 +117,19 @@ export class Calendar implements OnInit {
 
   onEventClick(clickData: EventClickData) {
     const event = clickData.event;
-    this.selectedTrip = event;
+    this.store.dispatch(CalendarActions.loadSelectedTrip({ trip: event.trip! }));
+    this.selectedTruck = event.truckId || null;
     this.popoverPosition = clickData.position;
     this.showPopover = true;
   }
 
   onDayClick(date: Date) {
-    // Handle day click
-    console.log('Day clicked:', date);
     this.selectedDate = date;
   }
 
   closePopover() {
     this.showPopover = false;
-    this.selectedTrip = null;
+    this.store.dispatch(CalendarActions.loadSelectedTrip({ trip: null }));
   }
 
   // Method to add a custom event to a specific date
@@ -116,5 +145,10 @@ export class Calendar implements OnInit {
   // Method to update an event
   updateEvent(event: CalendarEvent, oldDateKey: string) {
     this.store.dispatch(CalendarActions.updateCalendarEvent({ event, oldDateKey }));
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
