@@ -14,6 +14,6 @@ export class Main {
   constructor(
     private router: Router
   ){
-    router.navigate(['/main/customer'])
+    router.navigate(['/main/calendar'])
   }
 }

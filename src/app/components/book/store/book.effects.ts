@@ -2,11 +2,13 @@ import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { map, switchMap, catchError, take } from 'rxjs/operators';
 import { mergeMap, tap } from 'rxjs/operators';
-import { of, from } from 'rxjs';
+import { of, from, combineLatest } from 'rxjs';
 import * as BookActions from './book.actions';
 import { BookingService } from '../service/booking.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { TruckService } from '../../truck/services/truck.service';
+import { Truck } from '../../truck/model/truck.model';
 
 @Injectable()
 export class BookEffects {
@@ -14,10 +16,12 @@ export class BookEffects {
     private bookingService = inject(BookingService);
     private snackBar = inject(MatSnackBar);
     private router = inject(Router);
+    private truckService = inject(TruckService);
 
     readonly addBookingStart$;
     readonly addBookingEnd$;
     readonly addTrip$;
+    readonly loadTrucks$;
     readonly loadTrips$;
 
     constructor(private actions$: Actions) {
@@ -31,9 +35,9 @@ export class BookEffects {
                             switchMap(() => {
                                 const carsBooked = action.booking.vehicleIds || [];
                                 let totalWeight = 0
-                                for(let carId of carsBooked){
+                                for (let carId of carsBooked) {
                                     const vehicle = action.booking.customer?.vehicles?.find(v => v.id === carId);
-                                    if(vehicle && vehicle.weight){
+                                    if (vehicle && vehicle.weight) {
                                         totalWeight = totalWeight + vehicle.weight;
                                     }
                                 }
@@ -53,7 +57,7 @@ export class BookEffects {
                                     )
                                 )
                             }
-                                
+
                             ),
                             catchError((err: Error) => of(BookActions.addBookingFail({ error: err })))
                         )
@@ -94,6 +98,26 @@ export class BookEffects {
                         )
                     )
                 )
+            )
+        );
+
+        this.loadTrucks$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(BookActions.getTruckListStart),
+                switchMap(() => runInInjectionContext(this.injector, () =>
+                    this.truckService.getTrucks().pipe(
+                        map(trucks => {
+                            const truckList = trucks.map(t => {
+                                const asCreatedAt = (t as any).createdAt;
+                                const createdAt = asCreatedAt ? (typeof asCreatedAt.toDate === 'function' ? asCreatedAt.toDate() : new Date(asCreatedAt)) : null;
+
+                                return ({ ...t, createdAt, });
+                            }) as Truck[];
+                            return BookActions.getTruckListSuccess({ trucks: truckList });
+                        }),
+                        catchError(err => of(BookActions.getTruckListFail({ error: err })))
+                    )
+                ))
             )
         );
 

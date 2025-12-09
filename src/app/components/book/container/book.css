@@ -1,0 +1,179 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0px 20px;
+    margin-bottom: 20px;
+}
+
+.header{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    width: 100%;
+    max-width: 1500px;
+}
+
+h1{
+  margin: 0px !important;
+}
+
+.body{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-bottom: 20px;
+    gap: 20px;
+
+    h1{
+        margin: 0px !important
+    }
+}
+
+.desktop{
+    display: flex;
+    margin-top: 20px;
+    gap: 50px;
+}
+
+.form-actions-desktop{
+    display: flex;
+    justify-content: end;
+    gap: 20px;
+    align-items: center;
+
+    button{
+        width: 120px
+    }
+}
+
+.form-actions-mobile{
+    display: flex;
+    justify-content: space-between;
+    flex-grow: 1;
+    gap: 20px;
+    align-items: center;
+
+
+    button{
+        width: 45%
+    }
+}
+
+mat-card-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+mat-card-subtitle {
+  font-size: 1rem;
+  color: #666;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.info-section {
+  margin: 1rem 0;
+}
+
+.info-section mat-icon {
+  vertical-align: middle;
+  margin-right: 8px;
+  color: #555;
+}
+
+table{
+  width: auto;
+}
+td th{
+  min-width: 0px !important;
+}
+
+.customer-card-desktop {
+  width: 400px;
+  min-width: 400px;
+  max-height: 400px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.customer-card-mobile {
+  width: 90%;
+  margin: 1rem auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.female-customer-avatar {
+  background-color: #e91e63;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.male-customer-avatar {
+  background-color: #1e7de9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.paycheck {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.info{
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px
+}
+
+/* Trip styles */
+.trip-table {
+    margin-bottom: 20px;
+}
+
+.trip-form {
+    display: block;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+
+.trip-form button {
+    align-self: flex-end;
+    margin-bottom: 1.34375em; /* Aligns with mat-form-field */
+}
+
+/* Truck trip row colors - base colors */
+.truck-trip-row-0 { background-color: #f0f7ff; }
+.truck-trip-row-1 { background-color: #fff0f0; }
+.truck-trip-row-2 { background-color: #f0fff7; }
+.truck-trip-row-3 { background-color: #fff7f0; }
+.truck-trip-row-4 { background-color: #f7f0ff; }
+
+/* Hover effect for trip rows */
+.mat-mdc-row:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.primary-button{
+    background-color: #ED2D89; 
+    color: white
+}
+
+.delayed {
+    background-color: #f58787 !important;
+}

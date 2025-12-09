@@ -273,16 +273,16 @@
                 <form [formGroup]="vehicleForm" class="vehicle-form">
                     <div style="display:flex; justify-content: space-between; gap: 5px">
                         <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                            <mat-label>Year</mat-label>
+                            <input matInput type="number" formControlName="year">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
                             <mat-label>Make</mat-label>
                             <input matInput formControlName="make">
                         </mat-form-field>
                         <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
                             <mat-label>Model</mat-label>
                             <input matInput formControlName="model">
-                        </mat-form-field>
-                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
-                            <mat-label>Year</mat-label>
-                            <input matInput type="number" formControlName="year">
                         </mat-form-field>
                         <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
                             <mat-label>Plate</mat-label>

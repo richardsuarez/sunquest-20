@@ -68,9 +68,9 @@ export class TripService {
     });
   }
 
-  updateTrip(truckId: string, tripId: string, trip: Partial<Trip>): Observable<void> {
+  updateTrip(truckId: string, trip: Partial<Trip>): Observable<void> {
     return runInInjectionContext(this.injector, () => {
-      const dref = doc(this.firestore, `trucks/${truckId}/trips`, tripId);
+      const dref = doc(this.firestore, `trucks/${truckId}/trips`, trip.id || '');
       const p = updateDoc(dref, trip as any);
       return from(p) as Observable<void>;
     });

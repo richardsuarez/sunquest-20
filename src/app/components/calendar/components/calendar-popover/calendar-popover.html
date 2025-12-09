@@ -1,0 +1,119 @@
+<div class="booking-popover" #popoverContainer [style.top.px]="adjustedPosition.top"
+  [style.left.px]="adjustedPosition.left">
+  <div class="popover-header">
+    <div class="header-left">
+      <h2>Bookings for this Trip</h2>
+    </div>
+    <div class="header-center">
+      <div class="availability-section">
+        <span class="availability-title">Remaining Capacity</span>
+        <div class="availability-info">
+          <div class="availability-item">
+            <mat-icon class="availability-icon">directions_car</mat-icon>
+            <span class="availability-value">{{ trip?.remCarCap }}</span>
+          </div>
+          <div class="availability-item">
+            <img src="assets/weight.png" alt="weight" class="availability-icon">
+            <span class="availability-value">{{ trip?.remLoadCap }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button class="header-close" (click)="closePopover()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="popover-content">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="loading">
+      <p>Loading bookings...</p>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="error && !loading" class="error">
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading && !error && tripBookings.length === 0" class="empty">
+      <p>No bookings for this trip</p>
+    </div>
+
+    <!-- Bookings list -->
+    <div *ngIf="!loading && tripBookings.length > 0">
+      <table mat-table [dataSource]="tripBookings" class="mat-elevation-z8" style="text-align: start">
+        <ng-container matColumnDef="customer">
+          <th mat-header-cell *matHeaderCellDef>Customer</th>
+          <td mat-cell *matCellDef="let booking">{{ getPrimaryCustomer(booking) }}</td>
+        </ng-container>
+
+        <!-- Vehicle sub-columns in header -->
+        <ng-container matColumnDef="year">
+          <th mat-header-cell *matHeaderCellDef>Year</th>
+          <td mat-cell *matCellDef="let booking">
+            <table mat-table [dataSource]="getBookingVehicles(booking)">
+              <ng-container matColumnDef="year">
+                <td mat-cell *matCellDef="let vehicle">{{ vehicle.year }}</td>
+              </ng-container>
+              <tr mat-row *matRowDef="let vehicle; columns: ['year'];"></tr>
+            </table>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="make">
+          <th mat-header-cell *matHeaderCellDef>Make</th>
+          <td mat-cell *matCellDef="let booking">
+            <table mat-table [dataSource]="getBookingVehicles(booking)">
+              <ng-container matColumnDef="make">
+                <td mat-cell *matCellDef="let vehicle">{{ vehicle.make }}</td>
+              </ng-container>
+              <tr mat-row *matRowDef="let vehicle; columns: ['make'];"></tr>
+            </table>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="model">
+          <th mat-header-cell *matHeaderCellDef>Model</th>
+          <td mat-cell *matCellDef="let booking">
+            <table mat-table [dataSource]="getBookingVehicles(booking)">
+              <ng-container matColumnDef="model">
+                <td mat-cell *matCellDef="let vehicle">{{ vehicle.model }}</td>
+              </ng-container>
+              <tr mat-row *matRowDef="let vehicle; columns: ['model'];"></tr>
+            </table>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="plate">
+          <th mat-header-cell *matHeaderCellDef>Plate</th>
+          <td mat-cell *matCellDef="let booking">
+            <table mat-table [dataSource]="getBookingVehicles(booking)">
+              <ng-container matColumnDef="plate">
+                <td mat-cell *matCellDef="let vehicle">{{ vehicle.plate }}</td>
+              </ng-container>
+              <tr mat-row *matRowDef="let vehicle; columns: ['plate'];"></tr>
+            </table>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let booking">
+            <button mat-button color="primary" (click)="displayBooking(booking)">Details</button>
+            <button mat-button style="color: red;" (click)="deleteBooking(booking)">Cancel</button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="bookingTableColumns"></tr>
+        <tr mat-row *matRowDef="let booking; columns: bookingTableColumns;"></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Trip Actions Footer -->
+  <div class="popover-footer">
+    <button mat-button color="primary" (click)="editTrip()">Edit Trip</button>
+    <button mat-button style="color: red;" (click)="deleteTrip()">Delete Trip</button>
+  </div>
+</div>

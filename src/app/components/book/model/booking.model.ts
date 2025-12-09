@@ -18,8 +18,9 @@ export interface Booking {
   pickupWeekOfYear: number | null;
   from: string | null;
   to: string | null;
-  truckId: string | null;
+  departureDate: Date | null;
   tripId: string | null;
+  truckId: string | null;
   notes: string | null;
   createdAt?: Date;
 }

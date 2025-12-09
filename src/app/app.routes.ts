@@ -6,8 +6,10 @@ import { CUSTOMER_FEATURE_KEY, customerReducer } from './components/customer/sto
 import { CustomerEffects } from './components/customer/store/customer.effects';
 import { bookReducer } from './components/book/store/book.reducers';
 import { BookEffects } from './components/book/store/book.effects';
+import { CalendarEffects } from './components/calendar/store/calendar.effects';
 import { truckReducer, TRUCK_FEATURE_KEY } from './components/truck/store/truck.reducers';
 import { TruckEffects } from './components/truck/store/truck.effects';
+import { CALENDAR_FEATURE_KEY, calendarReducer } from './components/calendar/store/calendar.reducers';
 
 export const routes: Routes = [
     {
@@ -26,6 +28,18 @@ export const routes: Routes = [
                 path: '',
                 loadComponent() {
                     return import('./components/trip/trip').then(m => m.trip);
+                }
+            },
+            {
+                path: 'calendar',
+                providers: [
+                    // provide book feature state and effects when /main/calendar is active
+                    provideState('calendar', calendarReducer),
+                    provideState(CALENDAR_FEATURE_KEY, calendarReducer),
+                    provideEffects([CalendarEffects])
+                ],
+                loadComponent() {
+                    return import('./components/calendar/container/calendar').then(m => m.Calendar);
                 }
             },
             {
@@ -58,17 +72,13 @@ export const routes: Routes = [
                     // provide book feature state and effects when /main/book is active
                     provideState('book', bookReducer),
                     provideState(TRUCK_FEATURE_KEY, truckReducer),
-                    provideEffects([BookEffects, TruckEffects]),
+                    provideEffects([BookEffects,]),
                 ],
                 children: [
                     {
-                        path: '',
-                        loadComponent: () => import('./components/book/container/book').then(m => m.Book),
-                    },
-                    {
                         path: ':crud',
                         loadComponent(){
-                            return import('./components/book/book-edit/book-edit').then(m => m.BookEdit);
+                            return import('./components/book/container/book').then(m => m.Book);
                         },
                         canDeactivate: [
                             CanDeactivateGuard

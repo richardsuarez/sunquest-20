@@ -1,0 +1,58 @@
+<div class="calendar-wrapper">
+  <!-- Calendar Header with Navigation -->
+  <div class="calendar-header">
+    <button mat-icon-button (click)="previousMonth()">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <h2 class="month-year">{{ getMonthYearDisplay() }}</h2>
+    <button mat-icon-button (click)="nextMonth()">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <!-- Weekday Headers -->
+  <div class="weekdays">
+    <div class="weekday" *ngFor="let day of weekDays">{{ day }}</div>
+  </div>
+
+  <!-- Calendar Days Grid -->
+  <div class="calendar-grid">
+    <div 
+      class="day-cell"
+      [class.other-month]="!day.isCurrentMonth"
+      [class.today]="day.isToday"
+      (click)="selectDate(day.date)"
+      *ngFor="let day of days">
+      
+      <!-- Day number -->
+      <div class="day-number">{{ day.date.getDate() }}</div>
+      
+      <!-- Events in this day -->
+      <div *ngIf="day.isCurrentMonth" class="events-container">
+        <div 
+          class="event-badge"
+          [style.background-color]="event.color || '#3498db'"
+          [title]="event.title + (event.description ? ': ' + event.description : '')"
+          (click)="onEventClick(event, $event); $event.stopPropagation()"
+          *ngFor="let event of day.events | slice:0:3">
+          <span class="event-title">{{ event.title}}</span>
+          <div class="route" *ngIf="event.description && event.description.startsWith('Florida')">
+            <span>F</span>
+            <mat-icon>arrow_forward</mat-icon>
+            <span>N</span>
+          </div>
+          <div class="route" *ngIf="event.description && event.description.startsWith('New York')">
+            <span>N</span>
+            <mat-icon>arrow_forward</mat-icon>
+            <span>F</span>
+          </div>
+        </div>
+        
+        <!-- "More events" indicator -->
+        <div class="more-events" *ngIf="day.events.length > 3">
+          +{{ day.events.length - 3 }} more
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

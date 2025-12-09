@@ -1,7 +1,7 @@
 import { createReducer, on } from '@ngrx/store';
 import * as BookActions from './book.actions';
 import { initialBookState } from './book.state';
-import { Trip } from '../../trip/model/trip.model';
+import { Booking } from '../model/booking.model';
 
 export const BOOK_FEATURE_KEY = 'book';
 
@@ -40,7 +40,16 @@ export const bookReducer = createReducer(
     }
   })),
   // Optimistically update a trip's remaining capacities (decrease by provided deltas)
-  on(BookActions.getTruckListStart, (s) => ({ ...s, loading: true, error: null })),
+  on(BookActions.getTruckListStart, (s) => ({ ...s, loading: true, appError: null })),
   on(BookActions.getTruckListSuccess, (s, a) => ({ ...s, loading: false, trucks: a.trucks })),
-  on(BookActions.getTruckListFail, (s, a) => ({ ...s, loading: false, error: a.error })),
+  on(BookActions.getTruckListFail, (s, a) => ({ ...s, loading: false, appError: a.error })),
+
+  on(BookActions.createEmptyBooking, (state) => ({
+    ...state,
+    bookingViewModel: {} as Booking
+  })),
+  on(BookActions.loadBooking, (state, { booking }) => ({
+    ...state,
+    bookingViewModel: booking
+  }))
 );

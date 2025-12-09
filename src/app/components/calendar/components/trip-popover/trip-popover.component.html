@@ -1,0 +1,93 @@
+<div class="add-trip-dialog">
+    <div class="dialog-header">
+        <h2>{{ getTitle() }}</h2>
+        <button mat-icon-button (click)="onCancel()" class="close-button">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div class="dialog-content">
+        <form [formGroup]="tripForm" class="trip-form">
+            <!-- Truck Selection -->
+            <ng-container *ngIf="!trip?.id else labelInfo">
+                <mat-form-field appearance="fill" class="form-field" subscriptSizing="dynamic">
+                    <mat-label>Truck</mat-label>
+                    <mat-select formControlName="truckId">
+                        <mat-option *ngFor="let truck of truckList" [value]="truck.id">
+                            {{ truck.truckNumber }} ({{ truck.companyName }})
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="tripForm.get('truckId')?.hasError('required')">
+                        Truck is required
+                    </mat-error>
+                </mat-form-field>
+                
+                <!-- Load Number -->
+                <mat-form-field appearance="fill" class="form-field" subscriptSizing="dynamic">
+                    <mat-label>Load Number</mat-label>
+                    <input matInput formControlName="loadNumber" type="text" placeholder="Enter load number">
+                    <mat-error *ngIf="tripForm.get('loadNumber')?.hasError('required')">
+                        Load Number is required
+                    </mat-error>
+                </mat-form-field>
+            </ng-container>
+            
+            <ng-template #labelInfo>
+                {{ getTruckInfo() }}
+            </ng-template>
+
+            <!-- Departure Date -->
+            <mat-form-field appearance="fill" class="form-field" subscriptSizing="dynamic">
+                <mat-label>Departure Date</mat-label>
+                <input matInput formControlName="departureDate" [matDatepicker]="departurePickerStart"
+                    placeholder="Choose departure date">
+                <mat-datepicker-toggle matSuffix [for]="departurePickerStart"></mat-datepicker-toggle>
+                <mat-datepicker #departurePickerStart></mat-datepicker>
+                <mat-error *ngIf="tripForm.get('departureDate')?.hasError('required')">
+                    Departure Date is required
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Arrival Date -->
+            <mat-form-field appearance="fill" class="form-field" subscriptSizing="dynamic">
+                <mat-label>Arrival Date</mat-label>
+                <input matInput formControlName="arrivalDate" [matDatepicker]="arrivalPickerStart"
+                    placeholder="Choose arrival date" [min]="tripForm.controls.departureDate.value">
+                <mat-datepicker-toggle matSuffix [for]="arrivalPickerStart"></mat-datepicker-toggle>
+                <mat-datepicker #arrivalPickerStart></mat-datepicker>
+                <mat-error *ngIf="tripForm.get('arrivalDate')?.hasError('required')">
+                    Arrival Date is required
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Origin -->
+            <mat-form-field appearance="fill" class="form-field" subscriptSizing="dynamic">
+                <mat-label>Origin</mat-label>
+                <mat-select required formControlName="origin" (selectionChange)="updateTripDestination($event)">
+                    <mat-option value="Florida">Florida</mat-option>
+                    <mat-option value="New York">New York</mat-option>
+                </mat-select>
+                <mat-error *ngIf="tripForm.get('origin')?.hasError('required')">
+                    Origin is required
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Destination -->
+            <mat-form-field appearance="fill" class="form-field" subscriptSizing="dynamic">
+                <mat-label>Destination</mat-label>
+                <mat-select required formControlName="destination" (selectionChange)="updateTripOrigin($event)">
+                    <mat-option value="Florida">Florida</mat-option>
+                    <mat-option value="New York">New York</mat-option>
+                </mat-select>
+                <mat-error *ngIf="tripForm.get('destination')?.hasError('required')">
+                    Destination is required
+                </mat-error>
+            </mat-form-field>
+        </form>
+    </div>
+
+    <div *ngIf="isEditableTrip()" class="dialog-footer">
+        <button mat-raised-button (click)="onCancel()">Cancel</button>
+        <button mat-raised-button style="background-color: #ED2D89; color: white" (click)="onSave()">Save</button>
+    </div>
+</div>

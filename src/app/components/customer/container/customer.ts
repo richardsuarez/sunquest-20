@@ -20,7 +20,7 @@ import { Router } from '@angular/router';
 import { SearchCriteria } from '../model/customer.model';
 import { Store } from '@ngrx/store';
 import * as CustomerActions from '../store/customer.actions'
-import { CustomerService } from '../service/customer.service';
+import * as  BookAction from '../../book/store/book.actions';
 
 @Component({
   selector: 'app-customer',
@@ -131,6 +131,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   createBooking(customer: Customer | undefined) {
     if (customer) {
       this.store.dispatch(CustomerActions.loadCustomer({ customer }));
+      this.store.dispatch(BookAction.createEmptyBooking());
       this.router.navigate(['main/book/new']);
     }
   }
