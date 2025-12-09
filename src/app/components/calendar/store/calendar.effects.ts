@@ -4,19 +4,13 @@ import { map, switchMap, catchError, mergeMap, tap, concatMap } from 'rxjs/opera
 import { of, combineLatest, from } from 'rxjs';
 import * as CalendarActions from './calendar.actions';
 import { CalendarService } from '../service/calendar.service';
-import { TruckService } from '../../truck/services/truck.service';
-import { BookingService } from '../../book/service/booking.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { TripService } from '../../trip/services/trip.service';
 
 @Injectable()
 export class CalendarEffects {
   private injector = inject(EnvironmentInjector);
   private calendarService = inject(CalendarService);
-  private truckService = inject(TruckService);
-  private bookingService = inject(BookingService);
   private snackBar = inject(MatSnackBar);
-  private tripService = inject(TripService)
 
   readonly loadTrucksAndTrips$;
   readonly loadBookingsForMonth$;
@@ -50,7 +44,7 @@ export class CalendarEffects {
         switchMap(action =>
           runInInjectionContext(this.injector, () => {
             // First load all trucks
-            const trucks$ = this.truckService.getTrucks();
+            const trucks$ = this.calendarService.getTrucks();
 
             return trucks$.pipe(
               switchMap(trucks => {
@@ -134,7 +128,7 @@ export class CalendarEffects {
 
                 // Update the trip with the restored capacity
                 if (booking.tripId && booking.truckId) {
-                  return this.bookingService.updateTrip(
+                  return this.calendarService.updateTrip(
                     booking.truckId,
                     updatedTrip
                   ).pipe(
@@ -185,7 +179,7 @@ export class CalendarEffects {
       this.actions$.pipe(
         ofType(CalendarActions.updateTripStart),
         switchMap(action => runInInjectionContext(this.injector, () =>
-          this.tripService.updateTrip(action.truckId, action.trip).pipe(
+          this.calendarService.updateTrip(action.truckId, action.trip).pipe(
             map(() => CalendarActions.updateTripSuccess({
               truckId: action.truckId,
               trip: action.trip

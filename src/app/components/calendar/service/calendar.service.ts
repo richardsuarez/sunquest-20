@@ -4,6 +4,7 @@ import { increment } from 'firebase/firestore';
 import { from, Observable } from 'rxjs';
 import { Trip } from '../../trip/model/trip.model';
 import { Booking } from '../../book/model/booking.model';
+import { Truck } from '../../truck/model/truck.model';
 
 @Injectable({ providedIn: 'root' })
 export class CalendarService {
@@ -28,6 +29,41 @@ export class CalendarService {
       return from(p) as Observable<Trip>;
     });
   }
+
+  updateTrip(truckId: string, trip: Partial<Trip>): Observable<void> {
+    return runInInjectionContext(this.injector, () => {
+      const dref = doc(this.firestore, `trucks/${truckId}/trips`, trip.id || '');
+      const p = updateDoc(dref, trip as any);
+      return from(p) as Observable<void>;
+    });
+  }
+
+  getTrucks(): Observable<Truck[]> {
+      return runInInjectionContext(this.injector, () => {
+        const trucksRef = collection(this.firestore, 'trucks');
+        
+        const p = getDocsFromServer(trucksRef)
+          .then(snapshot => {
+            return snapshot.docs.map(d => {
+              const data = d.data() as any;
+              // normalize Firestore Timestamps to JS Date
+              const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+              return ({ ...data, id: d.id, departureDate } as Truck);
+            });
+          })
+          .catch(async (err) => {
+            console.warn('[TruckService] getTrucks() - getDocsFromServer failed, falling back to cache. Error:', err);
+            const snapshot = await getDocsFromCache(trucksRef);
+            return snapshot.docs.map(d => {
+              const data = d.data() as any;
+              const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+              return ({ ...data, id: d.id, departureDate } as Truck);
+            });
+          });
+  
+        return from(p) as Observable<Truck[]>;
+      });
+    }
 
   getTruckTrips(truckId: string): Observable<Trip[]> {
     return runInInjectionContext(this.injector, () => {
