@@ -295,4 +295,45 @@ export const calendarReducer = createReducer(
       calendarEvents: cleanCalendarEvents(updatedEvents)
     };
   }),
+
+  on(CalendarActions.deleteTripSuccess, (state, { truckId, tripId }) => {
+    // Remove trip from the trips list for the truck
+    const updatedTrips = {
+      ...state.trips,
+      [truckId]: (state.trips[truckId] || []).filter(t => t.id !== tripId)
+    };
+
+    // Remove trip from trips object if no trips left for this truck
+    if (updatedTrips[truckId].length === 0) {
+      const tripsWithoutTruck = { ...updatedTrips };
+      delete tripsWithoutTruck[truckId];
+      Object.assign(updatedTrips, tripsWithoutTruck);
+    }
+
+    // Remove calendar event for the deleted trip
+    const updatedEvents: { [key: string]: CalendarEvent[] } = {};
+    const tripEventId = `trip-${tripId}`;
+
+    // Search through all dates to remove the trip event
+    Object.keys(state.calendarEvents).forEach(dateKey => {
+      const eventsForDate = state.calendarEvents[dateKey] || [];
+      const filtered = eventsForDate.filter(e => e.id !== tripEventId);
+
+      // Only keep the date key if events remain after filtering
+      if (filtered.length > 0) {
+        updatedEvents[dateKey] = filtered;
+      }
+    });
+
+    // Clear selectedTrip if it's the deleted trip
+    const isSelectedTripDeleted = state.selectedTrip && state.selectedTrip.id === tripId;
+
+    return {
+      ...state,
+      trips: updatedTrips,
+      calendarEvents: cleanCalendarEvents(updatedEvents),
+      selectedTrip: isSelectedTripDeleted ? null : state.selectedTrip,
+      loading: false
+    };
+  }),
 );

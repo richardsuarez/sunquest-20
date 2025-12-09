@@ -142,4 +142,40 @@ export class CalendarService {
       return from(p) as Observable<void>;
     });
   }
+
+  deleteTrip(truckId: string, tripId: string): Observable<void> {
+    return runInInjectionContext(this.injector, () => {
+      const tripDocRef = doc(this.firestore, `trucks/${truckId}/trips/${tripId}`);
+      const p = deleteDoc(tripDocRef) as Promise<void>;
+      return from(p) as Observable<void>;
+    });
+  }
+
+  deleteBookingsByTripId(tripId: string): Observable<void> {
+    return runInInjectionContext(this.injector, () => {
+      const bookingsRef = collection(this.firestore, this.collectionName);
+      const q = query(bookingsRef, where('tripId', '==', tripId));
+
+      const p = getDocsFromServer(q)
+        .then(snapshot => {
+          // Delete all bookings for this trip
+          const deletePromises = snapshot.docs.map(docSnapshot => 
+            deleteDoc(doc(this.firestore, `${this.collectionName}/${docSnapshot.id}`))
+          );
+          return Promise.all(deletePromises);
+        })
+        .then(() => undefined)
+        .catch(async (err) => {
+          console.warn('[CalendarService] deleteBookingsByTripId() - server query failed', err);
+          // Try cache as fallback
+          const snapshot = await getDocsFromCache(q);
+          const deletePromises = snapshot.docs.map(docSnapshot => 
+            deleteDoc(doc(this.firestore, `${this.collectionName}/${docSnapshot.id}`))
+          );
+          return Promise.all(deletePromises).then(() => undefined);
+        });
+
+      return from(p) as Observable<void>;
+    });
+  }
 }

@@ -228,7 +228,7 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit {
         {
           data: {
             title: 'Delete Trip',
-            message: `Are you sure you want to delete trip ${this.trip.loadNumber}? All bookings for this trip will also be deleted.`,
+            message: `Are you sure you want to delete this trip? All bookings for this trip will also be deleted.`,
             cancelButton: 'No',
             successButton: 'Yes, Delete',
           }
@@ -239,8 +239,11 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit {
         map(result => {
           if (result) {
             // Dispatch action to delete the trip
-            // TODO: Implement trip deletion action
-            console.log('Delete trip:', this.trip?.id);
+            this.store.dispatch(CalendarActions.deleteTripStart({
+              truckId: this.truckId || '',
+              trip: this.trip!
+            }));
+            this.closePopover();
           }
         })
       ).subscribe();

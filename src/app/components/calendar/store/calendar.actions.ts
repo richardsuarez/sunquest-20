@@ -28,3 +28,11 @@ export const addTripFail = createAction('[Book] Add trip fail', props<{ error: E
 export const updateTripStart = createAction('[Trip] Update trip start', props<{ truckId: string; trip: Trip }>());
 export const updateTripSuccess = createAction('[Trip] Update trip success', props<{ truckId: string; trip: Partial<Trip> }>());
 export const updateTripFail = createAction('[Trip] Update trip fail', props<{ error: Error }>());
+
+export const deleteTripStart = createAction('[Trip] Delete trip start', props<{ truckId: string; trip: Trip }>());
+export const deleteTripSuccess = createAction('[Trip] Delete trip success', props<{ truckId: string; tripId: string }>());
+export const deleteTripFail = createAction('[Trip] Delete trip fail', props<{ error: Error }>());
+
+export const deleteBookingsByTripStart = createAction('[Trip] Delete bookings by trip start', props<{ tripId: string }>());
+export const deleteBookingsByTripSuccess = createAction('[Trip] Delete bookings by trip success', props<{ tripId: string }>());
+export const deleteBookingsByTripFail = createAction('[Trip] Delete bookings by trip fail', props<{ error: Error }>());

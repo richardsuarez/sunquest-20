@@ -1,6 +1,6 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, switchMap, catchError, mergeMap, tap } from 'rxjs/operators';
+import { map, switchMap, catchError, mergeMap, tap, concatMap } from 'rxjs/operators';
 import { of, combineLatest, from } from 'rxjs';
 import * as CalendarActions from './calendar.actions';
 import { CalendarService } from '../service/calendar.service';
@@ -23,6 +23,8 @@ export class CalendarEffects {
   readonly deleteBooking$;
   readonly addTrip$;
   readonly updateTrip$;
+  readonly deleteTrip$;
+  readonly deleteBookingsByTrip$;
 
   constructor(private actions$: Actions) {
     this.loadBookingsForMonth$ = createEffect(() =>
@@ -161,7 +163,7 @@ export class CalendarEffects {
         ofType(CalendarActions.addTripStart),
         switchMap((action) =>
           runInInjectionContext(this.injector, () =>
-            from(this.bookingService.addTrip(action.truckId, action.trip)).pipe(
+            from(this.calendarService.addTrip(action.truckId, action.trip)).pipe(
               map((trip) => {
                 this.snackBar.open('Trip added', 'Close', { duration: 3000 });
                 return CalendarActions.addTripSuccess({
@@ -191,6 +193,54 @@ export class CalendarEffects {
             catchError(err => of(CalendarActions.updateTripFail({ error: err })))
           )
         ))
+      )
+    );
+
+    this.deleteTrip$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(CalendarActions.deleteTripStart),
+        switchMap(action =>
+          runInInjectionContext(this.injector, () =>
+            this.calendarService.deleteTrip(action.truckId, action.trip.id!).pipe(
+              concatMap(() => 
+                // After trip is deleted successfully, dispatch action to delete its bookings
+                [
+                  CalendarActions.deleteTripSuccess({truckId: action.truckId, tripId: action.trip.id!}),
+                  CalendarActions.deleteBookingsByTripStart({ tripId: action.trip.id! }),
+                ]
+              ),
+              catchError(err => {
+                this.snackBar.open('Failed to delete trip', 'Close', { duration: 3000 });
+                console.error('[CalendarEffects] Failed to delete trip:', err);
+                return of(CalendarActions.deleteTripFail({ error: err }));
+              })
+            )
+          )
+        )
+      )
+    );
+
+    this.deleteBookingsByTrip$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(CalendarActions.deleteBookingsByTripStart),
+        switchMap(action =>
+          runInInjectionContext(this.injector, () =>
+            this.calendarService.deleteBookingsByTripId(action.tripId).pipe(
+              map(() => {
+                this.snackBar.open('Trip and bookings deleted', 'Close', { duration: 3000 });
+                // Note: The tripId comes from the initial deleteTripStart action
+                // We need to extract truckId from the trip data stored in the first effect
+                // For now, we dispatch success - the reducer will handle state cleanup
+                return CalendarActions.deleteBookingsByTripSuccess({ tripId: action.tripId });
+              }),
+              catchError(err => {
+                this.snackBar.open('Failed to delete trip bookings', 'Close', { duration: 3000 });
+                console.error('[CalendarEffects] Failed to delete bookings by trip:', err);
+                return of(CalendarActions.deleteBookingsByTripFail({ error: err }));
+              })
+            )
+          )
+        )
       )
     );
   }

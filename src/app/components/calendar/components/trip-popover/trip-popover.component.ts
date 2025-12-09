@@ -105,7 +105,6 @@ export class TripPopoverComponent {
             this.store.dispatch(CalendarActions.addTripStart({
                 truckId: tripData.truckId,
                 trip: {
-                    id: this.trip?.id,
                     loadNumber: tripData.loadNumber || '',
                     departureDate: tripData.departureDate || new Date(),
                     arrivalDate: tripData.arrivalDate || new Date(),
@@ -140,7 +139,10 @@ export class TripPopoverComponent {
     }
 
     isEditableTrip() {
-        return this.trip?.arrivalDate.getTime()! >= this.today.getTime()
+        if(this.trip && this.trip.id){
+            return this.trip?.arrivalDate.getTime()! >= this.today.getTime()
+        }
+        return true
     }
 
     updateTripOrigin(event?: any) {

@@ -101,7 +101,7 @@ export class Calendar implements OnInit, OnDestroy {
           destination: '',
           remLoadCap: 0,
           remCarCap: 0,
-          delayDate: new Date(),
+          delayDate: null,
         },
         truckTrip: null,
       },
