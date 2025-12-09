@@ -80,7 +80,7 @@
                             <th mat-header-cell *matHeaderCellDef> </th>
                             <td mat-cell *matCellDef="let element">
                                 <mat-checkbox [checked]="vehicleSelection[element.id]"
-                                    (change)="vehicleSelection[element.id] = $event.checked"></mat-checkbox>
+                                    (change)="vehicleSelection[element.id] = $event.checked; refillCheckAmount()"></mat-checkbox>
                             </td>
                         </ng-container>
 
@@ -127,15 +127,15 @@
                 <h3>Paycheck</h3>
                 <mat-form-field appearance="outline" floatLabel="always">
                     <mat-label>Check number</mat-label>
-                    <input matInput [formControl]="form.controls.checkNumber">
+                    <input matInput [formControl]="form.controls.checkNumber" appAllowOnlyNumbers>
                 </mat-form-field>
                 <mat-form-field appearance="outline" floatLabel="always">
                     <mat-label>Bank name</mat-label>
-                    <input matInput [formControl]="form.controls.bankName">
+                    <input matInput [formControl]="form.controls.bankName" appAllowAlphanumeric>
                 </mat-form-field>
                 <mat-form-field appearance="outline" floatLabel="always">
                     <mat-label>Amount</mat-label>
-                    <input type="number" matInput [formControl]="form.controls.amount">
+                    <input type="number" matInput [formControl]="form.controls.amount" appAllowOnlyNumbers>
                 </mat-form-field>
             </section>
 
@@ -144,7 +144,7 @@
                 <div class="info">
                     <mat-form-field appearance="outline" floatLabel="always">
                         <mat-label>Date</mat-label>
-                        <input required matInput [matDatepicker]="picker" [(ngModel)]="arrivalAt" [min]="today">
+                        <input required matInput [matDatepicker]="picker" [(ngModel)]="arrivalAt" [min]="today" appAllowOnlyNumbers>
                         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                         <mat-datepicker #picker></mat-datepicker>
                     </mat-form-field>
@@ -165,7 +165,7 @@
                     <mat-form-field appearance="outline" floatLabel="always">
                         <mat-label>Date</mat-label>
                         <input required matInput [matDatepicker]="pickupPicker" [(ngModel)]="pickupAt" [min]="today"
-                            [max]="arrivalAt">
+                            [max]="arrivalAt" appAllowOnlyNumbers>
                         <mat-datepicker-toggle matIconSuffix [for]="pickupPicker"></mat-datepicker-toggle>
                         <mat-datepicker #pickupPicker></mat-datepicker>
                     </mat-form-field>
@@ -275,7 +275,7 @@
                                         </table>
                                     </ng-container>
                                     <ng-container *ngIf="!(tripsMap[truck.id] || []).length">
-                                        <div class="no-trips">No trips available</div>
+                                        <div class="no-trips">No next trips available</div>
                                     </ng-container>
                                 </ng-container>
                             </td>

@@ -33,11 +33,15 @@ import { Truck } from '../../truck/model/truck.model';
 
 import * as BookActions from '../store/book.actions';
 import { Booking } from '../model/booking.model';
+import { AllowOnlyNumbersDirective } from '../../../shared/directives/allow-only-numbers.directive';
+import { AllowAlphanumericDirective } from '../../../shared/directives/allow-alphanumeric.directive';
 
 @Component({
   selector: 'app-book-edit',
   standalone: true,
   imports: [
+    AllowAlphanumericDirective,
+    AllowOnlyNumbersDirective,
     CommonModule,
     FormsModule,
     MatButtonModule,
@@ -107,7 +111,7 @@ export class Book implements OnInit {
   form = new FormGroup({
     checkNumber: new FormControl<string | null>(null),
     bankName: new FormControl<string | null>(null),
-    amount: new FormControl<number | null>(1200, [Validators.required]),
+    amount: new FormControl<number | null>(0, [Validators.required]),
     origin: new FormControl<string | null>(null),
     destination: new FormControl<string | null>(null),
     notes: new FormControl<string | null>(null),
@@ -322,6 +326,11 @@ export class Book implements OnInit {
     this.form.reset();
     this.currentSelectedTrip = null;
     this.vehicleSelection = {};
+  }
+
+  refillCheckAmount(){
+    const selectedCars = Object.values(this.vehicleSelection).filter((v) => v).length
+    this.form.controls.amount.setValue(1200 * selectedCars)
   }
 
   selectableTrip(trip: Trip): boolean {

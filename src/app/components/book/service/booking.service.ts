@@ -40,7 +40,8 @@ export class BookingService {
     return runInInjectionContext(this.injector, () => {
       const tripsRef = collection(this.firestore, `trucks/${truckId}/trips`);
       // build a query: get all trips ordered ascending by departureDate
-      const q = query(tripsRef, orderBy('departureDate', 'asc'));
+      const now = new Date()
+      const q = query(tripsRef, where('departureDate', '>=', now), orderBy('departureDate', 'asc'));
 
       const p = getDocsFromServer(q)
         .then(snapshot => {

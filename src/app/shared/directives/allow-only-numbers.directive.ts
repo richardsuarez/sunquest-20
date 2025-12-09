@@ -4,26 +4,23 @@ import { Directive, HostListener } from '@angular/core';
 	selector: '[appAllowOnlyNumbers]',
 })
 export class AllowOnlyNumbersDirective {
-	@HostListener('keypress', ['$event'])
-	onKeyPress(event: KeyboardEvent) {
-		if (
-			event.key &&
-			!Number.isInteger(Number.parseInt(event.key, 10)) &&
-			event.key !== 'Backspace' &&
-			event.key !== 'Delete'
-		) {
-			event.preventDefault();
+
+	@HostListener('input', ['$event'])
+	onNativeInput(event: any) {
+		const inputValue = event.target.value || '';
+		const filteredValue = inputValue.replace(/[^0-9]/g, '')
+		if (inputValue !== filteredValue) {
+			event.target.value = filteredValue
 		}
 	}
 
 	@HostListener('paste', ['$event'])
-	onPaste(event: any) {
-		const data = event.clipboardData.getData('text');
-		for (const character of data) {
-			if (!Number.isInteger(Number.parseInt(character, 10))) {
-				event.preventDefault();
-				break;
-			}
+	onPaste(event: ClipboardEvent) {
+		const pastedData = event.clipboardData?.getData('text') || '';
+		const filtered = pastedData.replace(/[^0-9]/g, '') 
+		if(pastedData !== filtered){
+			event.preventDefault();
+			document.execCommand('insertText', false, filtered)
 		}
 	}
 }
