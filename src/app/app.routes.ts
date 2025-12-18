@@ -10,6 +10,8 @@ import { CalendarEffects } from './components/calendar/store/calendar.effects';
 import { truckReducer, TRUCK_FEATURE_KEY } from './components/truck/store/truck.reducers';
 import { TruckEffects } from './components/truck/store/truck.effects';
 import { CALENDAR_FEATURE_KEY, calendarReducer } from './components/calendar/store/calendar.reducers';
+import { mainReducer } from './components/main/store/main.reducers';
+import { MainEffects } from './components/main/store/main.effects';
 
 export const routes: Routes = [
     {
@@ -20,22 +22,19 @@ export const routes: Routes = [
     },
     {
         path: 'main',
+        providers: [
+            provideState('main', mainReducer),
+            provideEffects([MainEffects]),
+        ],
         loadComponent() {
-            return import('./components/main/main').then(m => m.Main);
+            return import('./components/main/container/main').then(m => m.Main);
         },
         children: [
-            {
-                path: '',
-                loadComponent() {
-                    return import('./components/trip/trip').then(m => m.trip);
-                }
-            },
             {
                 path: 'calendar',
                 providers: [
                     // provide book feature state and effects when /main/calendar is active
                     provideState('calendar', calendarReducer),
-                    provideState(CALENDAR_FEATURE_KEY, calendarReducer),
                     provideEffects([CalendarEffects])
                 ],
                 loadComponent() {
@@ -71,7 +70,6 @@ export const routes: Routes = [
                 providers: [
                     // provide book feature state and effects when /main/book is active
                     provideState('book', bookReducer),
-                    provideState(TRUCK_FEATURE_KEY, truckReducer),
                     provideEffects([BookEffects,]),
                 ],
                 children: [

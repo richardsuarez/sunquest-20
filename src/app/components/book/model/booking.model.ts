@@ -23,4 +23,5 @@ export interface Booking {
   truckId: string | null;
   notes: string | null;
   createdAt?: Date;
+  season: string | null;
 }

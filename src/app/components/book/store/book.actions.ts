@@ -3,6 +3,7 @@ import { CalendarEvent } from '../../calendar/model/calendar-event.model';
 import { Booking } from '../model/booking.model';
 import { Trip } from '../../trip/model/trip.model';
 import { Truck } from '../../truck/model/truck.model';
+import { Season } from '../../../shared/season/models/season.model';
 
 // Booking actions
 export const addBookingStart = createAction('[Book] Add booking start', props<{ booking: Partial<Booking>, trip: Trip }>());
@@ -22,7 +23,7 @@ export const getTruckListStart = createAction('[Truck] Load trucks start');
 export const getTruckListSuccess = createAction('[Truck] Load trucks success', props<{ trucks: Truck[] }>());
 export const getTruckListFail = createAction('[Truck] Load trucks fail', props<{ error: Error }>());
 
-export const loadTripsStart = createAction('[Book] Load trips start', props<{ truckId: string }>());
+export const loadTripsStart = createAction('[Book] Load trips start', props<{ truckId: string, season: Season }>());
 export const loadTripsSuccess = createAction('[Book] Load trips success', props<{ truckId: string, trips: Trip[] }>());
 export const loadTripsFail = createAction('[Book] Load trips fail', props<{ error: Error }>());
 

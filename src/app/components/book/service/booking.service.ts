@@ -4,6 +4,7 @@ import { increment } from 'firebase/firestore';
 import { from, Observable } from 'rxjs';
 import { Booking } from '../model/booking.model';
 import { Trip } from '../../trip/model/trip.model';
+import { Season } from '../../../shared/season/models/season.model';
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
@@ -36,12 +37,16 @@ export class BookingService {
     });
   }
 
-  getTruckTrips(truckId: string): Observable<Trip[]> {
+  getTruckTrips(truckId: string, season: Season): Observable<Trip[]> {
     return runInInjectionContext(this.injector, () => {
       const tripsRef = collection(this.firestore, `trucks/${truckId}/trips`);
       // build a query: get all trips ordered ascending by departureDate
       const now = new Date()
-      const q = query(tripsRef, where('departureDate', '>=', now), orderBy('departureDate', 'asc'));
+      const q = query(
+        tripsRef, 
+        where('season', '==', `${season.seasonName}-${season.year}`),
+        where('departureDate', '>=', now), 
+        orderBy('departureDate', 'asc'));
 
       const p = getDocsFromServer(q)
         .then(snapshot => {

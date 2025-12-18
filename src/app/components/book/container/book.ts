@@ -21,7 +21,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTimepickerModule, MatTimepickerToggle } from '@angular/material/timepicker';
-import { map, merge, Observable, Subject, takeUntil } from 'rxjs';
+import { firstValueFrom, map, merge, Observable, Subject, takeUntil } from 'rxjs';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { PopupComponent } from '../../../shared/popup/popup.component';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators, FormsModule } from '@angular/forms';
@@ -32,9 +32,11 @@ import { Store } from '@ngrx/store';
 import { Truck } from '../../truck/model/truck.model';
 
 import * as BookActions from '../store/book.actions';
+import * as MainSelectors from '../../main/store/main.selectors';
 import { Booking } from '../model/booking.model';
 import { AllowOnlyNumbersDirective } from '../../../shared/directives/allow-only-numbers.directive';
 import { AllowAlphanumericDirective } from '../../../shared/directives/allow-alphanumeric.directive';
+import { Season } from '../../../shared/season/models/season.model';
 
 @Component({
   selector: 'app-book-edit',
@@ -83,10 +85,10 @@ export class Book implements OnInit {
   currentSelectedTrip: Trip | null = null;
   currentSelectedTruckId: string | null = null;
   today = new Date();
-  tomorrow = new Date(this.today.getTime() + 86400000)
-  dayAfterTomorrow = new Date(this.today.getTime() + 172800000)
+  tomorrow = new Date(this.today.getTime() + 86400000);
+  dayAfterTomorrow = new Date(this.today.getTime() + 172800000);
   arrivalAt: Date = new Date();
-  pickupAt!:Date;
+  pickupAt!: Date;
   crud = '';
 
   bookingVM$!: Observable<Booking | null>;
@@ -117,6 +119,9 @@ export class Book implements OnInit {
     notes: new FormControl<string | null>(null),
   });
 
+  activeSeason: Season | null = null;
+  seasons$!: Observable<Season[]>;
+
   constructor(
     private readonly breakpoints: BreakpointObserver,
     private readonly route: ActivatedRoute,
@@ -128,9 +133,10 @@ export class Book implements OnInit {
     this.savingBooking$ = this.store.select(savingBooking);
     this.tripsMap$ = this.store.select(sortedTripsMap);
     this.bookingVM$ = this.store.select(bookingVM);
+    this.seasons$ = this.store.select(MainSelectors.selectSeasons);
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.crud = this.route.snapshot.paramMap.get('crud') ?? '';
     this.breakpoints.observe([
       Breakpoints.HandsetPortrait,
@@ -166,7 +172,9 @@ export class Book implements OnInit {
           // and that we haven't already requested during this component lifecycle
           if (!this.requestedTrips.has(t.id)) {
             this.requestedTrips.add(t.id);
-            this.store.dispatch(BookActions.loadTripsStart({ truckId: t.id }));
+            if(this.activeSeason){
+              this.store.dispatch(BookActions.loadTripsStart({ truckId: t.id, season: this.activeSeason }));
+            }
           }
         }
       });
@@ -178,10 +186,23 @@ export class Book implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.checkDateValidation()
-      })
+      });
+
+    this.seasons$.pipe(takeUntil(this.destroy$)).subscribe(seasons => {
+      this.activeSeason = seasons.find(s => s.isActive) || null;
+      if (this.activeSeason && this.truckList && this.truckList.length > 0) {
+        this.truckList.forEach(t => {
+          if(t.id && this.activeSeason){
+            this.store.dispatch(BookActions.loadTripsStart({ truckId: t.id, season: this.activeSeason }));
+          }
+        });
+      }
+    });
   }
 
   addTrip() {
+    if(!this.activeSeason) return;
+
     if (this.tripForm.invalid) {
       this.tripForm.markAllAsTouched();
       return;
@@ -205,6 +226,7 @@ export class Book implements OnInit {
         remLoadCap: truck?.loadCapacity || 0,
         remCarCap: truck?.carCapacity || 0,
         delayDate: null,
+        season: `${this.activeSeason.seasonName}-${this.activeSeason.year}`,
       }
     }));
 
@@ -217,32 +239,32 @@ export class Book implements OnInit {
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
-      // only show the popup if the user modifies any fields AND DISCREPANCY VIEW MODAL IN STATE IS NOT NULL 
-      // when discrepancyViewModel is null means user SUBMITS form for add/edit discrepancy and we won't show popup message when submit
-      if ((this.tripForm && !this.tripForm.pristine) || (this.form && !this.form.pristine) || this.currentSelectedTrip || Object.values(this.vehicleSelection).some(selected => selected)) {
-        const dialogRef = this.matDialog.open(
-          PopupComponent,
-          {
-            data: {
-              title: 'Save Changes',
-              message: 'Are you sure you want to leave? Your changes will not be saved',
-              cancelButton: 'Discard',
-              successButton: 'Save',
-            }
+    // only show the popup if the user modifies any fields AND DISCREPANCY VIEW MODAL IN STATE IS NOT NULL 
+    // when discrepancyViewModel is null means user SUBMITS form for add/edit discrepancy and we won't show popup message when submit
+    if ((this.tripForm && !this.tripForm.pristine) || (this.form && !this.form.pristine) || this.currentSelectedTrip || Object.values(this.vehicleSelection).some(selected => selected)) {
+      const dialogRef = this.matDialog.open(
+        PopupComponent,
+        {
+          data: {
+            title: 'Save Changes',
+            message: 'Are you sure you want to leave? Your changes will not be saved',
+            cancelButton: 'Discard',
+            successButton: 'Save',
           }
-        );
-        return dialogRef.afterClosed().pipe(
-          takeUntil(this.destroy$),
-          map(result => {
-            switch (result) {
-              case 'Success': this.save(); return false;
-              case 'Cancel': return true;
-              default: return false;
-            }  // allow navigation if the user click discard button or click outside modal
-          }))
-      }
-      return true;
+        }
+      );
+      return dialogRef.afterClosed().pipe(
+        takeUntil(this.destroy$),
+        map(result => {
+          switch (result) {
+            case 'Success': this.save(); return false;
+            case 'Cancel': return true;
+            default: return false;
+          }  // allow navigation if the user click discard button or click outside modal
+        }))
     }
+    return true;
+  }
 
   private checkDateValidation() {
     const depDate = this.tripForm.controls.departureDate.value
@@ -291,7 +313,7 @@ export class Book implements OnInit {
       return;
     }
 
-    if(!this.currentSelectedTrip){
+    if (!this.currentSelectedTrip) {
       this.snackBar.open('Please select a trip to book', 'Close', { duration: 5000 });
       return;
     }
@@ -317,8 +339,8 @@ export class Book implements OnInit {
       truckId: this.currentSelectedTruckId,
       notes: this.form.controls.notes.value,
       createdAt: new Date()
-    };             
-    
+    };
+
     // dispatch booking action — effect will persist and handle snackbar/navigation
     this.store.dispatch(BookActions.addBookingStart({ booking, trip: this.currentSelectedTrip }));
 
@@ -328,16 +350,16 @@ export class Book implements OnInit {
     this.vehicleSelection = {};
   }
 
-  refillCheckAmount(){
+  refillCheckAmount() {
     const selectedCars = Object.values(this.vehicleSelection).filter((v) => v).length
     this.form.controls.amount.setValue(1200 * selectedCars)
   }
 
   selectableTrip(trip: Trip): boolean {
-    if(this.form.controls.origin.value && trip.origin !== this.form.controls.origin.value){
+    if (this.form.controls.origin.value && trip.origin !== this.form.controls.origin.value) {
       return false;
     }
-    if(this.arrivalAt && trip.departureDate > this.arrivalAt ){
+    if (this.arrivalAt && trip.departureDate > this.arrivalAt) {
       return false;
     }
     return true;

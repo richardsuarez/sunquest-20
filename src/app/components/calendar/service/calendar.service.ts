@@ -5,6 +5,7 @@ import { from, Observable } from 'rxjs';
 import { Trip } from '../../trip/model/trip.model';
 import { Booking } from '../../book/model/booking.model';
 import { Truck } from '../../truck/model/truck.model';
+import { Season } from '../../../shared/season/models/season.model';
 
 @Injectable({ providedIn: 'root' })
 export class CalendarService {
@@ -14,65 +15,88 @@ export class CalendarService {
 
   addTrip(truckId: string, trip: Partial<Trip>): Observable<Trip> {
     return runInInjectionContext(this.injector, () => {
-      const tripsRef = collection(this.firestore, `trucks/${truckId}/trips`);
-      const now = new Date();
-      const p = addDoc(tripsRef, {
-        ...trip,
-        truckId,
-        createdAt: now
-      }).then(docRef => ({
-        ...(trip as Trip),
-        id: docRef.id,
-        truckId,
-        createdAt: now
-      } as Trip));
-      return from(p) as Observable<Trip>;
+      return from((async () => {
+        try {
+          const tripsRef = collection(this.firestore, `trucks/${truckId}/trips`);
+          const now = new Date();
+          const docRef = await addDoc(tripsRef, {
+            ...trip,
+            truckId,
+            createdAt: now
+          });
+          return {
+            ...(trip as Trip),
+            id: docRef.id,
+            truckId,
+            createdAt: now
+          } as Trip;
+        } catch (error) {
+          throw error;
+        }
+      })());
     });
   }
 
   updateTrip(truckId: string, trip: Partial<Trip>): Observable<void> {
     return runInInjectionContext(this.injector, () => {
-      const dref = doc(this.firestore, `trucks/${truckId}/trips`, trip.id || '');
-      const p = updateDoc(dref, trip as any);
-      return from(p) as Observable<void>;
+      return from((async () => {
+        try {
+          const dref = doc(this.firestore, `trucks/${truckId}/trips`, trip.id || '');
+          await updateDoc(dref, trip as any);
+        } catch (error) {
+          throw error;
+        }
+      })());
     });
   }
 
   getTrucks(): Observable<Truck[]> {
-      return runInInjectionContext(this.injector, () => {
-        const trucksRef = collection(this.firestore, 'trucks');
-        
-        const p = getDocsFromServer(trucksRef)
-          .then(snapshot => {
-            return snapshot.docs.map(d => {
-              const data = d.data() as any;
-              // normalize Firestore Timestamps to JS Date
-              const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
-              return ({ ...data, id: d.id, departureDate } as Truck);
-            });
-          })
-          .catch(async (err) => {
-            console.warn('[TruckService] getTrucks() - getDocsFromServer failed, falling back to cache. Error:', err);
-            const snapshot = await getDocsFromCache(trucksRef);
-            return snapshot.docs.map(d => {
-              const data = d.data() as any;
-              const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
-              return ({ ...data, id: d.id, departureDate } as Truck);
-            });
-          });
-  
-        return from(p) as Observable<Truck[]>;
-      });
-    }
-
-  getTruckTrips(truckId: string): Observable<Trip[]> {
     return runInInjectionContext(this.injector, () => {
-      const tripsRef = collection(this.firestore, `trucks/${truckId}/trips`);
-      // build a query: get all trips ordered ascending by departureDate
-      const q = query(tripsRef, orderBy('departureDate', 'asc'));
+      return from((async () => {
+        try {
+          const trucksRef = collection(this.firestore, 'trucks');
+          let snapshot;
+          
+          try {
+            snapshot = await getDocsFromServer(trucksRef);
+          } catch (err) {
+            console.warn('[TruckService] getTrucks() - getDocsFromServer failed, falling back to cache. Error:', err);
+            snapshot = await getDocsFromCache(trucksRef);
+          }
 
-      const p = getDocsFromServer(q)
-        .then(snapshot => {
+          return snapshot.docs.map(d => {
+            const data = d.data() as any;
+            // normalize Firestore Timestamps to JS Date
+            const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+            return ({ ...data, id: d.id, departureDate } as Truck);
+          });
+        } catch (error) {
+          throw error;
+        }
+      })());
+    });
+  }
+
+  getTruckTrips(truckId: string, season: Season): Observable<Trip[]> {
+    return runInInjectionContext(this.injector, () => {
+      return from((async () => {
+        try {
+          const tripsRef = collection(this.firestore, `trucks/${truckId}/trips`);
+          // build a query: get all trips ordered ascending by departureDate
+          const q = query(
+            tripsRef,
+            where('season', '==', `${season.seasonName}-${season.year}`),
+            orderBy('departureDate', 'asc')
+          );
+
+          let snapshot;
+          try {
+            snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+          } catch (err) {
+            console.warn('[CalendarService] getTruckTrips() - getDocsFromServer failed for truckId:', truckId, 'Error:', err);
+            snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
+          }
+
           return snapshot.docs.map(d => {
             const data = d.data() as any;
             // normalize Firestore Timestamps to JS Date
@@ -90,46 +114,35 @@ export class CalendarService {
               truckId
             } as Trip);
           });
-        })
-        .catch(async (err) => {
-          console.warn('[BookingService] getTruckTrips() - getDocsFromServer failed for truckId:', truckId, 'Error:', err);
-          const snapshot = await getDocsFromCache(q);
-          return snapshot.docs.map(d => {
-            const data = d.data() as any;
-            const arrivalDate = data.arrivalDate ? (typeof data.arrivalDate.toDate === 'function' ? data.arrivalDate.toDate() : new Date(data.arrivalDate)) : null;
-            const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
-            const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
-            const delayDate = data.delayDate ? (typeof data.delayDate.toDate === 'function' ? data.delayDate.toDate() : new Date(data.delayDate)) : null;
-            return ({
-              ...data,
-              id: d.id,
-              arrivalDate,
-              departureDate,
-              createdAt,
-              delayDate,
-              truckId
-            } as Trip);
-          });
-        });
-
-      return from(p) as Observable<Trip[]>;
+        } catch (error) {
+          throw error;
+        }
+      })());
     });
   }
 
   // Get bookings for a specific date range (for calendar)
-  getBookingsForDateRange(startDate: Date, endDate: Date): Observable<Booking[]> {
+  getBookingsForDateRange(startDate: Date, endDate: Date, season: Season): Observable<Booking[]> {
     return runInInjectionContext(this.injector, () => {
-      const bookingsRef = collection(this.firestore, this.collectionName);
-      // Query bookings where departureDate is between startDate and endDate
-      const q = query(
-        bookingsRef,
-        where('departureDate', '>=', startDate),
-        where('departureDate', '<=', endDate),
-        orderBy('departureDate', 'asc')
-      );
+      return from((async () => {
+        try {
+          const bookingsRef = collection(this.firestore, this.collectionName);
+          // Query bookings where departureDate is between startDate and endDate
+          const q = query(
+            bookingsRef,
+            where('season', '==', `${season.seasonName}-${season.year}`),
+            where('departureDate', '>=', startDate),
+            where('departureDate', '<=', endDate),
+            orderBy('departureDate', 'asc')
+          );
 
-      const p = getDocsFromServer(q)
-        .then(snapshot => {
+          let snapshot;
+          try {
+            snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+          } catch {
+            snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
+          }
+
           return snapshot.docs.map(d => {
             const data = d.data() as any;
             // Normalize Firestore Timestamps to JS Date
@@ -146,72 +159,63 @@ export class CalendarService {
               departureDate
             } as Booking;
           });
-        })
-        .catch(async (err) => {
-          console.warn('[BookingService] getBookingsForDateRange() - server query failed', err);
-          const snapshot = await getDocsFromCache(q);
-          return snapshot.docs.map(d => {
-            const data = d.data() as any;
-            const arrivalAt = data.arrivalAt ? (typeof data.arrivalAt.toDate === 'function' ? data.arrivalAt.toDate() : new Date(data.arrivalAt)) : null;
-            const pickupAt = data.pickupAt ? (typeof data.pickupAt.toDate === 'function' ? data.pickupAt.toDate() : new Date(data.pickupAt)) : null;
-            const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
-            const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
-            return {
-              ...data,
-              id: d.id,
-              arrivalAt,
-              pickupAt,
-              createdAt,
-              departureDate
-            } as Booking;
-          });
-        });
-
-      return from(p) as Observable<Booking[]>;
+        } catch (error) {
+          throw error;
+        }
+      })());
     });
   }
 
   deleteBooking(id: string): Observable<void> {
     return runInInjectionContext(this.injector, () => {
-      const bookingDocRef = doc(this.firestore, `${this.collectionName}/${id}`);
-      const p = deleteDoc(bookingDocRef) as Promise<void>;
-      return from(p) as Observable<void>;
+      return from((async () => {
+        try {
+          const bookingDocRef = doc(this.firestore, `${this.collectionName}/${id}`);
+          await deleteDoc(bookingDocRef);
+        } catch (error) {
+          throw error;
+        }
+      })());
     });
   }
 
   deleteTrip(truckId: string, tripId: string): Observable<void> {
     return runInInjectionContext(this.injector, () => {
-      const tripDocRef = doc(this.firestore, `trucks/${truckId}/trips/${tripId}`);
-      const p = deleteDoc(tripDocRef) as Promise<void>;
-      return from(p) as Observable<void>;
+      return from((async () => {
+        try {
+          const tripDocRef = doc(this.firestore, `trucks/${truckId}/trips/${tripId}`);
+          await deleteDoc(tripDocRef);
+        } catch (error) {
+          throw error;
+        }
+      })());
     });
   }
 
   deleteBookingsByTripId(tripId: string): Observable<void> {
     return runInInjectionContext(this.injector, () => {
-      const bookingsRef = collection(this.firestore, this.collectionName);
-      const q = query(bookingsRef, where('tripId', '==', tripId));
+      return from((async () => {
+        try {
+          const bookingsRef = collection(this.firestore, this.collectionName);
+          const q = query(bookingsRef, where('tripId', '==', tripId));
 
-      const p = getDocsFromServer(q)
-        .then(snapshot => {
+          let snapshot;
+          try {
+            snapshot = await getDocsFromServer(q);
+          } catch (err) {
+            console.warn('[CalendarService] deleteBookingsByTripId() - server query failed', err);
+            snapshot = await getDocsFromCache(q);
+          }
+
           // Delete all bookings for this trip
-          const deletePromises = snapshot.docs.map(docSnapshot => 
+          const deletePromises = snapshot.docs.map(docSnapshot =>
             deleteDoc(doc(this.firestore, `${this.collectionName}/${docSnapshot.id}`))
           );
-          return Promise.all(deletePromises);
-        })
-        .then(() => undefined)
-        .catch(async (err) => {
-          console.warn('[CalendarService] deleteBookingsByTripId() - server query failed', err);
-          // Try cache as fallback
-          const snapshot = await getDocsFromCache(q);
-          const deletePromises = snapshot.docs.map(docSnapshot => 
-            deleteDoc(doc(this.firestore, `${this.collectionName}/${docSnapshot.id}`))
-          );
-          return Promise.all(deletePromises).then(() => undefined);
-        });
-
-      return from(p) as Observable<void>;
+          await Promise.all(deletePromises);
+        } catch (error) {
+          throw error;
+        }
+      })());
     });
   }
 }

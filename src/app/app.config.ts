@@ -14,6 +14,8 @@ import {environment } from './shared/firebase/environment';
 import { Firestore } from '@angular/fire/firestore';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
+import { MainEffects } from './components/main/store/main.effects';
+import { mainReducer } from './components/main/store/main.reducers';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -34,7 +36,7 @@ export const appConfig: ApplicationConfig = {
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideStorage(() => getStorage()),
-    provideStore({}),
-    provideEffects([]),
+    provideStore({ main: mainReducer }),
+    provideEffects([MainEffects]),
   ]
 };

@@ -1,0 +1,158 @@
+.season-popup-container {
+  padding: 30px;
+  width: 300px;  
+  max-height: 500px;
+}
+
+.season-popup-container h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.loading-state,
+.error-state,
+.no-seasons {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.error-state {
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+}
+
+.seasons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 30px
+}
+
+.season-card {
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.season-card.active {
+  border-color: #2196f3;
+  background-color: #f3f7ff;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+}
+
+mat-form-field{
+  width: 125px !important
+}
+
+mat-select{
+  width: 125px !important;
+}
+
+.alert-icon {
+  color: #ff9800;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-title {
+  margin: 0 0 4px 0;
+  font-weight: 600;
+  font-size: 14px;
+  color: #e65100;
+}
+
+.alert-message {
+  margin: 0;
+  font-size: 13px;
+  color: #bf360c;
+}
+
+.alert-message strong {
+  font-weight: 600;
+}
+
+.season-content {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.season-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.season-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.season-year {
+  font-size: 14px;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.season-actions {
+  display: flex;
+  align-items: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge {
+  display: inline-block;
+}
+
+.active-badge {
+  background-color: #4caf50;
+  color: white;
+}
+
+
+.closed-badge {
+  background-color: #bdbdbd;
+  color: white;
+}
+
+
+@media (max-width: 600px) {
+  .season-popup-container {
+    padding: 16px;
+    max-width: 100%;
+  }
+
+  .season-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .season-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .action-button {
+    flex: 1;
+  }
+}

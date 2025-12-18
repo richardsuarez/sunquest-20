@@ -103,6 +103,11 @@ export const calendarReducer = createReducer(
     };
   }),
 
+  on(CalendarActions.clearCalendarEvents, (state) => ({
+    ...state,
+    calendarEvents: {}
+  })),
+
   on(CalendarActions.loadBookingsForMonth, (state) => ({
     ...state,
     loading: true

@@ -113,6 +113,7 @@ export class TripPopoverComponent {
                     remLoadCap: truck?.loadCapacity || 0,
                     remCarCap: truck?.carCapacity || 0,
                     delayDate: null,
+                    season: this.trip?.season || null,
                 }
             }));
         }

@@ -1,7 +1,8 @@
-<div class="headers">
-    <button mat-button mat-raised-button (click)="newTrip()" style="background-color: #ED2D89; color: white">
-        Add Trip
-    </button>
+<div class="headers" *ngIf="!activeSeason">
+    <!-- Header content reserved for future use -->
+     <div style="background-color: rgb(249, 227, 225); padding: 20px; color: rgb(244, 67, 54);">
+        Not showing data because there is no active season. Please create a new season to see the calendar.
+     </div>
 </div>
 <div class="body">
     <app-calendar-view 
@@ -12,6 +13,15 @@
         (dayClick)="onDayClick($event)"
         (monthChanged)="onMonthChanged($event)">
     </app-calendar-view>
+
+    <!-- Floating Add Trip Button -->
+    <button 
+        mat-fab 
+        class="add-trip-fab" 
+        (click)="newTrip()"
+        aria-label="Add new trip">
+        <mat-icon>add</mat-icon>
+    </button>
 
     <!-- Booking Popover -->
     <app-calendar-popover

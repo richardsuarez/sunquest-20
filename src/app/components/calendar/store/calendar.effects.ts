@@ -26,7 +26,7 @@ export class CalendarEffects {
         ofType(CalendarActions.loadBookingsForMonth),
         switchMap(action =>
           runInInjectionContext(this.injector, () =>
-            this.calendarService.getBookingsForDateRange(action.startDate, action.endDate).pipe(
+            this.calendarService.getBookingsForDateRange(action.startDate, action.endDate, action.season).pipe(
               map(bookings => CalendarActions.loadBookingsForMonthSuccess({ bookings })),
               catchError(err => {
                 console.error('[CalendarEffects] Failed to load bookings:', err);
@@ -53,7 +53,7 @@ export class CalendarEffects {
                   .filter((truck): truck is { id: string } & any => !!truck.id)
                   .map(truck => {
                     // Filter trips by date range in the service
-                    return this.calendarService.getTruckTrips(truck.id).pipe(
+                    return this.calendarService.getTruckTrips(truck.id, action.season).pipe(
                       map(trips => ({
                         truckId: truck.id,
                         trips: trips.filter((trip: any) => {

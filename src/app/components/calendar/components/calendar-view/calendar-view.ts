@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CalendarEvent } from '../../model/calendar-event.model';
+import { Season } from '../../../../shared/season/models/season.model';
 
 interface Day {
   date: Date;

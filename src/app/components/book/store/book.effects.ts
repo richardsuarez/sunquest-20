@@ -126,7 +126,7 @@ export class BookEffects {
             this.actions$.pipe(
                 ofType(BookActions.loadTripsStart),
                 mergeMap((action) =>
-                    this.bookingService.getTruckTrips(action.truckId).pipe(
+                    this.bookingService.getTruckTrips(action.truckId, action.season).pipe(
                         map((trips) => BookActions.loadTripsSuccess({ truckId: action.truckId, trips: trips })),
                         catchError((err: Error) => {
                             console.error('Failed to load trips:', err);

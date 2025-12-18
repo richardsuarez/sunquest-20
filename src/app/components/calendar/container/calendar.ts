@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { Observable, takeUntil } from 'rxjs';
+import { firstValueFrom, Observable, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { CalendarViewComponent, MonthChange, EventClickData } from '../components/calendar-view/calendar-view';
@@ -13,6 +13,8 @@ import { TripPopoverComponent } from '../components/trip-popover/trip-popover.co
 import { CalendarEvent } from '../model/calendar-event.model';
 import * as CalendarActions from '../store/calendar.actions';
 import * as CalendarSelectors from '../store/calendar.selectors';
+import * as MainSelectors from '../../main/store/main.selectors';
+import { Season } from '../../../shared/season/models/season.model';
 
 @Component({
   selector: 'app-book',
@@ -30,7 +32,6 @@ import * as CalendarSelectors from '../store/calendar.selectors';
 })
 export class Calendar implements OnInit, OnDestroy {
   private store = inject(Store);
-  private readonly route = inject(Router);
   private matDialog = inject(MatDialog);
   private destroy$ = new Subject<void>();
 
@@ -39,19 +40,22 @@ export class Calendar implements OnInit, OnDestroy {
   calendarEvents: { [dateKey: string]: CalendarEvent[] } = {};
   truckList$: Observable<any[]>;
   truckList: any[] = [];
+  seasons$!: Observable<Season[]>;
 
   popoverPosition: { top: number; left: number } = { top: 0, left: 0 };
   showPopover = false;
   currentMonthStart: Date = new Date();
   currentMonthEnd: Date = new Date();
   selectedTruck: string | null = null;
+  activeSeason: Season | null = null;
 
   constructor() {
     this.calendarEvents$ = this.store.select(CalendarSelectors.selectCalendarEvents);
     this.truckList$ = this.store.select(CalendarSelectors.selectTrucks);
+    this.seasons$ = this.store.select(MainSelectors.selectSeasons);
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     // Load current month's bookings and trips
     const now = new Date();
     this.currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -62,11 +66,26 @@ export class Calendar implements OnInit, OnDestroy {
       this.truckList = trucks || [];
     });
 
-    this.store.dispatch(CalendarActions.loadBookingsForMonth({ startDate: this.currentMonthStart, endDate: this.currentMonthEnd }));
-    this.store.dispatch(CalendarActions.loadTrucksAndTrips({ monthStart: this.currentMonthStart, monthEnd: this.currentMonthEnd }));
-
     this.calendarEvents$.subscribe(events => {
       this.calendarEvents = events;
+    });
+
+    this.seasons$.pipe(takeUntil(this.destroy$)).subscribe(seasons => {
+      this.activeSeason = seasons.find(s => s.isActive) || null;
+      if (this.activeSeason) {
+        this.store.dispatch(CalendarActions.loadBookingsForMonth({
+          startDate: this.currentMonthStart,
+          endDate: this.currentMonthEnd,
+          season: this.activeSeason,
+        }));
+        this.store.dispatch(CalendarActions.loadTrucksAndTrips({
+          monthStart: this.currentMonthStart,
+          monthEnd: this.currentMonthEnd,
+          season: this.activeSeason,
+        }));
+      } else {
+        this.store.dispatch(CalendarActions.clearCalendarEvents());
+      }
     });
   }
 
@@ -79,14 +98,18 @@ export class Calendar implements OnInit, OnDestroy {
     this.showPopover = false;
 
     // Dispatch actions to load bookings and trips for the new month
-    this.store.dispatch(CalendarActions.loadBookingsForMonth({
-      startDate: monthChange.startDate,
-      endDate: monthChange.endDate,
-    }));
-    this.store.dispatch(CalendarActions.loadTrucksAndTrips({
-      monthStart: monthChange.startDate,
-      monthEnd: monthChange.endDate
-    }));
+    if (this.activeSeason) {
+      this.store.dispatch(CalendarActions.loadBookingsForMonth({
+        startDate: monthChange.startDate,
+        endDate: monthChange.endDate,
+        season: this.activeSeason,
+      }));
+      this.store.dispatch(CalendarActions.loadTrucksAndTrips({
+        monthStart: monthChange.startDate,
+        monthEnd: monthChange.endDate,
+        season: this.activeSeason
+      }));
+    }
   }
 
   newTrip() {
@@ -102,12 +125,12 @@ export class Calendar implements OnInit, OnDestroy {
           remLoadCap: 0,
           remCarCap: 0,
           delayDate: null,
+          season: this.activeSeason ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
         },
         truckTrip: null,
       },
       maxWidth: '500px',
       width: '90vw',
-
     });
   }
 
