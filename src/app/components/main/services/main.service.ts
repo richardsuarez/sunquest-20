@@ -1,7 +1,7 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Firestore, collection, query, updateDoc, doc, getDocsFromServer, getDocsFromCache, orderBy, addDoc } from '@angular/fire/firestore';
 import { Observable, from } from 'rxjs';
-import { Season } from '../../../shared/season/models/season.model';
+import { Season } from '../../season/models/season.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,14 +21,15 @@ export class MainService {
           const q = query(
             seasonsCollection, 
             orderBy('year', 'desc'), 
-            //orderBy('seasonName', 'desc'), 
+            orderBy('seasonName', 'desc'), 
             );
           
           let querySnapshot;
           try {
-            querySnapshot = await getDocsFromServer(q);
-          } catch {
-            querySnapshot = await getDocsFromCache(q);
+            querySnapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+          } catch(error) {
+            console.error('Error getting seasons from server, trying cache...', error);
+            querySnapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
           }
 
           const seasons: Season[] = [];

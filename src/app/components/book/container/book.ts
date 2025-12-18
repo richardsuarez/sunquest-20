@@ -36,7 +36,7 @@ import * as MainSelectors from '../../main/store/main.selectors';
 import { Booking } from '../model/booking.model';
 import { AllowOnlyNumbersDirective } from '../../../shared/directives/allow-only-numbers.directive';
 import { AllowAlphanumericDirective } from '../../../shared/directives/allow-alphanumeric.directive';
-import { Season } from '../../../shared/season/models/season.model';
+import { Season } from '../../season/models/season.model';
 
 @Component({
   selector: 'app-book-edit',
@@ -338,7 +338,8 @@ export class Book implements OnInit {
       tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id : null,
       truckId: this.currentSelectedTruckId,
       notes: this.form.controls.notes.value,
-      createdAt: new Date()
+      createdAt: new Date(),
+      season: this.activeSeason ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
     };
 
     // dispatch booking action — effect will persist and handle snackbar/navigation
@@ -400,6 +401,7 @@ export class Book implements OnInit {
       this.tripForm.controls.destination.setValue('Florida');
     }
   }
+
   weekNumber(date: Date | null): number {
     if (!date) {
       return 0;

@@ -5,7 +5,7 @@ import { from, Observable } from 'rxjs';
 import { Trip } from '../../trip/model/trip.model';
 import { Booking } from '../../book/model/booking.model';
 import { Truck } from '../../truck/model/truck.model';
-import { Season } from '../../../shared/season/models/season.model';
+import { Season } from '../../season/models/season.model';
 
 @Injectable({ providedIn: 'root' })
 export class CalendarService {
@@ -31,6 +31,7 @@ export class CalendarService {
             createdAt: now
           } as Trip;
         } catch (error) {
+          console.error('[CalendarService] addTrip() - failed to add trip for truckId:', truckId, 'Error:', error);
           throw error;
         }
       })());
@@ -44,6 +45,7 @@ export class CalendarService {
           const dref = doc(this.firestore, `trucks/${truckId}/trips`, trip.id || '');
           await updateDoc(dref, trip as any);
         } catch (error) {
+          console.error('[CalendarService] updateTrip() - failed to update trip with id:', trip.id, 'for truckId:', truckId, 'Error:', error);
           throw error;
         }
       })());
@@ -60,7 +62,7 @@ export class CalendarService {
           try {
             snapshot = await getDocsFromServer(trucksRef);
           } catch (err) {
-            console.warn('[TruckService] getTrucks() - getDocsFromServer failed, falling back to cache. Error:', err);
+            console.warn('[CalendarService] getTrucks() - getDocsFromServer failed, falling back to cache. Error:', err);
             snapshot = await getDocsFromCache(trucksRef);
           }
 
@@ -93,7 +95,7 @@ export class CalendarService {
           try {
             snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
           } catch (err) {
-            console.warn('[CalendarService] getTruckTrips() - getDocsFromServer failed for truckId:', truckId, 'Error:', err);
+            console.error('[CalendarService] getTruckTrips() - getDocsFromServer failed for truckId:', truckId, 'Error:', err);
             snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
           }
 
@@ -115,6 +117,7 @@ export class CalendarService {
             } as Trip);
           });
         } catch (error) {
+          console.error('[CalendarService] getTruckTrips() - failed for truckId:', truckId, 'Error:', error);
           throw error;
         }
       })());
@@ -139,7 +142,8 @@ export class CalendarService {
           let snapshot;
           try {
             snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
-          } catch {
+          } catch(error) {
+            console.error('[CalendarService] getBookingsForDateRange() - getDocsFromServer failed, falling back to cache. Error:', error);
             snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
           }
 
@@ -160,6 +164,7 @@ export class CalendarService {
             } as Booking;
           });
         } catch (error) {
+          console.error('[CalendarService] getBookingsForDateRange() - failed to get bookings for date range. Error:', error);
           throw error;
         }
       })());
@@ -173,6 +178,7 @@ export class CalendarService {
           const bookingDocRef = doc(this.firestore, `${this.collectionName}/${id}`);
           await deleteDoc(bookingDocRef);
         } catch (error) {
+          console.error('[CalendarService] deleteBooking() - failed to delete booking with id:', id, 'Error:', error);
           throw error;
         }
       })());
@@ -186,6 +192,7 @@ export class CalendarService {
           const tripDocRef = doc(this.firestore, `trucks/${truckId}/trips/${tripId}`);
           await deleteDoc(tripDocRef);
         } catch (error) {
+          console.error('[CalendarService] deleteTrip() - failed to delete trip with id:', tripId, 'for truckId:', truckId, 'Error:', error);
           throw error;
         }
       })());
@@ -203,7 +210,7 @@ export class CalendarService {
           try {
             snapshot = await getDocsFromServer(q);
           } catch (err) {
-            console.warn('[CalendarService] deleteBookingsByTripId() - server query failed', err);
+            console.error('[CalendarService] deleteBookingsByTripId() - server query failed', err);
             snapshot = await getDocsFromCache(q);
           }
 
@@ -213,6 +220,7 @@ export class CalendarService {
           );
           await Promise.all(deletePromises);
         } catch (error) {
+          console.error('[CalendarService] deleteBookingsByTripId() - failed to delete bookings for tripId:', tripId, 'Error:', error);
           throw error;
         }
       })());

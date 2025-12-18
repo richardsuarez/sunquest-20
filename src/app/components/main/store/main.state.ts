@@ -1,4 +1,4 @@
-import { Season } from "../../../shared/season/models/season.model";
+import { Season } from "../../season/models/season.model";
 
 export interface MainState {
   seasons: Season[];

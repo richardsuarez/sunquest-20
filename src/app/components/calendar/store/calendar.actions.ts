@@ -2,7 +2,7 @@ import { createAction, props } from '@ngrx/store';
 import { CalendarEvent } from '../model/calendar-event.model';
 import { Booking } from '../../book/model/booking.model';
 import { Trip } from '../../trip/model/trip.model';
-import { Season } from '../../../shared/season/models/season.model';
+import { Season } from '../../season/models/season.model';
 
 export const addCalendarEvent = createAction('[Calendar] Add Event', props<{ event: CalendarEvent }>());
 export const removeCalendarEvent = createAction('[Calendar] Remove Event', props<{ eventId: string; dateKey: string }>());

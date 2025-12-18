@@ -1,5 +1,11 @@
 <div class="season-popup-container">
-  <h2>Manage Seasons</h2>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
+    <h2>Manage Seasons</h2>
+    <button mat-icon-button (click)="closePopup()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  
 
   <!-- Loading State -->
   <div *ngIf="loading$ | async" class="loading-state">
@@ -16,23 +22,27 @@
 
     <!-- New Season Card -->
     <mat-card class="season-card" *ngIf="!isThereAnActiveSeason()">
-      <mat-card-content class="season-content">
+      <mat-card-content class="new-season-content">
         <div class="season-info">
           <mat-form-field appearance="fill" floatLabel="always" subscriptSizing="dynamic">
             <mat-label>Season</mat-label>
-            <mat-select (selectionChange)="pickSeasonName($event)">
+            <mat-select [formControl]="seasonNameControl">
               <mat-option value="Summer">Summer</mat-option>
               <mat-option value="Winter">Winter</mat-option>
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="fill" floatLabel="always" subscriptSizing="dynamic">
             <mat-label>Year</mat-label>
-            <mat-select (selectionChange)="pickYear($event)">
+            <mat-select [formControl]="yearControl">
               <mat-option [value]="today.getFullYear()">{{ today.getFullYear() }}</mat-option>
               <mat-option [value]="today.getFullYear() + 1">{{ today.getFullYear() + 1 }}</mat-option>
             </mat-select>
           </mat-form-field>
         </div>
+        <p *ngIf="seasonNameControl.hasError('seasonExists') || yearControl.hasError('seasonExists')"
+          style="color: red; font-size: 0.9rem; margin-top: 8px">
+          Season already exists. Pick another one.
+        </p>
       </mat-card-content>
       <mat-card-actions style="display: flex; justify-content: center">
         <button

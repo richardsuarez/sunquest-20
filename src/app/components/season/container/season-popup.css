@@ -78,6 +78,12 @@ mat-select{
   font-weight: 600;
 }
 
+.new-season-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
 .season-content {
   padding: 16px;
   display: flex;
@@ -108,11 +114,11 @@ mat-select{
 .season-actions {
   display: flex;
   align-items: center;
+  gap: 10px
 }
 
 .status-badge {
   display: inline-block;
-  padding: 4px 12px;
   border-radius: 16px;
   font-size: 12px;
   font-weight: 600;
@@ -124,12 +130,14 @@ mat-select{
 }
 
 .active-badge {
+  padding: 4px;
   background-color: #4caf50;
   color: white;
 }
 
 
 .closed-badge {
+  padding: 4px;
   background-color: #bdbdbd;
   color: white;
 }

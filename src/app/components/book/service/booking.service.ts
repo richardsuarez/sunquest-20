@@ -4,7 +4,7 @@ import { increment } from 'firebase/firestore';
 import { from, Observable } from 'rxjs';
 import { Booking } from '../model/booking.model';
 import { Trip } from '../../trip/model/trip.model';
-import { Season } from '../../../shared/season/models/season.model';
+import { Season } from '../../season/models/season.model';
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {

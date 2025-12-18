@@ -14,7 +14,7 @@ import { CalendarEvent } from '../model/calendar-event.model';
 import * as CalendarActions from '../store/calendar.actions';
 import * as CalendarSelectors from '../store/calendar.selectors';
 import * as MainSelectors from '../../main/store/main.selectors';
-import { Season } from '../../../shared/season/models/season.model';
+import { Season } from '../../season/models/season.model';
 
 @Component({
   selector: 'app-book',

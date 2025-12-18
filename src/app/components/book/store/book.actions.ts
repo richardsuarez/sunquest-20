@@ -3,7 +3,7 @@ import { CalendarEvent } from '../../calendar/model/calendar-event.model';
 import { Booking } from '../model/booking.model';
 import { Trip } from '../../trip/model/trip.model';
 import { Truck } from '../../truck/model/truck.model';
-import { Season } from '../../../shared/season/models/season.model';
+import { Season } from '../../season/models/season.model';
 
 // Booking actions
 export const addBookingStart = createAction('[Book] Add booking start', props<{ booking: Partial<Booking>, trip: Trip }>());

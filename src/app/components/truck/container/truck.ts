@@ -74,7 +74,7 @@ export class TruckList implements OnInit {
     const ref = this.dialog.open(PopupComponent, {
       data: {
         title: 'Delete Truck',
-        message: 'Are you sure you want to delete this truck? This action cannot be undone.',
+        message: `Are you sure you want to delete truck ${truck.truckNumber}?`,
         cancelButton: 'Cancel',
         successButton: 'Delete'
       }

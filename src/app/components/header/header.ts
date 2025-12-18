@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { SeasonPopup } from '../../shared/season/container/season-popup';
+import { SeasonPopup } from '../season/container/season-popup';
 
 @Component({
   selector: 'app-header',

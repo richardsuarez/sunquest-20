@@ -94,10 +94,10 @@ export class TruckEdit implements OnDestroy {
       }).unsubscribe();
     }
 
-    this.router.navigate(['/main/truck']);
+    this.dialogRef.close();
   }
 
   cancel() {
-    this.router.navigate(['/main/truck']);
+    this.dialogRef.close();
   }
 }

@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Season } from '../../../shared/season/models/season.model';
+import { Season } from '../../season/models/season.model';
 
 export const loadSeasons = createAction(
   '[Season] Load Seasons'
