@@ -9,9 +9,11 @@ import { BookEffects } from './components/book/store/book.effects';
 import { CalendarEffects } from './components/calendar/store/calendar.effects';
 import { truckReducer, TRUCK_FEATURE_KEY } from './components/truck/store/truck.reducers';
 import { TruckEffects } from './components/truck/store/truck.effects';
-import { CALENDAR_FEATURE_KEY, calendarReducer } from './components/calendar/store/calendar.reducers';
+import { calendarReducer } from './components/calendar/store/calendar.reducers';
 import { mainReducer } from './components/main/store/main.reducers';
 import { MainEffects } from './components/main/store/main.effects';
+import { reportReducer } from './components/report/store/report.reducers';
+import { ReportEffects } from './components/report/store/report.effects';
 
 export const routes: Routes = [
     {
@@ -75,7 +77,7 @@ export const routes: Routes = [
                 children: [
                     {
                         path: ':crud',
-                        loadComponent(){
+                        loadComponent() {
                             return import('./components/book/container/book').then(m => m.Book);
                         },
                         canDeactivate: [
@@ -94,6 +96,21 @@ export const routes: Routes = [
                 loadComponent() {
                     return import('./components/truck/container/truck').then(m => m.TruckList);
                 }
+            },
+            {
+                path: 'report',
+                children: [
+                    {
+                        path: 'book',
+                        loadComponent() {
+                            return import('./components/report/container/report').then(m => m.Report);
+                        },
+                    }
+                ],
+                providers: [
+                    provideState('report', reportReducer),
+                    provideEffects([ReportEffects]),
+                ],
             }
         ]
     }

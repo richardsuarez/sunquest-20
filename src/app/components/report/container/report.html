@@ -1,0 +1,27 @@
+<div class="header">
+    <h3>Pick a date range</h3>
+    <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+        <mat-label>Date range</mat-label>
+        <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
+            <input matStartDate required placeholder="Start date" formControlName="start">
+            <input matEndDate required placeholder="End date" formControlName="end">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+        <mat-error *ngIf="dateRange.hasError('required')">Please select a range</mat-error>
+    </mat-form-field>
+    <button *ngIf="!(loadingBookReport$ | async)" mat-raised-button type="submit" (click)="searchResult()"
+        style="background-color: #ED2D89; color: white">
+        Search
+    </button>
+    <button *ngIf="loadingBookReport$ | async" mat-raised-button disabled style="background-color: gray; color: white">
+        <mat-icon>
+            <mat-spinner diameter="18"></mat-spinner>
+        </mat-icon>
+        Searching...
+    </button>
+</div>
+<mat-progress-bar *ngIf="loadingBookReport$ | async" class="indeterminate"></mat-progress-bar>
+<div class="body">
+
+</div>
