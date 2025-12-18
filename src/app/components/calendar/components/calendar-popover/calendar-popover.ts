@@ -140,7 +140,7 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit {
       dialogRef.afterClosed().pipe(
         takeUntil(this.destroy$),
         map(result => {
-          if (result) {
+          if (result === 'Success') {
             this.store.dispatch(deleteBookingStart({ booking, trip: this.trip! }));
           }  // allow navigation if the user click discard button or click outside modal
         })
@@ -230,14 +230,14 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit {
             title: 'Delete Trip',
             message: `Are you sure you want to delete this trip? All bookings for this trip will also be deleted.`,
             cancelButton: 'No',
-            successButton: 'Yes, Delete',
+            successButton: 'Yes',
           }
         }
       );
       dialogRef.afterClosed().pipe(
         takeUntil(this.destroy$),
         map(result => {
-          if (result) {
+          if (result === 'Success') {
             // Dispatch action to delete the trip
             this.store.dispatch(CalendarActions.deleteTripStart({
               truckId: this.truckId || '',

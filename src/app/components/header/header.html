@@ -8,6 +8,10 @@
             <div class="shortcut" routerLink="/main/customer">Customers</div>
             <div class="shortcut" routerLink="/main/truck">Trucks</div>
             <div class="shortcut" routerLink="/main/report/book">Book Report</div>
+            
+        </nav>
+        <nav *ngIf="!isMobile" class="menu">
+            <div class="shortcut" style="cursor: pointer" (click)="openSeasonPopup()">Season</div>
             <button mat-raised-button style="display: flex; align-items: center; gap: 5px" (click)="logout()">
                 <mat-icon>logout</mat-icon>
                 Log Out

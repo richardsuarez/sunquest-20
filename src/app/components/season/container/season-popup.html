@@ -1,0 +1,94 @@
+<div class="season-popup-container">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
+    <h2>Manage Seasons</h2>
+    <button mat-icon-button (click)="closePopup()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  
+
+  <!-- Loading State -->
+  <div *ngIf="loading$ | async" class="loading-state">
+    <mat-progress-bar class="indeterminate"></mat-progress-bar>
+  </div>
+
+  <!-- Seasons List -->
+  <div *ngIf="!(loading$ | async)" class="seasons-list">
+    <!-- No Seasons Message -->
+    <div *ngIf="(seasons$ | async)?.length === 0" class="no-seasons">
+      <p>No seasons available. Open a new one</p>
+
+    </div>
+
+    <!-- New Season Card -->
+    <mat-card class="season-card" *ngIf="!isThereAnActiveSeason()">
+      <mat-card-content class="new-season-content">
+        <div class="season-info">
+          <mat-form-field appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+            <mat-label>Season</mat-label>
+            <mat-select [formControl]="seasonNameControl">
+              <mat-option value="Summer">Summer</mat-option>
+              <mat-option value="Winter">Winter</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+            <mat-label>Year</mat-label>
+            <mat-select [formControl]="yearControl">
+              <mat-option [value]="today.getFullYear()">{{ today.getFullYear() }}</mat-option>
+              <mat-option [value]="today.getFullYear() + 1">{{ today.getFullYear() + 1 }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <p *ngIf="seasonNameControl.hasError('seasonExists') || yearControl.hasError('seasonExists')"
+          style="color: red; font-size: 0.9rem; margin-top: 8px">
+          Season already exists. Pick another one.
+        </p>
+      </mat-card-content>
+      <mat-card-actions style="display: flex; justify-content: center">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="openSeason()"
+          style="background-color: #ED2D89; color: white; width: 100px"
+        >
+          Open
+        </button>
+      </mat-card-actions>
+    </mat-card>
+    <!-- Season Cards -->
+    <mat-card 
+      *ngFor="let season of seasons$ | async" 
+      class="season-card" 
+      [class.active]="season.isActive === true">
+      <mat-card-content class="season-content">
+        <div class="season-info">
+          <span class="season-name">{{ season.seasonName | titlecase }}</span>
+          <span class="season-year">{{ season.year }}</span>
+        </div>
+
+        <div class="season-actions">
+          <!-- Status Badge -->
+          <span class="status-badge">
+            <span *ngIf="season.isActive === true" 
+              class="badge active-badge"
+            >Active</span>
+            <span 
+              *ngIf="season.isActive === false" 
+              class="badge closed-badge"
+            >Closed</span>
+          </span>
+
+          <button
+            *ngIf="season.isActive === true"
+            mat-raised-button
+            color="warn"
+            (click)="closeSeason(season)"
+            class="action-button"
+          >
+            Close
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

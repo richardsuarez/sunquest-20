@@ -6,6 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { SeasonPopup } from '../season/container/season-popup';
 
 @Component({
   selector: 'app-header',
@@ -30,7 +32,8 @@ export class Header implements OnInit, OnDestroy{
 
   constructor(
     private readonly breakpoints: BreakpointObserver,
-    private readonly auth: AuthService
+    private readonly auth: AuthService,
+    private readonly matDialog: MatDialog,
   ){}
 
   ngOnInit(){
@@ -48,6 +51,10 @@ export class Header implements OnInit, OnDestroy{
 
   logout(){
     this.auth.logout()
+  }
+
+  openSeasonPopup(){
+    this.matDialog.open(SeasonPopup)
   }
 
   toggleMobileMainMenu(){
