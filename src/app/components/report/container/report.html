@@ -22,6 +22,124 @@
     </button>
 </div>
 <mat-progress-bar *ngIf="loadingBookReport$ | async" class="indeterminate"></mat-progress-bar>
-<div class="body">
 
+<!-- Report Body -->
+<div class="body" *ngIf="bookingReport$ | async as report">
+    <!-- Print Buttons (hidden on print) -->
+    <div class="print-controls" *ngIf="report.totalBookings > 0">
+        <div class="info">
+            <div style="text-align: center">
+                <h3>Trucks</h3>
+            </div>
+            <div style="text-align: center"><span>{{ report.trucks.length }}</span></div>
+        </div>
+        <div class="info">
+            <div style="text-align: center">
+                <h3>Trips</h3>
+            </div>
+            <div style="text-align: center"><span>{{ allTrips() }}</span></div>
+        </div>
+        <div class="info">
+            <div style="text-align: center">
+                <h3>Bookings</h3>
+            </div>
+            <div style="text-align: center"><span>{{ report.totalBookings}}</span></div>
+        </div>
+        <button mat-raised-button (click)="printFullReport()" style="background-color: #ED2D89; color: white">
+            <mat-icon>print</mat-icon>
+            Print Full Report
+        </button>
+    </div>
+
+    <!-- No Results -->
+    <div *ngIf="report.totalBookings === 0" class="no-results">
+        <p>No bookings found for the selected date range.</p>
+    </div>
+
+    <!-- Report Summary (hidden on print) -->
+
+
+    <!-- Trucks and Trips -->
+    <div *ngFor="let truckReport of report.trucks" class="truck-section">
+        <!-- Truck Header -->
+        <div class="truck-header">
+            <h2>{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+        </div>
+
+        <!-- Trips for this Truck -->
+        <div *ngFor="let bookingGroup of truckReport.trips" class="trip-section">
+            <!-- Trip Header -->
+            <div class="trip-header">
+                <div>
+                    <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
+                    <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{ bookingGroup.trip.destination }}</h2>
+                    <p class="trip-details">
+                        <span>Departure: {{ bookingGroup.trip.departureDate | date: 'short' }}</span>
+                        <span *ngIf="bookingGroup.trip.arrivalDate">Arrival: {{ bookingGroup.trip.arrivalDate | date:
+                            'short' }}</span>
+                    </p>
+                </div>
+
+                <div class="trip-print-button">
+                    <button mat-stroked-button (click)="printTrip(bookingGroup.trip.id!)">
+                        <mat-icon>print</mat-icon>
+                        Print Trip
+                    </button>
+                </div>
+            </div>
+
+            <!-- Print Trip Button -->
+
+
+            <!-- Bookings Table for this Trip -->
+            <div class="bookings-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Pickup</th>
+                            <th>Arrival</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let booking of bookingGroup.bookings" class="booking-row">
+                            <td>
+                                <div>
+                                    <p>{{ booking.customer?.primaryFirstName }} {{ booking.customer?.primaryLastName }}</p>
+                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>phone</mat-icon>{{ booking.customer?.phone }}</p>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <p *ngFor="let vehId of booking.vehicleIds">{{ vehicleInfo(booking, vehId) }}</p>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>location_on</mat-icon>{{ booking.pickupAddress }}</p>
+                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>schedule</mat-icon>{{ booking.pickupAt | date: 'short' }}</p>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>location_on</mat-icon>{{ booking.arrivalAddress }}</p>
+                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>schedule</mat-icon>{{ booking.arrivalAt | date: 'short' }}</p>
+                                </div>
+                            </td>
+                            <td>{{ booking.notes }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Trip Totals -->
+            <div class="trip-totals">
+                <p><strong>Total Bookings in Trip:</strong> {{ bookingGroup.bookings.length }}</p>
+                <p><strong>Total Amount:</strong> ${{ getTripTotals(bookingGroup.bookings)?.weight || 0 }}</p>
+                <p><strong>Total Vehicles:</strong> {{ getTripTotals(bookingGroup.bookings)?.volume || 0 }}</p>
+            </div>
+        </div>
+    </div>
 </div>

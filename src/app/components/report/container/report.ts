@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Season } from '../../season/models/season.model';
-import { Observable, Subject, takeUntil } from 'rxjs';
+import { Observable, Subject, takeUntil, combineLatest, map } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatError, MatFormFieldModule } from "@angular/material/form-field";
 import { MatDatepickerModule } from "@angular/material/datepicker";
@@ -16,6 +16,8 @@ import * as ReportSelectors from '../store/report.selectors';
 import { MatButtonModule } from '@angular/material/button';
 import { Truck } from '../../truck/model/truck.model';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ReportDataService, BookReport } from '../services/report-data.service';
+import { Booking } from '../../book/model/booking.model';
 
 @Component({
   selector: 'app-report',
@@ -48,7 +50,7 @@ export class Report implements OnInit {
   seasons$!: Observable<Season[]>;
   loading$!: Observable<boolean>;
   loadingBookReport$!: Observable<boolean>;
-  bookingReport$!: Observable<any>;
+  bookingReport$!: Observable<BookReport>;
   trucks$!: Observable<Truck[] | null>;
 
   destroy$ = new Subject<void>();
@@ -56,12 +58,25 @@ export class Report implements OnInit {
 
   constructor(
     private readonly store: Store,
+    private readonly reportDataService: ReportDataService,
   ) {
     this.seasons$ = this.store.select(MainSelectors.selectSeasons);
     this.loading$ = this.store.select(ReportSelectors.loading);
     this.loadingBookReport$ = this.store.select(ReportSelectors.loadingBookReport);
-    this.bookingReport$ = this.store.select(ReportSelectors.bookingReport);
     this.trucks$ = this.store.select(ReportSelectors.trucks);
+
+    // Combine bookings and trucks to create structured report
+    this.bookingReport$ = combineLatest([
+      this.store.select(ReportSelectors.bookingReport),
+      this.trucks$
+    ]).pipe(
+      map(([bookings, trucks]) => {
+        if (!bookings || bookings.length === 0) {
+          return { trucks: [], totalBookings: 0 };
+        }
+        return this.reportDataService.transformBookingsReport(bookings, trucks);
+      })
+    );
   }
 
   ngOnInit() {
@@ -87,6 +102,14 @@ export class Report implements OnInit {
     });
   }
 
+  allTrips(): number{
+    let tripCount = 0;
+    this.bookingReport$.pipe(takeUntil(this.destroy$)).subscribe(report => {
+      tripCount = report.trucks.reduce((acc, truck) => acc + truck.trips.length, 0);
+    });
+    return tripCount;
+  }
+
   searchResult(){
     if(!this.activeSeason){
       console.log('No active season selected');
@@ -100,5 +123,32 @@ export class Report implements OnInit {
     }
     this.dateRange.setErrors(null);
     this.store.dispatch(ReportActions.loadBookReportStart({start: this.dateRange.value.start!, end: this.dateRange.value.end!, season: this.activeSeason!}));
+  }
+
+  printFullReport() {
+    window.print();
+  }
+
+  printTrip(tripId: string) {
+    // Store the trip ID to filter in print
+    localStorage.setItem('printTripId', tripId);
+    window.print();
+    // Clear after a short delay to allow print dialog to open
+    setTimeout(() => {
+      localStorage.removeItem('printTripId');
+    }, 500);
+  }
+
+  getTripTotals(bookings: any[]) {
+    return this.reportDataService.getTripTotals(bookings);
+  }
+
+  vehicleInfo(booking: Booking, id: string){
+    let formattedVehicle: string = '';
+    if(booking.customer && booking.customer.vehicles && booking.customer.vehicles.length > 0){
+      const vehicle = booking.customer.vehicles.find(v => v.id === id);
+      formattedVehicle = `${vehicle?.color || ''} ${vehicle?.year || ''} ${vehicle?.make || ''} ${vehicle?.model || ''} (${vehicle?.plate || ''})`.trim();
+    }
+    return formattedVehicle;
   }
 }

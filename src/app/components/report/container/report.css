@@ -1,8 +1,381 @@
-.header{
+/* Normal View Styles */
+.header {
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.header h3 {
+    margin: 0;
+    flex: 1;
+    min-width: 200px;
+}
+
+.header mat-form-field {
+    flex: 1;
+    min-width: 250px;
+}
+
+.header button {
+    min-width: 120px;
+}
+
+.body {
+    padding: 20px;
+    background-color: #fff;
+}
+
+.print-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+
+    h3{
+        margin: 0;
+    }
+}
+
+.info{
+    padding: 10px;
+    border: 1px solid gray;
+    border-radius: 4px;
+    width: 15%;
+}
+
+.print-controls button {
+    margin-right: 10px;
+}
+
+.report-summary {
+    padding: 15px;
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196F3;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.report-summary p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-size: 16px;
+}
+
+/* Truck Section Styles */
+.truck-section {
+    margin-bottom: 30px;
+    page-break-inside: avoid;
+}
+
+.truck-header {
+    padding: 15px 20px;
+    border-radius: 4px 4px 0 0;
+    border: 2px solid gray;
+    margin-bottom: 0;
+}
+
+.truck-header h2 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+}
+
+/* Trip Section Styles */
+.trip-section {
+    margin-bottom: 20px;
+    border-left: 3px solid #FF9800;
+    padding-left: 15px;
+    background-color: #fff8f0;
+    padding: 15px;
+    border-radius: 0 4px 4px 0;
+    page-break-inside: avoid;
+}
+
+.trip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #FF9800;
+    padding-bottom: 10px;
+}
+
+.trip-header h3 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+    color: #1a237e;
+}
+
+.trip-header h2 {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 30px;
-    text-align: center;
-    padding: 20px;
+    gap: 8px;
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #1a237e;
+
+    mat-icon{
+        font-size: 18px;
+        height: 18px;
+    }
+}
+
+.trip-details {
+    margin: 5px 0 0 0;
+    font-size: 16px;
+    color: #666;
+}
+
+.trip-details span {
+    margin-right: 15px;
+}
+
+/* Print Trip Button */
+.trip-print-button {
+    text-align: right;
+    margin-bottom: 12px;
+}
+
+.trip-print-button button {
+    font-size: 12px;
+}
+
+/* Bookings Table Styles */
+.bookings-table {
+    margin-bottom: 15px;
+    overflow-x: auto;
+}
+
+.bookings-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background-color: white;
+}
+
+.bookings-table thead {
+    background-color: #f5f5f5;
+    border-bottom: 2px solid #2196F3;
+}
+
+.bookings-table th {
+    padding: 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-right: 1px solid #e0e0e0;
+}
+
+.bookings-table th:last-child {
+    border-right: none;
+}
+
+.bookings-table tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.2s;
+}
+
+.bookings-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.bookings-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.bookings-table td {
+    padding: 10px;
+    border-right: 1px solid #e0e0e0;
+}
+
+.bookings-table td:last-child {
+    border-right: none;
+}
+
+.bookings-table td.numeric {
+    text-align: right;
+}
+
+.bookings-table td.status {
+    font-weight: 500;
+    color: #2196F3;
+}
+
+/* Trip Totals */
+.trip-totals {
+    padding: 12px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    font-size: 13px;
+    border-left: 3px solid #4CAF50;
+}
+
+.trip-totals p {
+    margin: 5px 0;
+}
+
+/* Print Styles */
+@media print {
+
+    /* Hide screen-only elements */
+    .header {
+        display: none !important;
+    }
+
+    .print-controls {
+        display: none !important;
+    }
+
+    .report-summary {
+        display: block !important;
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+    }
+
+    .trip-print-button {
+        display: none !important;
+    }
+
+    /* Page setup */
+    body {
+        margin: 0;
+        padding: 10mm;
+        background: white;
+    }
+
+    .body {
+        padding: 0;
+        width: 100%;
+    }
+
+    /* Truck and trip sections */
+    .truck-section {
+        page-break-inside: avoid;
+        margin-bottom: 15mm;
+    }
+
+    .trip-section {
+        page-break-inside: avoid;
+        margin-bottom: 12mm;
+    }
+
+    /* Table print optimization */
+    .bookings-table table {
+        width: 100%;
+        font-size: 11px;
+    }
+
+    .bookings-table thead {
+        display: table-header-group;
+    }
+
+    .bookings-table tbody {
+        display: table-row-group;
+    }
+
+    .bookings-table tbody tr {
+        page-break-inside: avoid;
+    }
+
+    /* Print specific trip */
+    .truck-section.hidden-for-trip-print {
+        display: none !important;
+    }
+
+    .trip-section.hidden-for-trip-print {
+        display: none !important;
+    }
+
+    /* Colors and borders for print */
+    .truck-header {
+        background-color: #ccc;
+        color: black;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .trip-header {
+        border-bottom: 1px solid #666;
+    }
+
+    /* Remove shadows and transitions */
+    * {
+        box-shadow: none !important;
+        transition: none !important;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header mat-form-field {
+        width: 100%;
+    }
+
+    .bookings-table table {
+        font-size: 12px;
+    }
+
+    .bookings-table th,
+    .bookings-table td {
+        padding: 8px;
+    }
+
+    .truck-header h2 {
+        font-size: 18px;
+    }
+
+    .trip-header h3 {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 15px 10px;
+    }
+
+    .body {
+        padding: 10px;
+    }
+
+    .truck-header {
+        padding: 12px 15px;
+    }
+
+    .trip-section {
+        padding: 12px;
+    }
+
+    .bookings-table table {
+        font-size: 11px;
+    }
+
+    .bookings-table th,
+    .bookings-table td {
+        padding: 6px;
+    }
+
+    .truck-header h2 {
+        font-size: 16px;
+    }
+
+    .trip-header h3 {
+        font-size: 14px;
+    }
 }

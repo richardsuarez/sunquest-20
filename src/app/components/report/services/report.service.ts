@@ -34,6 +34,7 @@ export class ReportService {
                     snapshot.forEach(doc => {
                         const data = doc.data() as any;
                         const arrivalAt = data.arrivalAt ? (typeof data.arrivalAt.toDate === 'function' ? data.arrivalAt.toDate() : new Date(data.arrivalAt)) : null;
+                        const pickupAt = data.pickupAt ? (typeof data.pickupAt.toDate === 'function' ? data.pickupAt.toDate() : new Date(data.pickupAt)) : null;
                         const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
                         const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
                         
@@ -41,6 +42,7 @@ export class ReportService {
                             ...data as Booking,
                             id: doc.id,
                             arrivalAt,
+                            pickupAt,
                             departureDate,
                             createdAt,
                         });
@@ -102,9 +104,19 @@ export class ReportService {
                     }
                     let trips: any[] = [];
                     snapshot.forEach(doc => {
+                        const data = doc.data() as any;
+                        const arrivalDate = data.arrivalDate ? (typeof data.arrivalDate.toDate === 'function' ? data.arrivalDate.toDate() : new Date(data.arrivalDate)) : null;
+                        const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+                        const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+                        const delayDate = data.delayDate ? (typeof data.delayDate.toDate === 'function' ? data.delayDate.toDate() : new Date(data.delayDate)) : null;
+                        
                         trips.push({
-                            ...(doc.data() as any),
+                            ...data,
                             id: doc.id,
+                            arrivalDate,
+                            departureDate,
+                            createdAt,
+                            delayDate,
                         });
                     });
                     return trips;
