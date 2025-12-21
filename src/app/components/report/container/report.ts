@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Season } from '../../season/models/season.model';
-import { Observable, Subject, takeUntil, combineLatest, map } from 'rxjs';
+import { Observable, Subject, takeUntil } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatError, MatFormFieldModule } from "@angular/material/form-field";
 import { MatDatepickerModule } from "@angular/material/datepicker";
@@ -16,8 +16,9 @@ import * as ReportSelectors from '../store/report.selectors';
 import { MatButtonModule } from '@angular/material/button';
 import { Truck } from '../../truck/model/truck.model';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { ReportDataService, BookReport } from '../services/report-data.service';
+import { BookReport } from '../models/report.models';
 import { Booking } from '../../book/model/booking.model';
+import { Address } from '../../customer/model/customer.model';
 
 @Component({
   selector: 'app-report',
@@ -31,7 +32,7 @@ import { Booking } from '../../book/model/booking.model';
     MatProgressSpinnerModule,
     ReactiveFormsModule,
     AsyncPipe,
-],
+  ],
   templateUrl: './report.html',
   styleUrl: './report.css',
   providers: [provideNativeDateAdapter()],
@@ -50,79 +51,76 @@ export class Report implements OnInit {
   seasons$!: Observable<Season[]>;
   loading$!: Observable<boolean>;
   loadingBookReport$!: Observable<boolean>;
-  bookingReport$!: Observable<BookReport>;
+  bookReport$!: Observable<BookReport | null>;
+  bookings$!: Observable<Booking[] | null>;
   trucks$!: Observable<Truck[] | null>;
 
   destroy$ = new Subject<void>();
 
+  bookingList: Booking[] = [];
+  truckList: Truck[] = [];
 
   constructor(
     private readonly store: Store,
-    private readonly reportDataService: ReportDataService,
   ) {
+    this.store.dispatch(ReportActions.clearBookReport())
     this.seasons$ = this.store.select(MainSelectors.selectSeasons);
     this.loading$ = this.store.select(ReportSelectors.loading);
     this.loadingBookReport$ = this.store.select(ReportSelectors.loadingBookReport);
+    this.bookings$ = this.store.select(ReportSelectors.bookings);
     this.trucks$ = this.store.select(ReportSelectors.trucks);
+    this.bookReport$ = this.store.select(ReportSelectors.bookingReport);
 
-    // Combine bookings and trucks to create structured report
-    this.bookingReport$ = combineLatest([
-      this.store.select(ReportSelectors.bookingReport),
-      this.trucks$
-    ]).pipe(
-      map(([bookings, trucks]) => {
-        if (!bookings || bookings.length === 0) {
-          return { trucks: [], totalBookings: 0 };
-        }
-        return this.reportDataService.transformBookingsReport(bookings, trucks);
-      })
-    );
   }
 
   ngOnInit() {
-    this.store.dispatch(ReportActions.loadTrucks());
+    this.bookings$.pipe(takeUntil(this.destroy$)).subscribe((bookings) => {
+      if (bookings && bookings.length > 0) {
+        this.bookingList = bookings;
+        if (this.truckList.length > 0) {
+          this.store.dispatch(ReportActions.getBookReport({ bookings, trucks: this.truckList }));
+        }
+      }
+    });
+
+    this.trucks$.pipe(takeUntil(this.destroy$)).subscribe(trucks => {
+      if(trucks){
+        this.truckList = trucks;
+      }
+    })
 
     this.seasons$.pipe(takeUntil(this.destroy$)).subscribe((seasons) => {
       this.activeSeason = seasons.find(season => season.isActive) || null;
-    });
-
-    this.trucks$.pipe(takeUntil(this.destroy$)).subscribe((trucks) => {
-      if(trucks && trucks.length > 0){
-        trucks.forEach(t => {
-          if(t.id && t.trips === undefined && this.activeSeason){
-            this.store.dispatch(ReportActions.loadTruckTrips({
-              truckId: t.id, 
-              start: this.dateRange.controls.start.value ?? new Date(), 
-              end: this.dateRange.controls.end.value ?? new Date(), 
-              season: this.activeSeason,
-            }));
-          }
-        })
+      if (this.activeSeason) {
+        this.store.dispatch(ReportActions.loadTruckTrips({
+          season: this.activeSeason,
+        }));
       }
+
     });
   }
 
-  allTrips(): number{
+  allTrips(): number {
     let tripCount = 0;
-    this.bookingReport$.pipe(takeUntil(this.destroy$)).subscribe(report => {
-      tripCount = report.trucks.reduce((acc, truck) => acc + truck.trips.length, 0);
+    this.bookReport$.pipe(takeUntil(this.destroy$)).subscribe(report => {
+      tripCount = report ? report.trucks.reduce((acc, truck) => acc + truck.trips.length, 0) : 0
     });
     return tripCount;
   }
 
-  searchResult(){
-    if(!this.activeSeason){
+  searchResult() {
+    if (!this.activeSeason) {
       console.log('No active season selected');
       return;
     }
 
-    if(!this.dateRange.value.start || !this.dateRange.value.end){
+    if (!this.dateRange.value.start || !this.dateRange.value.end) {
 
       this.dateRange.setErrors({ 'required': true });
       return;
     }
     this.dateRange.setErrors(null);
-    this.store.dispatch(ReportActions.loadBookReportStart({start: this.dateRange.value.start!, end: this.dateRange.value.end!, season: this.activeSeason!}));
+    this.store.dispatch(ReportActions.loadBookingsStart({ start: this.dateRange.value.start!, end: this.dateRange.value.end!, season: this.activeSeason! }));
   }
 
   printFullReport() {
@@ -139,13 +137,25 @@ export class Report implements OnInit {
     }, 500);
   }
 
-  getTripTotals(bookings: any[]) {
-    return this.reportDataService.getTripTotals(bookings);
+  formatAddress(address: Address | null): string {
+    if (!address) return 'Not provided';
+    const { address1, address2, bldg, apt, city, state, zipCode } = address;
+    return `${address1}${address2 ? `, ${address2}` : ''}${bldg ? `, Bldg. ${bldg}` : ''}${apt ? `, Apt. ${apt}` : ''}, ${city}, ${state} ${zipCode}`;
   }
 
-  vehicleInfo(booking: Booking, id: string){
+  getTripTotals(bookings: Booking[]): { weight: number; volume: number } {
+    return bookings.reduce(
+      (acc, booking) => ({
+        weight: acc.weight + (booking.paycheck?.amount || 0),
+        volume: acc.volume + (booking.vehicleIds?.length || 0)
+      }),
+      { weight: 0, volume: 0 }
+    );
+  }
+
+  vehicleInfo(booking: Booking, id: string) {
     let formattedVehicle: string = '';
-    if(booking.customer && booking.customer.vehicles && booking.customer.vehicles.length > 0){
+    if (booking.customer && booking.customer.vehicles && booking.customer.vehicles.length > 0) {
       const vehicle = booking.customer.vehicles.find(v => v.id === id);
       formattedVehicle = `${vehicle?.color || ''} ${vehicle?.year || ''} ${vehicle?.make || ''} ${vehicle?.model || ''} (${vehicle?.plate || ''})`.trim();
     }

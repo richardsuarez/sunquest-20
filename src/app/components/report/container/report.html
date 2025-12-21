@@ -23,8 +23,12 @@
 </div>
 <mat-progress-bar *ngIf="loadingBookReport$ | async" class="indeterminate"></mat-progress-bar>
 
+<div *ngIf="(bookings$ | async) && (bookings$ | async)?.length === 0" class="no-results">
+    <p>No bookings found for the selected date range.</p>
+</div>
+
 <!-- Report Body -->
-<div class="body" *ngIf="bookingReport$ | async as report">
+<div class="body" *ngIf="bookReport$ | async as report">
     <!-- Print Buttons (hidden on print) -->
     <div class="print-controls" *ngIf="report.totalBookings > 0">
         <div class="info">
@@ -72,7 +76,8 @@
             <div class="trip-header">
                 <div>
                     <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
-                    <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{ bookingGroup.trip.destination }}</h2>
+                    <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
+                        bookingGroup.trip.destination }}</h2>
                     <p class="trip-details">
                         <span>Departure: {{ bookingGroup.trip.departureDate | date: 'short' }}</span>
                         <span *ngIf="bookingGroup.trip.arrivalDate">Arrival: {{ bookingGroup.trip.arrivalDate | date:
@@ -107,8 +112,10 @@
                         <tr *ngFor="let booking of bookingGroup.bookings" class="booking-row">
                             <td>
                                 <div>
-                                    <p>{{ booking.customer?.primaryFirstName }} {{ booking.customer?.primaryLastName }}</p>
-                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>phone</mat-icon>{{ booking.customer?.phone }}</p>
+                                    <p>{{ booking.customer?.primaryFirstName }} {{ booking.customer?.primaryLastName }}
+                                    </p>
+                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>phone</mat-icon>{{
+                                        booking.customer?.phone }}</p>
                                 </div>
                             </td>
                             <td>
@@ -118,14 +125,20 @@
                             </td>
                             <td>
                                 <div>
-                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>location_on</mat-icon>{{ booking.pickupAddress }}</p>
-                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>schedule</mat-icon>{{ booking.pickupAt | date: 'short' }}</p>
+                                    <p style="display: flex; align-items: center; gap: 4px">
+                                        <mat-icon>location_on</mat-icon>{{ formatAddress(booking.pickupAddress) }}</p>
+                                    <p style="display: flex; align-items: center; gap: 4px">
+                                        <mat-icon>calendar_month</mat-icon>{{ booking.pickupAt | date: 'MM/dd/yyyy' }}
+                                    </p>
                                 </div>
                             </td>
                             <td>
                                 <div>
-                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>location_on</mat-icon>{{ booking.arrivalAddress }}</p>
-                                    <p style="display: flex; align-items: center; gap: 4px"><mat-icon>schedule</mat-icon>{{ booking.arrivalAt | date: 'short' }}</p>
+                                    <p style="display: flex; align-items: center; gap: 4px">
+                                        <mat-icon>location_on</mat-icon>{{ formatAddress(booking.arrivalAddress) }}</p>
+                                    <p style="display: flex; align-items: center; gap: 4px">
+                                        <mat-icon>calendar_month</mat-icon>{{ booking.arrivalAt | date: 'MM/dd/yyyy' }}
+                                    </p>
                                 </div>
                             </td>
                             <td>{{ booking.notes }}</td>

@@ -7,5 +7,6 @@ export const selectReportState = createFeatureSelector<ReportState>(REPORT_FEATU
 
 export const loading = createSelector(selectReportState, (state: ReportState) => state.loading);
 export const loadingBookReport = createSelector(selectReportState, (state: ReportState) => state.loadingBookReport);
-export const bookingReport = createSelector(selectReportState, (state: ReportState) => state.bookingReport);
+export const bookingReport = createSelector(selectReportState, (state: ReportState) => state.bookReport);
+export const bookings = createSelector(selectReportState, (state: ReportState) => state.bookings);
 export const trucks = createSelector(selectReportState, (state: ReportState) => state.trucks);

@@ -2,15 +2,16 @@ import { createAction, props } from "@ngrx/store";
 import { Booking } from "../../book/model/booking.model";
 import { Season } from "../../season/models/season.model";
 import { Truck } from "../../truck/model/truck.model";
+import { BookReport } from "../models/report.models";
 
-export const loadBookReportStart = createAction(
+export const loadBookingsStart = createAction(
     '[Report] Start loading booking report',
     props<{start: Date, end: Date, season: Season}>(),
 );
 
-export const loadBookReportSuccess = createAction(
+export const loadBookingsSuccess = createAction(
     '[Report] Successfully loaded booking report',
-    props<{bookingReport: Booking[]}>(),
+    props<{bookings: Booking[]}>(),
 );
 
 export const fail = createAction(
@@ -18,21 +19,26 @@ export const fail = createAction(
     props<{error: Error}>(),
 );
 
-export const loadTrucks = createAction(
-    '[Report] Load trucks',
-);
-
-export const loadTrucksSuccess = createAction(
-    '[Report] Successfully loaded trucks',
-    props<{trucks: Truck[]}>(),
-); 
-
 export const loadTruckTrips = createAction(
     '[Report] Load truck trips',
-    props<{truckId: string, start: Date, end: Date, season: Season}>(),
+    props<{season: Season}>(),
 );
 
 export const loadTruckTripsSuccess = createAction(
     '[Report] Successfully loaded truck trips',
-    props<{truckId: string, trips: any[]}>(),
+    props<{trucks: Truck[]}>(),
+);
+
+export const getBookReport = createAction(
+    '[Report] Get booking report with trucks',
+    props<{bookings: Booking[], trucks: Truck[]}>(),
+);
+
+export const getBookReportSuccess = createAction(
+    '[Report] Successfully got booking report with trucks',
+    props<{bookReport: BookReport}>(),
+);
+
+export const clearBookReport = createAction(
+    '[Report] Set as null bookReport property'
 );

@@ -11,26 +11,12 @@ export class ReportEffects {
     private actions$ = inject(Actions);
     private reportService = inject(ReportService);
 
-    bookReport$ = createEffect(() =>
+    bookings$ = createEffect(() =>
         this.actions$.pipe(
-            ofType(ReportActions.loadBookReportStart),
+            ofType(ReportActions.loadBookingsStart),
             switchMap((action) =>
-                this.reportService.getBookingReport(action.start, action.end, action.season).pipe(
-                    map((bookingReport) => ReportActions.loadBookReportSuccess({ bookingReport })),
-                    catchError((error) =>
-                        of(ReportActions.fail({ error }))
-                    )
-                )
-            )
-        )
-    );
-
-    trucks$ = createEffect(() =>
-        this.actions$.pipe(
-            ofType(ReportActions.loadTrucks),
-            switchMap(() =>
-                this.reportService.getTrucks().pipe(
-                    map((trucks) => ReportActions.loadTrucksSuccess({ trucks })),
+                this.reportService.getBookings(action.start, action.end, action.season).pipe(
+                    map((bookings) => ReportActions.loadBookingsSuccess({ bookings })),
                     catchError((error) =>
                         of(ReportActions.fail({ error }))
                     )
@@ -43,8 +29,22 @@ export class ReportEffects {
         this.actions$.pipe(
             ofType(ReportActions.loadTruckTrips),
             switchMap((action) =>
-                this.reportService.getTruckTrips(action.truckId, action.season).pipe(
-                    map((trips) => ReportActions.loadTruckTripsSuccess({ truckId: action.truckId, trips })),
+                this.reportService.getTruckTrips(action.season).pipe(
+                    map((truckWithTrips) => ReportActions.loadTruckTripsSuccess({ trucks: truckWithTrips })),
+                    catchError((error) =>
+                        of(ReportActions.fail({ error }))
+                    )
+                )
+            )
+        )
+    );
+
+    bookReport$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(ReportActions.getBookReport),
+            switchMap((action) =>
+                this.reportService.transformBookingsReport(action.bookings, action.trucks).pipe(
+                    map((bookReport) => ReportActions.getBookReportSuccess({ bookReport })),
                     catchError((error) =>
                         of(ReportActions.fail({ error }))
                     )
