@@ -1,5 +1,5 @@
 import { EnvironmentInjector, inject, Injectable, runInInjectionContext } from "@angular/core";
-import { collection, Firestore, getDocsFromCache, getDocsFromServer, query, where } from "@angular/fire/firestore";
+import { collection, Firestore, getDocsFromCache, getDocsFromServer, orderBy, query, where } from "@angular/fire/firestore";
 import { Season } from "../../season/models/season.model";
 import { from, Observable, of } from "rxjs";
 import { Booking } from "../../book/model/booking.model";
@@ -102,6 +102,7 @@ export class ReportService {
                             const q = query(
                                 tripsCollection,
                                 where('season', '==', `${season.seasonName}-${season.year}`),
+                                orderBy('departureDate', 'asc')
                             );
                             let snapshot;
                             try {

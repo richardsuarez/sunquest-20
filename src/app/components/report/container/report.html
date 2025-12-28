@@ -69,6 +69,12 @@
             <!-- Truck Header -->
             <div class="truck-header">
                 <h2>{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                <div class="all-trips-print-button">
+                    <button mat-stroked-button (click)="printAllTripsForTruck(truckReport)">
+                        <mat-icon>print</mat-icon>
+                        Print All Trips
+                    </button>
+                </div>
             </div>
 
             <!-- Trips for this Truck -->
@@ -119,7 +125,8 @@
                                         </p>
                                         <p style="display: flex; align-items: center; gap: 4px">
                                             <mat-icon>phone</mat-icon>{{
-                                            booking.customer?.phone }}</p>
+                                            booking.customer?.phone }}
+                                        </p>
                                     </div>
                                 </td>
                                 <td>
@@ -169,8 +176,7 @@
 
 
 <!-- Print View Component -->
-<app-print-view 
-    *ngIf="printing"
+<app-print-view *ngIf="printing" 
     [bookReport]="printingData.bookReport"
-    [bookingGroup]="printingData.bookingGroup"
-></app-print-view>
+    [truckTrips]="printingData.truckTrips"
+    [bookingGroup]="printingData.bookingGroup"></app-print-view>

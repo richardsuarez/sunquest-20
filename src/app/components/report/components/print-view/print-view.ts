@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { AfterViewInit, Component, Input, Output, EventEmitter } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { BookingGroup, BookReport } from '../../models/report.models';
+import { BookingGroup, BookReport, TruckReport } from '../../models/report.models';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Booking } from '../../../book/model/booking.model';
@@ -22,6 +22,7 @@ import { Address } from '../../../customer/model/customer.model';
 export class PrintView implements AfterViewInit {
 
   @Input() bookReport: BookReport | null = null;
+  @Input() truckTrips: TruckReport | null = null;
   @Input() bookingGroup: BookingGroup | null = null;
   @Output() closed = new EventEmitter<void>();
 

@@ -64,7 +64,7 @@ export class Report implements OnInit {
   bookingList: Booking[] = [];
   truckList: Truck[] = [];
 
-  printingData!: {bookReport: BookReport | null, bookingGroup: BookingGroup | null}
+  printingData!: {bookReport: BookReport | null, truckTrips: TruckReport | null, bookingGroup: BookingGroup | null}
   printing = false;
 
   // Print preview state
@@ -139,6 +139,7 @@ export class Report implements OnInit {
   printFullReport(report: BookReport) {
     this.printingData = {
       bookReport: report,
+      truckTrips: null,
       bookingGroup: null,
     }
     this.printing = true;
@@ -146,14 +147,33 @@ export class Report implements OnInit {
       this.printing = false;
       this.printingData = {
         bookReport: null,
+        truckTrips: null,
         bookingGroup: null,
       };
     }, 1000)
   }
 
+  printAllTripsForTruck(report: TruckReport) {
+    this.printingData = {
+      bookReport: null,
+      truckTrips: report,
+      bookingGroup: null,
+    }
+    this.printing = true;
+    setTimeout(() => {
+      this.printing = false;
+      this.printingData = {
+        bookReport: null,
+        truckTrips: null,
+        bookingGroup: null,
+      };
+    }, 2000)
+  }
+
   printTrip(bookingGroup: BookingGroup) {
     this.printingData = {
       bookReport: null,
+      truckTrips: null,
       bookingGroup: bookingGroup,
     }
     this.printing = true;
@@ -161,6 +181,7 @@ export class Report implements OnInit {
       this.printing = false;
       this.printingData = {
         bookReport: null,
+        truckTrips: null,
         bookingGroup: null,
       };
     }, 1000)
