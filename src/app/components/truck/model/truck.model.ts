@@ -7,6 +7,7 @@ export interface Truck {
   loadCapacity: number | null; // lbs
   carCapacity: number | null; // number of cars
   createdAt?: Date | null;
+  trips?: Trip[];
 }
 
 

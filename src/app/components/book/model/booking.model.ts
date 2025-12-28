@@ -1,4 +1,4 @@
-import { Customer, Vehicle } from '../../customer/model/customer.model';
+import { Address, Customer, Vehicle } from '../../customer/model/customer.model';
 import { Trip } from '../../trip/model/trip.model';
 
 export interface Paycheck {
@@ -12,8 +12,10 @@ export interface Booking {
   customer: Customer | null;
   vehicleIds: string[];
   paycheck: Paycheck;
+  arrivalAddress: Address | null;
   arrivalAt: Date | null; // ISO datetime
   arrivalWeekOfYear: number | null;
+  pickupAddress: Address | null;
   pickupAt: Date | null; // ISO datetime
   pickupWeekOfYear: number | null;
   from: string | null;

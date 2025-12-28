@@ -30,6 +30,10 @@ h1{
     }
 }
 
+.booking-desktop{
+  max-width: 70%;
+}
+
 .desktop{
     display: flex;
     margin-top: 20px;
@@ -91,11 +95,12 @@ table{
 }
 td th{
   min-width: 0px !important;
+  padding: 0px 5px !important;
+  text-align: center !important;
 }
 
 .customer-card-desktop {
-  width: 400px;
-  min-width: 400px;
+  max-width: 30%;
   max-height: 400px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -127,8 +132,14 @@ td th{
 
 .paycheck {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   margin-top: 20px;
+  gap: 20px;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 200px;
+  }
 }
 
 .info{

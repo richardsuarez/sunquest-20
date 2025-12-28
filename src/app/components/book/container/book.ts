@@ -2,7 +2,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { customerViewModel } from '../../customer/store/customer.selectors';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Customer } from '../../customer/model/customer.model';
+import { Address, Customer } from '../../customer/model/customer.model';
 import { getTruckListStart } from '../store/book.actions';
 import { getVehiclesStart } from '../../customer/store/customer.actions';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,7 +21,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTimepickerModule, MatTimepickerToggle } from '@angular/material/timepicker';
-import { firstValueFrom, map, merge, Observable, Subject, takeUntil } from 'rxjs';
+import { map, merge, Observable, Subject, takeUntil } from 'rxjs';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { PopupComponent } from '../../../shared/popup/popup.component';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators, FormsModule } from '@angular/forms';
@@ -87,7 +87,9 @@ export class Book implements OnInit {
   today = new Date();
   tomorrow = new Date(this.today.getTime() + 86400000);
   dayAfterTomorrow = new Date(this.today.getTime() + 172800000);
+  arrivalAddress: Address | null = null;
   arrivalAt: Date = new Date();
+  pickupAddress: Address | null = null;
   pickupAt!: Date;
   crud = '';
 
@@ -117,6 +119,26 @@ export class Book implements OnInit {
     origin: new FormControl<string | null>(null),
     destination: new FormControl<string | null>(null),
     notes: new FormControl<string | null>(null),
+  });
+
+  deliveryAddressForm = new FormGroup({
+    address1: new FormControl<string | null>(null),
+    address2: new FormControl<string | null>(null),
+    bldg: new FormControl<string | null>(null),
+    apt: new FormControl<string | null>(null),
+    city: new FormControl<string | null>(null),
+    state: new FormControl<string | null>(null),
+    zipCode: new FormControl<string | null>(null),
+  });
+
+  pickupAddressForm = new FormGroup({
+    address1: new FormControl<string | null>(null),
+    address2: new FormControl<string | null>(null),
+    bldg: new FormControl<string | null>(null),
+    apt: new FormControl<string | null>(null),
+    city: new FormControl<string | null>(null),
+    state: new FormControl<string | null>(null),
+    zipCode: new FormControl<string | null>(null),
   });
 
   activeSeason: Season | null = null;
@@ -149,18 +171,20 @@ export class Book implements OnInit {
 
     this.customer$.pipe(takeUntil(this.destroy$)).subscribe(customer => {
       this.currentCustomer = customer;
-      if (customer && customer.DocumentID && !customer.vehicles) {
-        this.store.dispatch(getVehiclesStart({ customerId: customer.DocumentID }));
-        // initialize vehicle selection
+      if (customer) {
+        if (customer.DocumentID && !customer.vehicles) {
+          this.store.dispatch(getVehiclesStart({ customerId: customer.DocumentID }));
+        }
+        if (customer.vehicles) {
+          customer.vehicles.forEach(v => {
+            if (v.id) {
+              this.vehicleSelection[v.id] = false;
+            }
+          });
+        }
       }
-      if (customer && customer.vehicles) {
-        customer.vehicles.forEach(v => {
-          if (v.id) {
-            this.vehicleSelection[v.id] = false;
-          }
-        });
-      }
-      if (!customer) {
+
+      if (!customer?.DocumentID) {
         this.router.navigate(['main/customer/']);
       }
     });
@@ -172,7 +196,7 @@ export class Book implements OnInit {
           // and that we haven't already requested during this component lifecycle
           if (!this.requestedTrips.has(t.id)) {
             this.requestedTrips.add(t.id);
-            if(this.activeSeason){
+            if (this.activeSeason) {
               this.store.dispatch(BookActions.loadTripsStart({ truckId: t.id, season: this.activeSeason }));
             }
           }
@@ -192,7 +216,7 @@ export class Book implements OnInit {
       this.activeSeason = seasons.find(s => s.isActive) || null;
       if (this.activeSeason && this.truckList && this.truckList.length > 0) {
         this.truckList.forEach(t => {
-          if(t.id && this.activeSeason){
+          if (t.id && this.activeSeason) {
             this.store.dispatch(BookActions.loadTripsStart({ truckId: t.id, season: this.activeSeason }));
           }
         });
@@ -201,7 +225,7 @@ export class Book implements OnInit {
   }
 
   addTrip() {
-    if(!this.activeSeason) return;
+    if (!this.activeSeason) return;
 
     if (this.tripForm.invalid) {
       this.tripForm.markAllAsTouched();
@@ -329,8 +353,10 @@ export class Book implements OnInit {
         amount: this.form.controls.amount.value || 1200,
       },
       arrivalAt,
+      arrivalAddress: this.deliveryAddressForm.getRawValue(),
       arrivalWeekOfYear: this.weekNumber(arrivalAt),
       pickupAt,
+      pickupAddress: this.pickupAddressForm.getRawValue(),
       pickupWeekOfYear: this.weekNumber(pickupAt),
       from: this.form.controls.origin.value,
       to: this.form.controls.destination.value,
@@ -357,13 +383,27 @@ export class Book implements OnInit {
   }
 
   selectableTrip(trip: Trip): boolean {
-    if (this.form.controls.origin.value && trip.origin !== this.form.controls.origin.value) {
-      return false;
-    }
-    if (this.arrivalAt && trip.departureDate > this.arrivalAt) {
+    if ((this.form.controls.origin.value && trip.origin !== this.form.controls.origin.value) || 
+      (this.arrivalAt && trip.departureDate > this.arrivalAt) ||
+      (this.pickupAt && trip.departureDate < this.pickupAt) ||
+      (this.vehicleSelection && Object.values(this.vehicleSelection).filter(v => v).length > trip.remCarCap) || 
+      (this.vehicleSelection && this.selectedVehiclesLoad() > trip.remLoadCap)) {
       return false;
     }
     return true;
+  }
+
+  selectedVehiclesLoad(): number{
+    let totalLoad = 0;
+    Object.keys(this.vehicleSelection).forEach(id => {
+      if(this.vehicleSelection[id] && this.currentCustomer && this.currentCustomer.vehicles){
+        const vehicle = this.currentCustomer.vehicles.find(v => v.id === id);
+        if(vehicle){
+          totalLoad += vehicle.weight || 0;
+        }
+      }
+    });
+    return totalLoad;
   }
 
   toggleVehicle(id: string) {
@@ -373,16 +413,92 @@ export class Book implements OnInit {
   updateRouteOrigin(event?: any) {
     if (this.form.controls.destination.value === 'Florida') {
       this.form.controls.origin.setValue('New York');
+      if(this.currentCustomer && this.currentCustomer.newYorkAddress){
+        this.pickupAddressForm.controls.address1.setValue(this.currentCustomer.newYorkAddress.address1);
+        this.pickupAddressForm.controls.address2.setValue(this.currentCustomer.newYorkAddress.address2);
+        this.pickupAddressForm.controls.bldg.setValue(this.currentCustomer.newYorkAddress.bldg);
+        this.pickupAddressForm.controls.apt.setValue(this.currentCustomer.newYorkAddress.apt);
+        this.pickupAddressForm.controls.city.setValue(this.currentCustomer.newYorkAddress.city);
+        this.pickupAddressForm.controls.state.setValue(this.currentCustomer.newYorkAddress.state);
+        this.pickupAddressForm.controls.zipCode.setValue(this.currentCustomer.newYorkAddress.zipCode);
+      }
+
+      if(this.currentCustomer && this.currentCustomer.floridaAddress){
+        this.deliveryAddressForm.controls.address1.setValue(this.currentCustomer.floridaAddress.address1);
+        this.deliveryAddressForm.controls.address2.setValue(this.currentCustomer.floridaAddress.address2);
+        this.deliveryAddressForm.controls.bldg.setValue(this.currentCustomer.floridaAddress.bldg);
+        this.deliveryAddressForm.controls.apt.setValue(this.currentCustomer.floridaAddress.apt);
+        this.deliveryAddressForm.controls.city.setValue(this.currentCustomer.floridaAddress.city);
+        this.deliveryAddressForm.controls.state.setValue(this.currentCustomer.floridaAddress.state);
+        this.deliveryAddressForm.controls.zipCode.setValue(this.currentCustomer.floridaAddress.zipCode);
+      }
     } else if (this.form.controls.destination.value === 'New York') {
       this.form.controls.origin.setValue('Florida');
+      if(this.currentCustomer && this.currentCustomer.floridaAddress){
+        this.pickupAddressForm.controls.address1.setValue(this.currentCustomer.floridaAddress.address1);
+        this.pickupAddressForm.controls.address2.setValue(this.currentCustomer.floridaAddress.address2);
+        this.pickupAddressForm.controls.bldg.setValue(this.currentCustomer.floridaAddress.bldg);
+        this.pickupAddressForm.controls.apt.setValue(this.currentCustomer.floridaAddress.apt);
+        this.pickupAddressForm.controls.city.setValue(this.currentCustomer.floridaAddress.city);
+        this.pickupAddressForm.controls.state.setValue(this.currentCustomer.floridaAddress.state);
+        this.pickupAddressForm.controls.zipCode.setValue(this.currentCustomer.floridaAddress.zipCode);
+      }
+
+      if(this.currentCustomer && this.currentCustomer.newYorkAddress){
+        this.deliveryAddressForm.controls.address1.setValue(this.currentCustomer.newYorkAddress.address1);
+        this.deliveryAddressForm.controls.address2.setValue(this.currentCustomer.newYorkAddress.address2);
+        this.deliveryAddressForm.controls.bldg.setValue(this.currentCustomer.newYorkAddress.bldg);
+        this.deliveryAddressForm.controls.apt.setValue(this.currentCustomer.newYorkAddress.apt);
+        this.deliveryAddressForm.controls.city.setValue(this.currentCustomer.newYorkAddress.city);
+        this.deliveryAddressForm.controls.state.setValue(this.currentCustomer.newYorkAddress.state);
+        this.deliveryAddressForm.controls.zipCode.setValue(this.currentCustomer.newYorkAddress.zipCode);
+      }
     }
   }
 
   updateRouteDestination(event: any) {
     if (this.form.controls.origin.value === 'Florida') {
       this.form.controls.destination.setValue('New York');
+      if(this.currentCustomer && this.currentCustomer.newYorkAddress){
+        this.deliveryAddressForm.controls.address1.setValue(this.currentCustomer.newYorkAddress.address1);
+        this.deliveryAddressForm.controls.address2.setValue(this.currentCustomer.newYorkAddress.address2);
+        this.deliveryAddressForm.controls.bldg.setValue(this.currentCustomer.newYorkAddress.bldg);
+        this.deliveryAddressForm.controls.apt.setValue(this.currentCustomer.newYorkAddress.apt);
+        this.deliveryAddressForm.controls.city.setValue(this.currentCustomer.newYorkAddress.city);
+        this.deliveryAddressForm.controls.state.setValue(this.currentCustomer.newYorkAddress.state);
+        this.deliveryAddressForm.controls.zipCode.setValue(this.currentCustomer.newYorkAddress.zipCode);
+      }
+
+      if(this.currentCustomer && this.currentCustomer.floridaAddress){
+        this.pickupAddressForm.controls.address1.setValue(this.currentCustomer.floridaAddress.address1);
+        this.pickupAddressForm.controls.address2.setValue(this.currentCustomer.floridaAddress.address2);
+        this.pickupAddressForm.controls.bldg.setValue(this.currentCustomer.floridaAddress.bldg);
+        this.pickupAddressForm.controls.apt.setValue(this.currentCustomer.floridaAddress.apt);
+        this.pickupAddressForm.controls.city.setValue(this.currentCustomer.floridaAddress.city);
+        this.pickupAddressForm.controls.state.setValue(this.currentCustomer.floridaAddress.state);
+        this.pickupAddressForm.controls.zipCode.setValue(this.currentCustomer.floridaAddress.zipCode);
+      }
     } else if (this.form.controls.origin.value === 'New York') {
       this.form.controls.destination.setValue('Florida');
+      if(this.currentCustomer && this.currentCustomer.floridaAddress){
+        this.deliveryAddressForm.controls.address1.setValue(this.currentCustomer.floridaAddress.address1);
+        this.deliveryAddressForm.controls.address2.setValue(this.currentCustomer.floridaAddress.address2);
+        this.deliveryAddressForm.controls.bldg.setValue(this.currentCustomer.floridaAddress.bldg);
+        this.deliveryAddressForm.controls.apt.setValue(this.currentCustomer.floridaAddress.apt);
+        this.deliveryAddressForm.controls.city.setValue(this.currentCustomer.floridaAddress.city);
+        this.deliveryAddressForm.controls.state.setValue(this.currentCustomer.floridaAddress.state);
+        this.deliveryAddressForm.controls.zipCode.setValue(this.currentCustomer.floridaAddress.zipCode);
+      }
+
+      if(this.currentCustomer && this.currentCustomer.newYorkAddress){
+        this.pickupAddressForm.controls.address1.setValue(this.currentCustomer.newYorkAddress.address1);
+        this.pickupAddressForm.controls.address2.setValue(this.currentCustomer.newYorkAddress.address2);
+        this.pickupAddressForm.controls.bldg.setValue(this.currentCustomer.newYorkAddress.bldg);
+        this.pickupAddressForm.controls.apt.setValue(this.currentCustomer.newYorkAddress.apt);
+        this.pickupAddressForm.controls.city.setValue(this.currentCustomer.newYorkAddress.city);
+        this.pickupAddressForm.controls.state.setValue(this.currentCustomer.newYorkAddress.state);
+        this.pickupAddressForm.controls.zipCode.setValue(this.currentCustomer.newYorkAddress.zipCode);
+      }
     }
   }
 

@@ -4,6 +4,7 @@ import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Booking } from '../../../book/model/booking.model';
+import { Address } from '../../../customer/model/customer.model';
 
 @Component({
   selector: 'app-booking-details-popup',
@@ -38,6 +39,12 @@ export class BookingDetailsPopupComponent {
     const vehicleIds = this.booking.vehicleIds || [];
     const vehicles = this.booking.customer?.vehicles || [];
     return vehicles.filter(v => v.id && vehicleIds.includes(v.id));
+  }
+
+  formatAddress(address: Address | null): string {
+    if (!address) return 'Not provided';
+    const { address1, address2, bldg, apt, city, state, zipCode } = address;
+    return `${address1}${address2 ? `, ${address2}` : ''}${bldg ? `, Bldg. ${bldg}` : ''}${apt ? `, Apt. ${apt}` : ''}, ${city}, ${state} ${zipCode}`;
   }
 
   formatDate(date: Date | null | undefined): string {

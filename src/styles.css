@@ -8,3 +8,33 @@ html, body, app-root {
 body {
 	font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+
+/* styles.scss (global) */
+@media print {
+  /* hide everything by default */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* show only the print area */
+  #print-area,
+  #print-area * {
+    visibility: visible !important;
+  }
+
+  /* place print area at top-left so it prints nicely */
+  #print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* common fixes */
+  .app-header,
+  .app-sidebar,
+  .no-print {
+    display: none !important;
+  }
+}
+

@@ -69,7 +69,7 @@
                 </section>
             </mat-card-content>
         </mat-card>
-        <div style="display: block">
+        <div style="display: block" [class.booking-desktop]="!isMobile">
             <section>
                 <h3>Select vehicle(s) to book</h3>
                 <div *ngIf="customer.vehicles && customer.vehicles.length; else noVeh">
@@ -123,60 +123,23 @@
                 </ng-template>
             </section>
 
-            <section class="paycheck">
+            <section>
                 <h3>Paycheck</h3>
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <mat-label>Check number</mat-label>
-                    <input matInput [formControl]="form.controls.checkNumber" appAllowOnlyNumbers>
-                </mat-form-field>
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <mat-label>Bank name</mat-label>
-                    <input matInput [formControl]="form.controls.bankName" appAllowAlphanumeric>
-                </mat-form-field>
-                <mat-form-field appearance="outline" floatLabel="always">
-                    <mat-label>Amount</mat-label>
-                    <input type="number" matInput [formControl]="form.controls.amount" appAllowOnlyNumbers>
-                </mat-form-field>
-            </section>
-
-            <section>
-                <h3>Customer Arrival</h3>
-                <div class="info">
+                <div class="paycheck">
                     <mat-form-field appearance="outline" floatLabel="always">
-                        <mat-label>Date</mat-label>
-                        <input required matInput [matDatepicker]="picker" [(ngModel)]="arrivalAt" [min]="today" appAllowOnlyNumbers>
-                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                        <mat-datepicker #picker></mat-datepicker>
+                        <mat-label>Check number</mat-label>
+                        <input matInput [formControl]="form.controls.checkNumber" appAllowOnlyNumbers>
                     </mat-form-field>
                     <mat-form-field appearance="outline" floatLabel="always">
-                        <mat-label>Time</mat-label>
-                        <input required matInput [matTimepicker]="timePicker" [(ngModel)]="arrivalAt">
-                        <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
-                        <mat-timepicker #timePicker />
+                        <mat-label>Bank name</mat-label>
+                        <input matInput [formControl]="form.controls.bankName" appAllowAlphanumeric>
                     </mat-form-field>
-                    <div>Week #: {{ weekNumber(arrivalAt) }}</div>
+                    <mat-form-field appearance="outline" floatLabel="always">
+                        <mat-label>Amount</mat-label>
+                        <input type="number" matInput [formControl]="form.controls.amount" appAllowOnlyNumbers>
+                    </mat-form-field>
                 </div>
 
-            </section>
-
-            <section>
-                <h3>Pick up Date</h3>
-                <div class="info">
-                    <mat-form-field appearance="outline" floatLabel="always">
-                        <mat-label>Date</mat-label>
-                        <input required matInput [matDatepicker]="pickupPicker" [(ngModel)]="pickupAt" [min]="today"
-                            [max]="arrivalAt" appAllowOnlyNumbers>
-                        <mat-datepicker-toggle matIconSuffix [for]="pickupPicker"></mat-datepicker-toggle>
-                        <mat-datepicker #pickupPicker></mat-datepicker>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" floatLabel="always">
-                        <mat-label>Time</mat-label>
-                        <input required matInput [matTimepicker]="pickupTimePicker" [(ngModel)]="pickupAt">
-                        <mat-timepicker-toggle matIconSuffix [for]="pickupTimePicker" />
-                        <mat-timepicker #pickupTimePicker />
-                    </mat-form-field>
-                    <div>Week #: {{ weekNumber(pickupAt) }}</div>
-                </div>
             </section>
 
             <section>
@@ -200,6 +163,136 @@
                     </mat-form-field>
                 </div>
             </section>
+
+            <section>
+                <h3>Customer Arrival</h3>
+                <div class="info">
+                    <mat-form-field appearance="outline" floatLabel="always">
+                        <mat-label>Date</mat-label>
+                        <input required matInput [matDatepicker]="picker" [(ngModel)]="arrivalAt" [min]="today"
+                            appAllowOnlyNumbers>
+                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" floatLabel="always">
+                        <mat-label>Time</mat-label>
+                        <input required matInput [matTimepicker]="timePicker" [(ngModel)]="arrivalAt">
+                        <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+                        <mat-timepicker #timePicker />
+                    </mat-form-field>
+                    <div>Week #: {{ weekNumber(arrivalAt) }}</div>
+                </div>
+                <div>
+                    <h3>Delivery Address <span style="font-weight: lighter; color: red;">(Suggested address: Customer's
+                            {{form.controls.destination.value}} address)</span></h3>
+                    <div style="display: flex; justify-content: space-between; width: 100%; gap: 10px">
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 50%;">
+                            <mat-label>Address 1</mat-label>
+                            <input type="text" matInput required [formControl]="deliveryAddressForm.controls.address1"
+                                appAllowAlphanumeric>
+                        </mat-form-field>
+
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 50%;">
+                            <mat-label>Address 2</mat-label>
+                            <input type="text" matInput [formControl]="deliveryAddressForm.controls.address2">
+                        </mat-form-field>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; width: 100%; gap: 10px">
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>Building</mat-label>
+                            <input type="text" matInput [formControl]="deliveryAddressForm.controls.bldg"
+                                appAllowAlphanumeric>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>Apartment</mat-label>
+                            <input type="text" matInput [formControl]="deliveryAddressForm.controls.apt"
+                                appAllowAlphanumeric>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>City</mat-label>
+                            <input type="text" matInput required [formControl]="deliveryAddressForm.controls.city"
+                                appAllowAlphaAndSpecificChar>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>State</mat-label>
+                            <input type="text" matInput required [formControl]="deliveryAddressForm.controls.state"
+                                appAllowAlphaAndSpecificChar>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>Zip Code</mat-label>
+                            <input type="text" matInput required [formControl]="deliveryAddressForm.controls.zipCode"
+                                appAllowOnlyNumbers>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3>Pick up Date</h3>
+                <div class="info">
+                    <mat-form-field appearance="outline" floatLabel="always">
+                        <mat-label>Date</mat-label>
+                        <input required matInput [matDatepicker]="pickupPicker" [(ngModel)]="pickupAt" [min]="today"
+                            [max]="arrivalAt" appAllowOnlyNumbers>
+                        <mat-datepicker-toggle matIconSuffix [for]="pickupPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #pickupPicker></mat-datepicker>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" floatLabel="always">
+                        <mat-label>Time</mat-label>
+                        <input required matInput [matTimepicker]="pickupTimePicker" [(ngModel)]="pickupAt">
+                        <mat-timepicker-toggle matIconSuffix [for]="pickupTimePicker" />
+                        <mat-timepicker #pickupTimePicker />
+                    </mat-form-field>
+                    <div>Week #: {{ weekNumber(pickupAt) }}</div>
+                </div>
+                <div>
+                    <h3>Pickup Address <span style="font-weight: lighter; color: red;">(Suggested address: Customer's
+                            {{form.controls.origin.value}} address)</span></h3>
+                    <div style="display: flex; justify-content: space-between; width: 100%; gap: 10px">
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 50%;">
+                            <mat-label>Address 1</mat-label>
+                            <input type="text" matInput required [formControl]="pickupAddressForm.controls.address1"
+                                appAllowAlphanumeric>
+                        </mat-form-field>
+
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 50%;">
+                            <mat-label>Address 2</mat-label>
+                            <input type="text" matInput [formControl]="pickupAddressForm.controls.address2">
+                        </mat-form-field>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; width: 100%; gap: 10px">
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>Building</mat-label>
+                            <input type="text" matInput [formControl]="pickupAddressForm.controls.bldg"
+                                appAllowAlphanumeric>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>Apartment</mat-label>
+                            <input type="text" matInput [formControl]="pickupAddressForm.controls.apt"
+                                appAllowAlphanumeric>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>City</mat-label>
+                            <input type="text" matInput requiered [formControl]="pickupAddressForm.controls.city"
+                                appAllowAlphaAndSpecificChar>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>State</mat-label>
+                            <input type="text" matInput required [formControl]="pickupAddressForm.controls.state"
+                                appAllowAlphaAndSpecificChar>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>Zip Code</mat-label>
+                            <input type="text" matInput required [formControl]="pickupAddressForm.controls.zipCode"
+                                appAllowOnlyNumbers>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </section>
+
+
 
             <section>
                 <h3>Next Trips</h3>
@@ -364,7 +457,7 @@
 
             <section>
                 <h3>Notes</h3>
-                <mat-form-field appearance="outline" style="max-width: 500px">
+                <mat-form-field appearance="outline" floatLabel="always" style="width: 100%">
                     <mat-label>Trip notes</mat-label>
                     <textarea matInput [formControl]="form.controls.notes"></textarea>
                 </mat-form-field>

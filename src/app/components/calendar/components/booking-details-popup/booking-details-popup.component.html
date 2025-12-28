@@ -7,10 +7,6 @@
   </div>
 
   <div class="dialog-content">
-    <!-- Booking ID -->
-    <div class="section booking-id-section">
-      <span class="booking-id">ID: {{ booking.id }}</span>
-    </div>
 
     <!-- Customer Info -->
     <div class="section">
@@ -64,7 +60,7 @@
     <!-- Trip Dates -->
     <div class="section">
       <h3 class="section-title">Trip Dates</h3>
-      <div class="info-grid">
+      <div class="info-grid" style="margin-bottom: 20px;">
         <div class="info-item">
           <span class="label">Pickup Date</span>
           <span class="value">{{ formatDate(booking.pickupAt) }}</span>
@@ -72,6 +68,16 @@
         <div class="info-item">
           <span class="label">Arrival Date</span>
           <span class="value">{{ formatDate(booking.arrivalAt) }}</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Pickup Address</span>
+          <span class="value">{{ formatAddress(booking.pickupAddress) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Delivery Address</span>
+          <span class="value">{{ formatAddress(booking.arrivalAddress) }}</span>
         </div>
       </div>
     </div>
