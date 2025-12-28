@@ -16,9 +16,11 @@ import * as ReportSelectors from '../store/report.selectors';
 import { MatButtonModule } from '@angular/material/button';
 import { Truck } from '../../truck/model/truck.model';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { BookReport } from '../models/report.models';
+import { BookReport, TruckReport, BookingGroup } from '../models/report.models';
 import { Booking } from '../../book/model/booking.model';
 import { Address } from '../../customer/model/customer.model';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { PrintView } from '../components/print-view/print-view';
 
 @Component({
   selector: 'app-report',
@@ -32,7 +34,9 @@ import { Address } from '../../customer/model/customer.model';
     MatProgressSpinnerModule,
     ReactiveFormsModule,
     AsyncPipe,
-  ],
+    MatDialogModule,
+    PrintView
+],
   templateUrl: './report.html',
   styleUrl: './report.css',
   providers: [provideNativeDateAdapter()],
@@ -59,6 +63,15 @@ export class Report implements OnInit {
 
   bookingList: Booking[] = [];
   truckList: Truck[] = [];
+
+  printingData!: {bookReport: BookReport | null, bookingGroup: BookingGroup | null}
+  printing = false;
+
+  // Print preview state
+  showPrintPreview = false;
+  printMode: 'full' | 'trip' = 'full';
+  selectedTripId: string | null = null;
+  previewData: BookReport | BookingGroup | null = null;
 
   constructor(
     private readonly store: Store,
@@ -123,18 +136,34 @@ export class Report implements OnInit {
     this.store.dispatch(ReportActions.loadBookingsStart({ start: this.dateRange.value.start!, end: this.dateRange.value.end!, season: this.activeSeason! }));
   }
 
-  printFullReport() {
-    window.print();
+  printFullReport(report: BookReport) {
+    this.printingData = {
+      bookReport: report,
+      bookingGroup: null,
+    }
+    this.printing = true;
+    setTimeout(() => {
+      this.printing = false;
+      this.printingData = {
+        bookReport: null,
+        bookingGroup: null,
+      };
+    }, 1000)
   }
 
-  printTrip(tripId: string) {
-    // Store the trip ID to filter in print
-    localStorage.setItem('printTripId', tripId);
-    window.print();
-    // Clear after a short delay to allow print dialog to open
+  printTrip(bookingGroup: BookingGroup) {
+    this.printingData = {
+      bookReport: null,
+      bookingGroup: bookingGroup,
+    }
+    this.printing = true;
     setTimeout(() => {
-      localStorage.removeItem('printTripId');
-    }, 500);
+      this.printing = false;
+      this.printingData = {
+        bookReport: null,
+        bookingGroup: null,
+      };
+    }, 1000)
   }
 
   formatAddress(address: Address | null): string {
@@ -160,5 +189,12 @@ export class Report implements OnInit {
       formattedVehicle = `${vehicle?.color || ''} ${vehicle?.year || ''} ${vehicle?.make || ''} ${vehicle?.model || ''} (${vehicle?.plate || ''})`.trim();
     }
     return formattedVehicle;
+  }
+
+  getPreviewDataAsBookingGroup(): BookingGroup | null {
+    if (this.printMode === 'trip' && this.previewData && 'trip' in this.previewData) {
+      return this.previewData as BookingGroup;
+    }
+    return null;
   }
 }

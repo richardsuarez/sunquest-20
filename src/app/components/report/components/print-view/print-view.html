@@ -1,0 +1,176 @@
+<div id="print-area" class="print-preview-modal">
+
+    <!-- Modal Body - Print Content -->
+    <div id="printable" class="print-preview-content">
+        <!-- Full Report Preview -->
+        <ng-container *ngIf="bookReport as report">
+            <div class="print-full-report">
+
+                <!-- All Trucks -->
+                <div *ngFor="let truckReport of report.trucks" class="truck-section">
+                    <div class="truck-header">
+                        <h2>{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                    </div>
+
+                    <div *ngFor="let bookingGroup of truckReport.trips" class="trip-section">
+                        <div class="trip-header">
+                            <div>
+                                <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
+                                <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
+                                    bookingGroup.trip.destination }}</h2>
+                            </div>
+                            <div class="trip-details">
+                                <span>Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy'
+                                    }}</span>
+                                <span *ngIf="bookingGroup.trip.arrivalDate">Arrival: {{
+                                    bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="bookings-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Vehicle</th>
+                                        <th>Pickup</th>
+                                        <th>Arrival</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let booking of bookingGroup.bookings">
+                                        <td>
+                                            <div>
+                                                <p>{{ booking.customer?.primaryFirstName }} {{
+                                                    booking.customer?.primaryLastName }}
+                                                </p>
+                                                <p style="display: flex; align-items: center; gap: 4px">
+                                                    <mat-icon>phone</mat-icon>{{
+                                                    booking.customer?.phone }}
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <p *ngFor="let vehId of booking.vehicleIds">{{ vehicleInfo(booking,
+                                                    vehId) }}</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <div style="display: flex; align-items: center; gap: 5px">
+                                                    <mat-icon>location_on</mat-icon>
+                                                    <p>{{formatAddress(booking.pickupAddress) }}</p>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 5px">
+                                                    <mat-icon>calendar_month</mat-icon>
+                                                    <p>{{ booking.pickupAt | date:
+                                                        'MM/dd/yyyy' }}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <p style="display: flex; align-items: center; gap: 5px">
+                                                    <mat-icon>location_on</mat-icon>{{
+                                                    formatAddress(booking.arrivalAddress) }}
+                                                </p>
+                                                <p style="display: flex; align-items: center; gap: 5px">
+                                                    <mat-icon>calendar_month</mat-icon>{{ booking.arrivalAt | date:
+                                                    'MM/dd/yyyy' }}
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td>{{ booking.notes }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="trip-totals">
+                            <p><strong>Total Bookings in Trip:</strong> {{ bookingGroup.bookings.length }}</p>
+                            <p><strong>Total Amount:</strong> ${{ getTripTotals(bookingGroup.bookings).weight || 0 }}
+                            </p>
+                            <p><strong>Total Vehicles:</strong> {{ getTripTotals(bookingGroup.bookings).volume || 0 }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+
+        <!-- Trip Preview -->
+        <ng-container *ngIf="bookingGroup">
+            <div class="print-trip" [ngSwitch]="true">
+                <div class="trip-header">
+                    <div>
+                        <h3>Trip {{ bookingGroup!.trip.loadNumber }}</h3>
+                        <h2>{{ bookingGroup!.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
+                            bookingGroup!.trip.destination }}</h2>
+                        <p class="trip-details">
+                            <span>Departure: {{ bookingGroup!.trip.departureDate | date: 'MMM dd, yyyy' }}</span>
+                            <span *ngIf="bookingGroup!.trip.arrivalDate">Arrival: {{ bookingGroup!.trip.arrivalDate |
+                                date:
+                                'MMM dd, yyyy' }}</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bookings-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Vehicle</th>
+                                <th>Pickup</th>
+                                <th>Arrival</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let booking of bookingGroup!.bookings" class="booking-row">
+                                <td>
+                                    <div>
+                                        <p>{{ booking.customer?.primaryFirstName }} {{ booking.customer?.primaryLastName
+                                            }}
+                                        </p>
+                                        <p style="display: flex; align-items: center; gap: 4px">
+                                            <mat-icon>phone</mat-icon>{{
+                                            booking.customer?.phone }}
+                                        </p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <p *ngFor="let vehId of booking.vehicleIds">{{ vehicleInfo(booking, vehId) }}
+                                        </p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <p>{{ formatAddress(booking.pickupAddress) }}</p>
+                                        <p>{{ booking.pickupAt | date: 'MM/dd/yyyy'}}</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <p>{{ formatAddress(booking.arrivalAddress) }}</p>
+                                        <p>{{ booking.arrivalAt | date: 'MM/dd/yyyy'}}</p>
+                                    </div>
+                                </td>
+                                <td>{{ booking.notes }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="trip-totals">
+                    <p><strong>Bookings:</strong> {{ bookingGroup!.bookings.length }}</p>
+                    <p><strong>Amount:</strong> ${{ getTripTotals(bookingGroup!.bookings).weight || 0 }}</p>
+                    <p><strong>Vehicles:</strong> {{ getTripTotals(bookingGroup!.bookings).volume || 0 }}</p>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

@@ -1,0 +1,13 @@
+@media print{
+    * {
+        visibility: hidden;
+    }
+
+    #printable{
+        visibility: visible;
+    }
+
+    app-header{
+        visibility: hidden;
+    }
+}
