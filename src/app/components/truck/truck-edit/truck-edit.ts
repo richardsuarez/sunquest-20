@@ -91,9 +91,8 @@ export class TruckEdit implements OnDestroy {
         if (s && s.id) {
           this.store.dispatch(TruckActions.updateTruckStart({ id: s.id, truck: payload }));
         }
-      }).unsubscribe();
+      });
     }
-
     this.dialogRef.close();
   }
 

@@ -50,6 +50,7 @@ export class Login {
   }
 
   ngOnDestroy() {
+    this.destroy$.next();
     this.destroy$.complete()
   }
 

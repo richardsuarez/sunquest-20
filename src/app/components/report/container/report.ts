@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Season } from '../../season/models/season.model';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -41,7 +41,7 @@ import { PrintView } from '../components/print-view/print-view';
   styleUrl: './report.css',
   providers: [provideNativeDateAdapter()],
 })
-export class Report implements OnInit {
+export class Report implements OnInit, OnDestroy {
 
   today = new Date();
   month = this.today.getMonth();
@@ -111,6 +111,11 @@ export class Report implements OnInit {
       }
 
     });
+  }
+
+  ngOnDestroy(){
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   allTrips(): number {
