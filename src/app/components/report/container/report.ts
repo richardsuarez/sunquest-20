@@ -21,6 +21,7 @@ import { Booking } from '../../book/model/booking.model';
 import { Address } from '../../customer/model/customer.model';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { PrintView } from '../components/print-view/print-view';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-report',
@@ -42,7 +43,8 @@ import { PrintView } from '../components/print-view/print-view';
   providers: [provideNativeDateAdapter()],
 })
 export class Report implements OnInit, OnDestroy {
-
+  
+  isMobile!: boolean;
   today = new Date();
   month = this.today.getMonth();
   year = this.today.getFullYear();
@@ -75,6 +77,7 @@ export class Report implements OnInit, OnDestroy {
 
   constructor(
     private readonly store: Store,
+    private readonly breakpoints: BreakpointObserver,
   ) {
     this.store.dispatch(ReportActions.clearBookReport())
     this.seasons$ = this.store.select(MainSelectors.selectSeasons);
@@ -87,6 +90,11 @@ export class Report implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.breakpoints.observe([
+      Breakpoints.HandsetPortrait,
+    ]).subscribe(res => {
+      this.isMobile = res.matches;
+    });
     this.bookings$.pipe(takeUntil(this.destroy$)).subscribe((bookings) => {
       if (bookings && bookings.length > 0) {
         this.bookingList = bookings;
