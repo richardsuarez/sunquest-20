@@ -16,3 +16,21 @@ export interface CalendarEvent {
 export interface CalendarEventsByDate {
   [dateKey: string]: CalendarEvent[]; // dateKey format: YYYY-MM-DD
 }
+
+export interface Day {
+  date: Date;
+  dateKey: string;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  events: CalendarEvent[];
+}
+
+export interface MonthChange {
+  startDate: Date;
+  endDate: Date;
+}
+
+export interface EventClickData {
+  event: CalendarEvent;
+  position: { top: number; left: number };
+}

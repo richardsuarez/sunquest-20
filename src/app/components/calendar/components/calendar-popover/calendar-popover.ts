@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef, OnDestroy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,7 +7,7 @@ import { Booking } from '../../../book/model/booking.model';
 import { map, Observable, Subject, takeUntil } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { currentMonthBookings, selectedTrip, selectTrucks } from '../../store/calendar.selectors';
-import { MatDialog } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { PopupComponent } from '../../../../shared/popup/popup.component';
 import { BookingDetailsPopupComponent } from '../booking-details-popup/booking-details-popup.component';
 import { deleteBookingStart } from '../../store/calendar.actions';
@@ -24,19 +24,18 @@ import * as CalendarActions from '../../store/calendar.actions';
   templateUrl: './calendar-popover.html',
   styleUrl: './calendar-popover.css'
 })
-export class CalendarPopoverComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CalendarPopoverComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private matDialog = inject(MatDialog);
   private router = inject(Router);
   @ViewChild('popoverContainer') popoverContainer: ElementRef | undefined;
 
   trip: Trip | null = null;
-  @Input() truckId: string | null = null;
-  @Input() startDate: Date = new Date();
-  @Input() endDate: Date = new Date();
-  @Input() position: { top: number; left: number } = { top: 0, left: 0 };
-  @Output() close = new EventEmitter<void>();
-
+  isMobile: boolean = false;
+  truckId: string | null = null;
+  startDate: Date = new Date();
+  endDate: Date = new Date();
+  
   tripBookings: Booking[] = []
   selectedTrip$!: Observable<Trip | null>;
   bookings$!: Observable<Booking[] | null>;
@@ -47,10 +46,20 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit, OnDestro
   truckList: any[] = [];
   truckList$: Observable<any[]>;
 
-  bookingTableColumns: string[] = ['customer', 'year', 'make', 'model', 'plate', 'actions'];
-  vehicelColumns: string[] = ['year', 'make', 'model', 'plate'];
+  currentBooking!: Booking;
+  bookingIndex = 0;
 
-  constructor() {
+  bookingTableColumns: string[] = ['customer', 'year', 'make', 'model', 'plate', 'vin', 'actions'];
+  vehicelColumns: string[] = ['year', 'make', 'model', 'plate', 'vin'];
+
+  constructor(
+    public dialogRef: MatDialogRef<CalendarPopoverComponent>,
+    @Inject(MAT_DIALOG_DATA) data: { isMobile: boolean, truckId: string, startDate: Date, endDate: Date },
+  ) {
+    this.isMobile = data.isMobile;
+    this.truckId = data.truckId;
+    this.startDate = data.startDate;
+    this.endDate = data.endDate;
     this.bookings$ = this.store.select(currentMonthBookings)
     this.selectedTrip$ = this.store.select(selectedTrip);
     this.truckList$ = this.store.select(selectTrucks);
@@ -64,14 +73,13 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit, OnDestro
     this.bookings$.pipe(takeUntil(this.destroy$)).subscribe(bookings => {
       if (bookings) {
         this.tripBookings = bookings.filter(b => b.tripId === this.trip?.id);
+        this.currentBooking = this.tripBookings[0];
       }
     })
 
     this.truckList$.pipe(takeUntil(this.destroy$)).subscribe(trucks => {
       this.truckList = trucks || [];
     });
-
-    this.adjustedPosition = this.position;
   }
 
   ngOnDestroy(){
@@ -79,54 +87,8 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit, OnDestro
     this.destroy$.complete();
   }
 
-  ngAfterViewInit() {
-    setTimeout(() => this.adjustPopoverPosition(), 0);
-  }
-
-  private adjustPopoverPosition() {
-    if (!this.popoverContainer) return;
-
-    const popover = this.popoverContainer.nativeElement as HTMLElement;
-    const popoverRect = popover.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-    const padding = 16; // padding from edges
-    const gap = 8; // gap between trigger and popover
-
-    let adjustedTop = this.position.top;
-    let adjustedLeft = this.position.left;
-
-    // Get the actual height of the popover from the element
-    const popoverHeight = popoverRect.height;
-    const popoverWidth = popoverRect.width;
-
-    // Calculate positions accounting for the popover's actual dimensions
-    const proposedBottom = adjustedTop + popoverHeight + gap;
-    const proposedRight = adjustedLeft + popoverWidth + padding;
-
-    // Check if popover goes below viewport
-    if (proposedBottom > viewportHeight) {
-      // Position above the trigger element instead (popover appears above)
-      // Need space for trigger element height (estimate ~40px for event badge)
-      adjustedTop = this.position.top - popoverHeight - gap - 40;
-    }
-
-    // Check if popover goes beyond right edge
-    if (proposedRight > viewportWidth) {
-      adjustedLeft = viewportWidth - popoverWidth - padding;
-    }
-
-    // Check if popover goes beyond left edge
-    if (adjustedLeft < padding) {
-      adjustedLeft = padding;
-    }
-
-    // Ensure top doesn't go above viewport
-    if (adjustedTop < padding) {
-      adjustedTop = padding;
-    }
-
-    this.adjustedPosition = { top: adjustedTop, left: adjustedLeft };
+  close(){
+    this.dialogRef.close();
   }
 
   deleteBooking(booking: Booking) {
@@ -186,10 +148,6 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit, OnDestro
     return booking.customer.primaryFirstName + ' ' + booking.customer.primaryMiddleName + ' ' + booking.customer.primaryLastName;
   }
 
-  closePopover() {
-    this.close.emit();
-  }
-
   displayBooking(booking: Booking) {
     if (!booking) return;
 
@@ -204,6 +162,20 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit, OnDestro
         this.toEditBooking(booking);
       }
     });
+  }
+
+  nextBooking(){
+    if(this.bookingIndex <= this.tripBookings.length - 1){
+      this.bookingIndex = this.bookingIndex + 1;
+      this.currentBooking = this.tripBookings[this.bookingIndex];
+    }
+  }
+
+  previousBooking(){
+    if(this.bookingIndex > 0){
+      this.bookingIndex = this.bookingIndex - 1;
+      this.currentBooking = this.tripBookings[this.bookingIndex];
+    }
   }
 
   toEditBooking(booking: Booking) {
@@ -223,7 +195,6 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit, OnDestro
       maxWidth: '500px',
       width: '90vw',
     });
-    this.closePopover();
   }
 
   deleteTrip() {
@@ -248,7 +219,6 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit, OnDestro
               truckId: this.truckId || '',
               trip: this.trip!
             }));
-            this.closePopover();
           }
         })
       ).subscribe();
