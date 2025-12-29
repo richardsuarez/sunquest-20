@@ -66,7 +66,7 @@ export class Calendar implements OnInit, OnDestroy {
       this.truckList = trucks || [];
     });
 
-    this.calendarEvents$.subscribe(events => {
+    this.calendarEvents$.pipe(takeUntil(this.destroy$)).subscribe(events => {
       this.calendarEvents = events;
     });
 
