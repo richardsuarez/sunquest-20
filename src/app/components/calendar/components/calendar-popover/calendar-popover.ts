@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, inject, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,7 +24,7 @@ import * as CalendarActions from '../../store/calendar.actions';
   templateUrl: './calendar-popover.html',
   styleUrl: './calendar-popover.css'
 })
-export class CalendarPopoverComponent implements OnInit, AfterViewInit {
+export class CalendarPopoverComponent implements OnInit, AfterViewInit, OnDestroy {
   private store = inject(Store);
   private matDialog = inject(MatDialog);
   private router = inject(Router);
@@ -72,6 +72,11 @@ export class CalendarPopoverComponent implements OnInit, AfterViewInit {
     });
 
     this.adjustedPosition = this.position;
+  }
+
+  ngOnDestroy(){
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngAfterViewInit() {
