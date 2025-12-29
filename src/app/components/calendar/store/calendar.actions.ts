@@ -13,7 +13,7 @@ export const clearCalendarEvents = createAction('[Calendar] Clear Events');
 export const loadBookingsForMonth = createAction('[Calendar] Load Bookings For Month', props<{ startDate: Date; endDate: Date; season: Season }>());
 export const loadBookingsForMonthSuccess = createAction('[Calendar] Load Bookings For Month Success', props<{ bookings: Booking[] }>());
 export const loadBookingsForMonthFail = createAction('[Calendar] Load Bookings For Month Fail', props<{ error: Error }>());
-export const loadTrucksAndTrips = createAction('[Calendar] Load Trucks And Trips', props<{ monthStart: Date; monthEnd: Date, season: Season }>());
+export const loadTrucksAndTrips = createAction('[Calendar] Load Trucks And Trips', props<{ monthStart: Date | null; monthEnd: Date | null, season: Season }>());
 export const loadTrucksAndTripsSuccess = createAction('[Calendar] Load Trucks And Trips Success', props<{ trucks: any[]; trips: { [truckId: string]: any[] } }>());
 export const loadTrucksAndTripsFail = createAction('[Calendar] Load Trucks And Trips Fail', props<{ error: Error }>());
 

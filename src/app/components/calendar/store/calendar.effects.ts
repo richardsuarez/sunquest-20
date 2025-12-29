@@ -56,10 +56,12 @@ export class CalendarEffects {
                     return this.calendarService.getTruckTrips(truck.id, action.season).pipe(
                       map(trips => ({
                         truckId: truck.id,
-                        trips: trips.filter((trip: any) => {
+                        trips: (action.monthStart && action.monthEnd)
+                        ? trips.filter((trip: any) => {
                           const depDate = new Date(trip.departureDate);
-                          return depDate >= action.monthStart && depDate <= action.monthEnd;
+                          return depDate >= action.monthStart! && depDate <= action.monthEnd!;
                         })
+                        :trips
                       }))
                     );
                   });

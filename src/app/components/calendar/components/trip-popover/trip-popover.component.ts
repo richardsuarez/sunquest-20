@@ -1,4 +1,4 @@
-import { Component, Inject, AfterViewInit, inject } from '@angular/core';
+import { Component, Inject, AfterViewInit, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -14,6 +14,9 @@ import { Store } from '@ngrx/store';
 import { Truck } from '../../../truck/model/truck.model';
 import * as CalendarActions from '../../store/calendar.actions';
 import { Trip } from '../../../trip/model/trip.model';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { selectTrips } from '../../store/calendar.selectors';
+import { AllowOnlyNumbersDirective } from "../../../../shared/directives/allow-only-numbers.directive";
 
 @Component({
     selector: 'app-trip-popover',
@@ -28,19 +31,23 @@ import { Trip } from '../../../trip/model/trip.model';
         MatInputModule,
         MatSelectModule,
         MatDatepickerModule,
-        MatNativeDateModule
+        MatNativeDateModule,
+        AllowOnlyNumbersDirective
     ],
     providers: [provideNativeDateAdapter()],
     templateUrl: './trip-popover.component.html',
     styleUrls: ['./trip-popover.component.scss']
 })
-export class TripPopoverComponent {
+export class TripPopoverComponent implements OnInit, OnDestroy {
     private store = inject(Store);
+    destroy$ = new Subject<void>();
     today = new Date();
     private tomorrow = new Date(this.today.getTime() + 86400000);
     private dayAfterTomorrow = new Date(this.today.getTime() + 172800000);
     trip: Trip | null = null;
     originalTruckId: string | null = null;
+    truckTripsObserver$!: Observable<{ [truckId: string]: Trip[]; }>;
+    truckTrips: { [truckId: string]: Trip[]; } = {};
 
     tripForm = new FormGroup({
         truckId: new FormControl<string>('', [Validators.required]),
@@ -70,6 +77,23 @@ export class TripPopoverComponent {
                 destination: data.trip.destination,
             });
         }
+
+        this.truckTripsObserver$ = this.store.select(selectTrips);
+    }
+
+    ngOnInit() {
+        this.truckTripsObserver$.pipe(takeUntil(this.destroy$)).subscribe((trips) => {
+            this.truckTrips = trips;
+        });
+
+        this.tripForm.controls.truckId.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((truckId) => {
+            this.onSelectTruck(truckId)
+        });
+    }
+
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     onCancel(): void {
@@ -122,6 +146,21 @@ export class TripPopoverComponent {
         this.dialogRef.close('success');
     }
 
+    onSelectTruck(truckId: string | null) {
+        // Calculate the next load number for the selected truck
+        if (truckId) {
+            const trips = this.truckTrips[truckId!];
+            let highestLoadNumber = 0;
+            trips.forEach(t => {
+                if (Number.parseInt(t.loadNumber) > highestLoadNumber) {
+                    highestLoadNumber = Number.parseInt(t.loadNumber);
+                }
+            });
+            highestLoadNumber += 1;
+            this.tripForm.controls.loadNumber.setValue(highestLoadNumber.toString());
+        }
+    }
+
     getErrorMessage(fieldName: string): string {
         const control = this.tripForm.get(fieldName);
         if (control?.hasError('required')) {
@@ -140,7 +179,7 @@ export class TripPopoverComponent {
     }
 
     isEditableTrip() {
-        if(this.trip && this.trip.id){
+        if (this.trip && this.trip.id) {
             return this.trip?.arrivalDate.getTime()! >= this.today.getTime()
         }
         return true
