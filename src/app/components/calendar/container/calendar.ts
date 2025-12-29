@@ -4,17 +4,17 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { firstValueFrom, Observable, takeUntil } from 'rxjs';
-import { Router } from '@angular/router';
+import { Observable, takeUntil } from 'rxjs';
 import { Subject } from 'rxjs';
-import { CalendarViewComponent, MonthChange, EventClickData } from '../components/calendar-view/calendar-view';
+import { CalendarViewComponent } from '../components/calendar-view/calendar-view';
 import { CalendarPopoverComponent } from '../components/calendar-popover/calendar-popover';
 import { TripPopoverComponent } from '../components/trip-popover/trip-popover.component';
-import { CalendarEvent } from '../model/calendar-event.model';
+import { CalendarEvent, MonthChange, EventClickData, Day } from '../model/calendar-event.model';
 import * as CalendarActions from '../store/calendar.actions';
 import * as CalendarSelectors from '../store/calendar.selectors';
 import * as MainSelectors from '../../main/store/main.selectors';
 import { Season } from '../../season/models/season.model';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-book',
@@ -24,8 +24,7 @@ import { Season } from '../../season/models/season.model';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    CalendarViewComponent,
-    CalendarPopoverComponent
+    CalendarViewComponent
   ],
   templateUrl: './calendar.html',
   styleUrl: './calendar.css',
@@ -34,8 +33,9 @@ export class Calendar implements OnInit, OnDestroy {
   private store = inject(Store);
   private matDialog = inject(MatDialog);
   private destroy$ = new Subject<void>();
+  isMobile!: boolean;
 
-  selectedDate: Date = new Date();
+  selectedDay!: Day;
   calendarEvents$: Observable<{ [dateKey: string]: CalendarEvent[] }>;
   calendarEvents: { [dateKey: string]: CalendarEvent[] } = {};
   truckList$: Observable<any[]>;
@@ -49,13 +49,20 @@ export class Calendar implements OnInit, OnDestroy {
   selectedTruck: string | null = null;
   activeSeason: Season | null = null;
 
-  constructor() {
+  constructor(
+    private readonly breakpoints: BreakpointObserver,
+  ) {
     this.calendarEvents$ = this.store.select(CalendarSelectors.selectCalendarEvents);
     this.truckList$ = this.store.select(CalendarSelectors.selectTrucks);
     this.seasons$ = this.store.select(MainSelectors.selectSeasons);
   }
 
   async ngOnInit() {
+    this.breakpoints.observe([
+      Breakpoints.HandsetPortrait,
+    ]).subscribe(res => {
+      this.isMobile = res.matches;
+    });
     // Load current month's bookings and trips
     const now = new Date();
     this.currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -134,20 +141,27 @@ export class Calendar implements OnInit, OnDestroy {
     });
   }
 
-  onDateSelected(date: Date) {
-    this.selectedDate = date;
+  onDateSelected(day: Day) {
+    this.selectedDay = day;
   }
 
   onEventClick(clickData: EventClickData) {
     const event = clickData.event;
     this.store.dispatch(CalendarActions.loadSelectedTrip({ trip: event.trip! }));
-    this.selectedTruck = event.truckId || null;
-    this.popoverPosition = clickData.position;
-    this.showPopover = true;
+    
+    this.matDialog.open(CalendarPopoverComponent, {
+      data:{
+        isMobile: this.isMobile,
+        truckId: event.truckId || null,
+        startDate: this.currentMonthStart,
+        endDate: this.currentMonthEnd,
+      },
+      maxWidth: '90vw',
+    })
   }
 
-  onDayClick(date: Date) {
-    this.selectedDate = date;
+  onDayClick(day: Day) {
+    this.selectedDay = day;
   }
 
   closePopover() {

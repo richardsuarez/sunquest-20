@@ -32,24 +32,36 @@
     <div class="body" *ngIf="bookReport$ | async as report">
         <!-- Print Buttons (hidden on print) -->
         <div class="print-controls" *ngIf="report.totalBookings > 0">
-            <div class="info">
-                <div style="text-align: center">
-                    <h3>Trucks</h3>
+            <ng-container *ngIf="!isMobile else reportGlobalInfo">
+                <div class="info">
+                    <div style="text-align: center">
+                        <h3>Trucks</h3>
+                    </div>
+                    <div style="text-align: center"><span>{{ report.trucks.length }}</span></div>
                 </div>
-                <div style="text-align: center"><span>{{ report.trucks.length }}</span></div>
-            </div>
-            <div class="info">
-                <div style="text-align: center">
-                    <h3>Trips</h3>
+                <div class="info">
+                    <div style="text-align: center">
+                        <h3>Trips</h3>
+                    </div>
+                    <div style="text-align: center"><span>{{ allTrips() }}</span></div>
                 </div>
-                <div style="text-align: center"><span>{{ allTrips() }}</span></div>
-            </div>
-            <div class="info">
-                <div style="text-align: center">
-                    <h3>Bookings</h3>
+                <div class="info">
+                    <div style="text-align: center">
+                        <h3>Bookings</h3>
+                    </div>
+                    <div style="text-align: center"><span>{{ report.totalBookings}}</span></div>
                 </div>
-                <div style="text-align: center"><span>{{ report.totalBookings}}</span></div>
-            </div>
+            </ng-container>
+
+            <ng-template  #reportGlobalInfo>
+                <div>
+                    <p><strong>Trucks:</strong> {{ report.trucks.length }}</p>
+                    <p><strong>Trips:</strong> {{ allTrips() }}</p>
+                    <p><strong>Bookings:</strong> {{ report.totalBookings }}</p>
+                </div>
+
+            </ng-template>
+
             <button mat-raised-button (click)="printFullReport(report)" style="background-color: #ED2D89; color: white">
                 <mat-icon>print</mat-icon>
                 Print Full Report
@@ -85,12 +97,14 @@
                         <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
                         <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
                             bookingGroup.trip.destination }}</h2>
-                        <p class="trip-details">
-                            <span>Departure: {{ bookingGroup.trip.departureDate | date: 'short' }}</span>
-                            <span *ngIf="bookingGroup.trip.arrivalDate">Arrival: {{ bookingGroup.trip.arrivalDate |
+                        <p *ngIf="!isMobile" class="trip-details">
+                            <span>Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy' }}</span>
+                            <span>Arrival: {{ bookingGroup.trip.arrivalDate |
                                 date:
-                                'short' }}</span>
+                                'MMM dd, yyyy' }}</span>
                         </p>
+                        <p class="trip-details" *ngIf="isMobile">Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy' }}</p>
+                        <p class="trip-details" *ngIf="isMobile">Arrival: {{ bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</p>
                     </div>
 
                     <div class="trip-print-button">
@@ -124,7 +138,7 @@
                                             }}
                                         </p>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon>phone</mat-icon>{{
+                                            <mat-icon *ngIf="!isMobile">phone</mat-icon>{{
                                             booking.customer?.phone }}
                                         </p>
                                     </div>
@@ -138,10 +152,10 @@
                                 <td>
                                     <div>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon>location_on</mat-icon>{{ formatAddress(booking.pickupAddress) }}
+                                            <mat-icon *ngIf="!isMobile">location_on</mat-icon>{{ formatAddress(booking.pickupAddress) }}
                                         </p>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon>calendar_month</mat-icon>{{ booking.pickupAt | date: 'MM/dd/yyyy'
+                                            <mat-icon *ngIf="!isMobile">calendar_month</mat-icon>{{ booking.pickupAt | date: 'MM/dd/yyyy'
                                             }}
                                         </p>
                                     </div>
@@ -149,10 +163,10 @@
                                 <td>
                                     <div>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon>location_on</mat-icon>{{ formatAddress(booking.arrivalAddress) }}
+                                            <mat-icon *ngIf="!isMobile">location_on</mat-icon>{{ formatAddress(booking.arrivalAddress) }}
                                         </p>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon>calendar_month</mat-icon>{{ booking.arrivalAt | date: 'MM/dd/yyyy'
+                                            <mat-icon *ngIf="!isMobile">calendar_month</mat-icon>{{ booking.arrivalAt | date: 'MM/dd/yyyy'
                                             }}
                                         </p>
                                     </div>
@@ -176,7 +190,5 @@
 
 
 <!-- Print View Component -->
-<app-print-view *ngIf="printing" 
-    [bookReport]="printingData.bookReport"
-    [truckTrips]="printingData.truckTrips"
+<app-print-view *ngIf="printing" [bookReport]="printingData.bookReport" [truckTrips]="printingData.truckTrips"
     [bookingGroup]="printingData.bookingGroup"></app-print-view>

@@ -65,7 +65,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   vehicles$!: Observable<Vehicle[]>;
   // temporary vehicles list stored until the user clicks Save
   tempVehicles: Partial<Vehicle>[] = [];
-  vehiclesProperties = ['year', 'make', 'model', 'plate', 'state', 'weight', 'actions'];
+  vehiclesProperties = ['year', 'make', 'model', 'plate', 'state', 'weight', 'vin', 'actions'];
 
   vehicleForm = new FormGroup({
     make: new FormControl<string | null>('', Validators.required),

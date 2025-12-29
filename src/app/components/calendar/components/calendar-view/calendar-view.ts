@@ -3,26 +3,9 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { CalendarEvent } from '../../model/calendar-event.model';
-import { Season } from '../../../season/models/season.model';
+import { CalendarEvent, Day, EventClickData, MonthChange } from '../../model/calendar-event.model';
 
-interface Day {
-  date: Date;
-  dateKey: string;
-  isCurrentMonth: boolean;
-  isToday: boolean;
-  events: CalendarEvent[];
-}
 
-export interface MonthChange {
-  startDate: Date;
-  endDate: Date;
-}
-
-export interface EventClickData {
-  event: CalendarEvent;
-  position: { top: number; left: number };
-}
 
 @Component({
   selector: 'app-calendar-view',
@@ -32,11 +15,12 @@ export interface EventClickData {
   styleUrl: './calendar-view.css'
 })
 export class CalendarViewComponent implements OnInit, OnChanges {
-  @Input() selectedDate: Date = new Date();
+  @Input() isMobile: boolean = false;
+  @Input() selectedDay!: Day | null;
   @Input() calendarEvents: { [dateKey: string]: CalendarEvent[] } = {};
-  @Output() dateSelected = new EventEmitter<Date>();
+  @Output() dateSelected = new EventEmitter<Day>();
   @Output() eventClick = new EventEmitter<EventClickData>();
-  @Output() dayClick = new EventEmitter<Date>();
+  @Output() dayClick = new EventEmitter<Day>();
   @Output() monthChanged = new EventEmitter<MonthChange>();
 
   currentMonth: Date = new Date();
@@ -58,16 +42,14 @@ export class CalendarViewComponent implements OnInit, OnChanges {
     this.days = [];
     const year = this.currentMonth.getFullYear();
     const month = this.currentMonth.getMonth();
-    
+
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const prevLastDay = new Date(year, month, 0);
-    
+
     const firstDayOfWeek = firstDay.getDay();
     const lastDayDate = lastDay.getDate();
     const prevLastDayDate = prevLastDay.getDate();
-    
-    let dateCounter = 0;
 
     // Previous month days
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
@@ -142,10 +124,12 @@ export class CalendarViewComponent implements OnInit, OnChanges {
     this.monthChanged.emit({ startDate, endDate });
   }
 
-  selectDate(date: Date) {
-    this.selectedDate = date;
-    this.dateSelected.emit(date);
-    this.dayClick.emit(date);
+  selectDate(day: Day) {
+    if (this.isMobile) {
+      this.selectedDay = day;
+      this.dateSelected.emit(day);
+      this.dayClick.emit(day);
+    }
   }
 
   onEventClick(event: CalendarEvent, mouseEvent: MouseEvent) {
@@ -155,6 +139,7 @@ export class CalendarViewComponent implements OnInit, OnChanges {
       left: rect.left
     };
     this.eventClick.emit({ event, position });
+
   }
 
   getDayEvents(day: Day): CalendarEvent[] {

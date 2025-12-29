@@ -6,7 +6,8 @@
 </div>
 <div class="body">
     <app-calendar-view 
-        [selectedDate]="selectedDate"
+        [isMobile]="isMobile"
+        [selectedDay]="selectedDay"
         [calendarEvents]="calendarEvents"
         (dateSelected)="onDateSelected($event)"
         (eventClick)="onEventClick($event)"
@@ -22,14 +23,4 @@
         aria-label="Add new trip">
         <mat-icon>add</mat-icon>
     </button>
-
-    <!-- Booking Popover -->
-    <app-calendar-popover
-        *ngIf="showPopover"
-        [truckId]="selectedTruck"
-        [startDate]="currentMonthStart"
-        [endDate]="currentMonthEnd"
-        [position]="popoverPosition"
-        (close)="closePopover()">
-    </app-calendar-popover>
 </div>
