@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { customerViewModel } from '../../customer/store/customer.selectors';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Address, Customer } from '../../customer/model/customer.model';
 import { getTruckListStart } from '../store/book.actions';
@@ -69,13 +69,14 @@ import { Season } from '../../season/models/season.model';
   styleUrls: ['./book.css'],
   providers: [provideNativeDateAdapter()],
 })
-export class Book implements OnInit {
+export class Book implements OnInit, OnDestroy {
   private store = inject(Store);
   public router = inject(Router);
   private snackBar = inject(MatSnackBar);
   customer$!: Observable<Customer | null>;
   truckList$!: Observable<Truck[]>;
   tripsMap$!: Observable<{ [truckId: string]: Trip[] }>;
+  trips: { [truckId: string]: Trip[] } = {};
   truckList: Truck[] = [];
   currentCustomer: Customer | null = null;
   private requestedTrips = new Set<string>();
@@ -100,7 +101,7 @@ export class Book implements OnInit {
 
   // Trip table column definitions
   truckColumns = ['truckNumber', 'trips'];
-  tripColumns = ['checkbox', 'loadNumber', 'departureDate', 'delayDate', 'week', 'origin', 'destination', 'remLoadCap', 'remCarCap'];
+  tripColumns = ['checkbox', 'loadNumber', 'departureDate', 'origin', 'destination', 'remLoadCap', 'remCarCap'];
 
   // Form for adding new trips
   tripForm = new FormGroup({
@@ -184,7 +185,7 @@ export class Book implements OnInit {
         }
       }
 
-      if (!customer?.DocumentID) {
+      if (!customer) {
         this.router.navigate(['main/customer/']);
       }
     });
@@ -222,6 +223,20 @@ export class Book implements OnInit {
         });
       }
     });
+
+    this.tripsMap$.pipe(takeUntil(this.destroy$)).subscribe((tripMap) => {
+      this.trips = tripMap;
+      
+    });
+
+    this.tripForm.controls.truckId.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((truckId) => {
+      this.onSelectTruck(truckId);
+    })
+  }
+
+  ngOnDestroy(): void {
+      this.destroy$.next();
+      this.destroy$.complete();
   }
 
   addTrip() {
@@ -256,6 +271,18 @@ export class Book implements OnInit {
 
     // Reset form after submission
     this.tripForm.reset();
+  }
+
+  allTripsAreUpcoming(trips: Trip[]){
+    if(trips.length === 0) return false;
+    const now = new Date();
+    let aux = true;
+    trips.forEach((t) => {
+      if(t.departureDate > now){
+        aux = false;
+      }
+    });
+    return aux;
   }
 
   areSelectedVehicles(): boolean {
@@ -324,6 +351,11 @@ export class Book implements OnInit {
     this.router.navigate(['main/customer'])
   }
 
+  nextTrips(trips: any[]){
+    const now = new Date();
+    return trips.filter(t => t.departureDate >= now);
+  }
+
   async save() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -377,28 +409,43 @@ export class Book implements OnInit {
     this.vehicleSelection = {};
   }
 
+  onSelectTruck(truckId: string | null) {
+    // Calculate the next load number for the selected truck
+    if (truckId) {
+      const trips = this.trips[truckId!];
+      let highestLoadNumber = 0;
+      trips.forEach(t => {
+        if (Number.parseInt(t.loadNumber) > highestLoadNumber) {
+          highestLoadNumber = Number.parseInt(t.loadNumber);
+        }
+      });
+      highestLoadNumber += 1;
+      this.tripForm.controls.loadNumber.setValue(highestLoadNumber.toString());
+    }
+  }
+
   refillCheckAmount() {
     const selectedCars = Object.values(this.vehicleSelection).filter((v) => v).length
     this.form.controls.amount.setValue(1200 * selectedCars)
   }
 
   selectableTrip(trip: Trip): boolean {
-    if ((this.form.controls.origin.value && trip.origin !== this.form.controls.origin.value) || 
+    if ((this.form.controls.origin.value && trip.origin !== this.form.controls.origin.value) ||
       (this.arrivalAt && trip.departureDate > this.arrivalAt) ||
       (this.pickupAt && trip.departureDate < this.pickupAt) ||
-      (this.vehicleSelection && Object.values(this.vehicleSelection).filter(v => v).length > trip.remCarCap) || 
+      (this.vehicleSelection && Object.values(this.vehicleSelection).filter(v => v).length > trip.remCarCap) ||
       (this.vehicleSelection && this.selectedVehiclesLoad() > trip.remLoadCap)) {
       return false;
     }
     return true;
   }
 
-  selectedVehiclesLoad(): number{
+  selectedVehiclesLoad(): number {
     let totalLoad = 0;
     Object.keys(this.vehicleSelection).forEach(id => {
-      if(this.vehicleSelection[id] && this.currentCustomer && this.currentCustomer.vehicles){
+      if (this.vehicleSelection[id] && this.currentCustomer && this.currentCustomer.vehicles) {
         const vehicle = this.currentCustomer.vehicles.find(v => v.id === id);
-        if(vehicle){
+        if (vehicle) {
           totalLoad += vehicle.weight || 0;
         }
       }
@@ -413,7 +460,7 @@ export class Book implements OnInit {
   updateRouteOrigin(event?: any) {
     if (this.form.controls.destination.value === 'Florida') {
       this.form.controls.origin.setValue('New York');
-      if(this.currentCustomer && this.currentCustomer.newYorkAddress){
+      if (this.currentCustomer && this.currentCustomer.newYorkAddress) {
         this.pickupAddressForm.controls.address1.setValue(this.currentCustomer.newYorkAddress.address1);
         this.pickupAddressForm.controls.address2.setValue(this.currentCustomer.newYorkAddress.address2);
         this.pickupAddressForm.controls.bldg.setValue(this.currentCustomer.newYorkAddress.bldg);
@@ -423,7 +470,7 @@ export class Book implements OnInit {
         this.pickupAddressForm.controls.zipCode.setValue(this.currentCustomer.newYorkAddress.zipCode);
       }
 
-      if(this.currentCustomer && this.currentCustomer.floridaAddress){
+      if (this.currentCustomer && this.currentCustomer.floridaAddress) {
         this.deliveryAddressForm.controls.address1.setValue(this.currentCustomer.floridaAddress.address1);
         this.deliveryAddressForm.controls.address2.setValue(this.currentCustomer.floridaAddress.address2);
         this.deliveryAddressForm.controls.bldg.setValue(this.currentCustomer.floridaAddress.bldg);
@@ -434,7 +481,7 @@ export class Book implements OnInit {
       }
     } else if (this.form.controls.destination.value === 'New York') {
       this.form.controls.origin.setValue('Florida');
-      if(this.currentCustomer && this.currentCustomer.floridaAddress){
+      if (this.currentCustomer && this.currentCustomer.floridaAddress) {
         this.pickupAddressForm.controls.address1.setValue(this.currentCustomer.floridaAddress.address1);
         this.pickupAddressForm.controls.address2.setValue(this.currentCustomer.floridaAddress.address2);
         this.pickupAddressForm.controls.bldg.setValue(this.currentCustomer.floridaAddress.bldg);
@@ -444,7 +491,7 @@ export class Book implements OnInit {
         this.pickupAddressForm.controls.zipCode.setValue(this.currentCustomer.floridaAddress.zipCode);
       }
 
-      if(this.currentCustomer && this.currentCustomer.newYorkAddress){
+      if (this.currentCustomer && this.currentCustomer.newYorkAddress) {
         this.deliveryAddressForm.controls.address1.setValue(this.currentCustomer.newYorkAddress.address1);
         this.deliveryAddressForm.controls.address2.setValue(this.currentCustomer.newYorkAddress.address2);
         this.deliveryAddressForm.controls.bldg.setValue(this.currentCustomer.newYorkAddress.bldg);
@@ -459,7 +506,7 @@ export class Book implements OnInit {
   updateRouteDestination(event: any) {
     if (this.form.controls.origin.value === 'Florida') {
       this.form.controls.destination.setValue('New York');
-      if(this.currentCustomer && this.currentCustomer.newYorkAddress){
+      if (this.currentCustomer && this.currentCustomer.newYorkAddress) {
         this.deliveryAddressForm.controls.address1.setValue(this.currentCustomer.newYorkAddress.address1);
         this.deliveryAddressForm.controls.address2.setValue(this.currentCustomer.newYorkAddress.address2);
         this.deliveryAddressForm.controls.bldg.setValue(this.currentCustomer.newYorkAddress.bldg);
@@ -469,7 +516,7 @@ export class Book implements OnInit {
         this.deliveryAddressForm.controls.zipCode.setValue(this.currentCustomer.newYorkAddress.zipCode);
       }
 
-      if(this.currentCustomer && this.currentCustomer.floridaAddress){
+      if (this.currentCustomer && this.currentCustomer.floridaAddress) {
         this.pickupAddressForm.controls.address1.setValue(this.currentCustomer.floridaAddress.address1);
         this.pickupAddressForm.controls.address2.setValue(this.currentCustomer.floridaAddress.address2);
         this.pickupAddressForm.controls.bldg.setValue(this.currentCustomer.floridaAddress.bldg);
@@ -480,7 +527,7 @@ export class Book implements OnInit {
       }
     } else if (this.form.controls.origin.value === 'New York') {
       this.form.controls.destination.setValue('Florida');
-      if(this.currentCustomer && this.currentCustomer.floridaAddress){
+      if (this.currentCustomer && this.currentCustomer.floridaAddress) {
         this.deliveryAddressForm.controls.address1.setValue(this.currentCustomer.floridaAddress.address1);
         this.deliveryAddressForm.controls.address2.setValue(this.currentCustomer.floridaAddress.address2);
         this.deliveryAddressForm.controls.bldg.setValue(this.currentCustomer.floridaAddress.bldg);
@@ -490,7 +537,7 @@ export class Book implements OnInit {
         this.deliveryAddressForm.controls.zipCode.setValue(this.currentCustomer.floridaAddress.zipCode);
       }
 
-      if(this.currentCustomer && this.currentCustomer.newYorkAddress){
+      if (this.currentCustomer && this.currentCustomer.newYorkAddress) {
         this.pickupAddressForm.controls.address1.setValue(this.currentCustomer.newYorkAddress.address1);
         this.pickupAddressForm.controls.address2.setValue(this.currentCustomer.newYorkAddress.address2);
         this.pickupAddressForm.controls.bldg.setValue(this.currentCustomer.newYorkAddress.bldg);

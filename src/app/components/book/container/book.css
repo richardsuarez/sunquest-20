@@ -168,13 +168,6 @@ td th{
     margin-bottom: 1.34375em; /* Aligns with mat-form-field */
 }
 
-/* Truck trip row colors - base colors */
-.truck-trip-row-0 { background-color: #f0f7ff; }
-.truck-trip-row-1 { background-color: #fff0f0; }
-.truck-trip-row-2 { background-color: #f0fff7; }
-.truck-trip-row-3 { background-color: #fff7f0; }
-.truck-trip-row-4 { background-color: #f7f0ff; }
-
 /* Hover effect for trip rows */
 .mat-mdc-row:hover {
     background-color: rgba(0, 0, 0, 0.04);
@@ -183,8 +176,4 @@ td th{
 .primary-button{
     background-color: #ED2D89; 
     color: white
-}
-
-.delayed {
-    background-color: #f58787 !important;
 }

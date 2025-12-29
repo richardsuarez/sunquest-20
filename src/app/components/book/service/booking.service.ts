@@ -45,7 +45,6 @@ export class BookingService {
       const q = query(
         tripsRef, 
         where('season', '==', `${season.seasonName}-${season.year}`),
-        where('departureDate', '>=', now), 
         orderBy('departureDate', 'asc'));
 
       const p = getDocsFromServer(q)

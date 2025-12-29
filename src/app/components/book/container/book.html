@@ -307,8 +307,8 @@
                             <th mat-header-cell *matHeaderCellDef>Trips</th>
                             <td mat-cell *matCellDef="let truck">
                                 <ng-container *ngIf="(tripsMap$ | async) as tripsMap">
-                                    <ng-container *ngIf="(tripsMap[truck.id] || []).length > 0">
-                                        <table mat-table [dataSource]="tripsMap[truck.id]" class="nested-table">
+                                    <ng-container *ngIf="(tripsMap[truck.id] || []).length > 0 && !allTripsAreUpcoming(tripsMap[truck.id]) else noNextTrips">
+                                        <table mat-table [dataSource]="nextTrips(tripsMap[truck.id])" class="nested-table">
                                             <ng-container matColumnDef="checkbox">
                                                 <th mat-header-cell *matHeaderCellDef> </th>
                                                 <td mat-cell *matCellDef="let trip"
@@ -328,18 +328,6 @@
                                                 <th mat-header-cell *matHeaderCellDef>Departure</th>
                                                 <td mat-cell *matCellDef="let trip">{{trip.departureDate |
                                                     date:'short'}}</td>
-                                            </ng-container>
-
-                                            <ng-container matColumnDef="delayDate">
-                                                <th mat-header-cell *matHeaderCellDef>Delay</th>
-                                                <td mat-cell *matCellDef="let trip" style="color: red">{{trip.delayDate
-                                                    | date:'short'}}</td>
-                                            </ng-container>
-
-                                            <ng-container matColumnDef="week">
-                                                <th mat-header-cell *matHeaderCellDef>Week</th>
-                                                <td mat-cell *matCellDef="let trip">{{weekNumber(trip.departureDate)}}
-                                                </td>
                                             </ng-container>
 
                                             <ng-container matColumnDef="origin">
@@ -363,13 +351,12 @@
                                             </ng-container>
 
                                             <tr mat-header-row *matHeaderRowDef="tripColumns"></tr>
-                                            <tr mat-row *matRowDef="let trip; columns: tripColumns;"
-                                                [class.delayed]="trip.delayDate"></tr>
+                                            <tr mat-row *matRowDef="let trip; columns: tripColumns;"></tr>
                                         </table>
                                     </ng-container>
-                                    <ng-container *ngIf="!(tripsMap[truck.id] || []).length">
+                                    <ng-template #noNextTrips>
                                         <div class="no-trips">No next trips available</div>
-                                    </ng-container>
+                                    </ng-template>
                                 </ng-container>
                             </td>
                         </ng-container>
