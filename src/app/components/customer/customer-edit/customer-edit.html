@@ -170,6 +170,10 @@
                     <div *ngIf="customerVM.vehicles && customerVM.vehicles.length">
                         <table mat-table [dataSource]="customerVM.vehicles" class="mat-elevation-z8"
                             style="border: 1px solid gray; margin-bottom: 20px">
+                            <ng-container matColumnDef="color">
+                                <th mat-header-cell *matHeaderCellDef> Color </th>
+                                <td mat-cell *matCellDef="let element"> {{element.color}} </td>
+                            </ng-container>
                             <ng-container matColumnDef="year">
                                 <th mat-header-cell *matHeaderCellDef> Year </th>
                                 <td mat-cell *matCellDef="let element"> {{element.year}} </td>
@@ -225,6 +229,10 @@
                     <h4 style="margin-bottom: 0px !important">Pending Vehicles</h4>
                     <table mat-table [dataSource]="tempVehicles" class="mat-elevation-z8"
                         style="border: 1px solid gray; margin-bottom: 20px">
+                        <ng-container matColumnDef="color">
+                            <th mat-header-cell *matHeaderCellDef> Color </th>
+                            <td mat-cell *matCellDef="let element"> {{element.color}} </td>
+                        </ng-container>
                         <ng-container matColumnDef="year">
                             <th mat-header-cell *matHeaderCellDef> Year </th>
                             <td mat-cell *matCellDef="let element"> {{element.year}} </td>
@@ -273,6 +281,10 @@
                 <form [formGroup]="vehicleForm" class="vehicle-form">
                     <div style="display:flex; justify-content: space-between; gap: 5px">
                         <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
+                            <mat-label>Color</mat-label>
+                            <input matInput formControlName="color">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
                             <mat-label>Year</mat-label>
                             <input matInput type="number" formControlName="year">
                         </mat-form-field>
@@ -284,12 +296,12 @@
                             <mat-label>Model</mat-label>
                             <input matInput formControlName="model">
                         </mat-form-field>
+                    </div>
+                    <div style="display:flex; justify-content: space-between; margin-top:8px; gap: 5px">
                         <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
                             <mat-label>Plate</mat-label>
                             <input matInput formControlName="plate">
                         </mat-form-field>
-                    </div>
-                    <div style="display:flex; justify-content: space-between; margin-top:8px; gap: 5px">
                         <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
                             <mat-label>State</mat-label>
                             <input matInput formControlName="state">
@@ -297,10 +309,6 @@
                         <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
                             <mat-label>VIN</mat-label>
                             <input matInput formControlName="vin">
-                        </mat-form-field>
-                        <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
-                            <mat-label>Color</mat-label>
-                            <input matInput formControlName="color">
                         </mat-form-field>
                         <mat-form-field floatLabel="always" appearance="outline" style="flex:1">
                             <mat-label>Weight (lbs)</mat-label>
@@ -463,51 +471,94 @@
 
             <h3>Vehicles</h3>
 
-            <mat-card *ngFor="let v of currentCustomer?.vehicles"
-                style="width: 100%; margin-bottom: 20px; padding: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>{{v.year}} {{v.make}} {{v.model}}</strong><br>
-                        VIN: {{v.vin}}<br>
-                        Plate: {{v.plate}} ({{v.state}})<br>
-                        Weight: {{v.weight}} lbs
+            <div class="vehicles-list" *ngIf="currentCustomer?.vehicles && currentCustomer?.vehicles?.length">
+                <div class="vehicle-item" *ngFor="let vehicle of currentCustomer?.vehicles">
+                    <div style="width: 75%">
+                        <div class="vehicle-detail">
+                            <span class="detail-label">Color:</span>
+                            <span class="detail-value">{{ vehicle.color }}</span>
+                        </div>
+                        <div class="vehicle-detail">
+                            <span class="detail-label">Year:</span>
+                            <span class="detail-value">{{ vehicle.year }}</span>
+                        </div>
+                        <div class="vehicle-detail">
+                            <span class="detail-label">Make:</span>
+                            <span class="detail-value">{{ vehicle.make }}</span>
+                        </div>
+                        <div class="vehicle-detail">
+                            <span class="detail-label">Model:</span>
+                            <span class="detail-value">{{ vehicle.model }}</span>
+                        </div>
+                        <div class="vehicle-detail">
+                            <span class="detail-label">Plate:</span>
+                            <span class="detail-value">{{ vehicle.plate }}</span>
+                        </div>
+                        <div class="vehicle-detail">
+                            <span class="detail-label">VIN:</span>
+                            <span class="detail-value">{{ vehicle.vin }}</span>
+                        </div>
                     </div>
-                    <div>
-                        <button mat-icon-button color="primary" (click)="vehicleForm.patchValue(v)">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button mat-icon-button color="warn" (click)="deleteVehicle(v.id)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
+                    <div class="card-actions" style="width: 25%">
+                        <button mat-button style="color: red;"
+                            (click)="deleteVehicle(vehicle.id)">Delete</button>
                     </div>
                 </div>
-            </mat-card>
-            <div *ngIf="currentCustomer && (!currentCustomer.vehicles || currentCustomer.vehicles.length === 0)" style="margin-bottom: 20px">
+            </div>
+
+            <div *ngIf="currentCustomer && (!currentCustomer.vehicles || currentCustomer.vehicles.length === 0)"
+                style="margin-bottom: 20px; width: 100%">
                 <div style="margin: 10px">No register vehicles for this customer</div>
             </div>
             <!-- temporary vehicles (not yet persisted) -->
-             <h3 *ngIf="tempVehicles && tempVehicles.length > 0">Pending vehicles</h3>
-             <mat-card *ngFor="let v of tempVehicles"
-                style="width: 100%; margin-bottom: 20px; padding: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>{{v.year}} {{v.make}} {{v.model}}</strong><br>
-                        VIN: {{v.vin}}<br>
-                        Plate: {{v.plate}} ({{v.state}})<br>
-                        Weight: {{v.weight}} lbs
+            <h3 *ngIf="tempVehicles && tempVehicles.length > 0">Pending vehicles</h3>
+            <div class="vehicles-list">
+                <div class="vehicle-item" *ngFor="let vehicle of tempVehicles">
+                    <div style="width: 75%">
+                        <div class="vehicle-detail">
+                            <span class="detail-label">Color:</span>
+                            <span class="detail-value">{{ vehicle.color }}</span>
+                        </div>
+                        <div class="vehicle-detail">
+                            <span class="detail-label">Year:</span>
+                            <span class="detail-value">{{ vehicle.year }}</span>
+                        </div>
+                        <div class="vehicle-detail">
+                            <span class="detail-label">Make:</span>
+                            <span class="detail-value">{{ vehicle.make }}</span>
+                        </div>
+                        <div class="vehicle-detail">
+                            <span class="detail-label">Model:</span>
+                            <span class="detail-value">{{ vehicle.model }}</span>
+                        </div>
+                        <div class="vehicle-detail">
+                            <span class="detail-label">Plate:</span>
+                            <span class="detail-value">{{ vehicle.plate }}</span>
+                        </div>
+                        <div class="vehicle-detail">
+                            <span class="detail-label">VIN:</span>
+                            <span class="detail-value">{{ vehicle.vin }}</span>
+                        </div>
                     </div>
-                    <div>
-                        <button mat-icon-button color="primary" (click)="vehicleForm.patchValue(v)">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button mat-icon-button color="warn" (click)="deleteTempVehicle(v)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
+                    <div class="card-actions" style="width: 25%">
+                        <button mat-button style="color: red;"
+                            (click)="deleteTempVehicle(vehicle)">Delete</button>
                     </div>
                 </div>
-            </mat-card>
+            </div>
+            
 
             <form [formGroup]="vehicleForm" style="width: 100%">
+                <div style="display: flex; justify-content: space-between; width: 100%">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Color</mat-label>
+                        <input matInput formControlName="color">
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Year</mat-label>
+                        <input matInput type="number" formControlName="year">
+                    </mat-form-field>
+                </div>
                 <div style="display: flex; justify-content: space-between; width: 100%">
                     <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
                         <mat-label>Make</mat-label>
@@ -520,28 +571,18 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; width: 100%">
                     <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>Year</mat-label>
-                        <input matInput type="number" formControlName="year">
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
                         <mat-label>Plate</mat-label>
                         <input matInput formControlName="plate">
                     </mat-form-field>
-                </div>
-                <div style="display: flex; justify-content: space-between; width: 100%">
                     <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
                         <mat-label>State</mat-label>
                         <input matInput formControlName="state">
                     </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>VIN</mat-label>
-                        <input matInput formControlName="vin">
-                    </mat-form-field>
                 </div>
                 <div style="display: flex; justify-content: space-between; width: 100%">
                     <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>Color</mat-label>
-                        <input matInput formControlName="color">
+                        <mat-label>VIN</mat-label>
+                        <input matInput formControlName="vin">
                     </mat-form-field>
                     <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
                         <mat-label>Weight (lbs)</mat-label>
@@ -550,20 +591,21 @@
 
                 </div>
                 <div style="display:flex; justify-content: end; align-items:center; margin-bottom: 15px">
-                    <button mat-raised-button color="primary" type="button" (click)="addVehicle()">Add
-                        Vehicle</button>
+                    <button mat-raised-button color="primary" type="button" (click)="addVehicle()">
+                        Add Vehicle
+                    </button>
                 </div>
             </form>
         </form>
         <div [class.form-actions-desktop]="!isMobile" [class.form-actions-mobile]="isMobile">
             <button mat-raised-button (click)="navigateBack()" style="color: black">Back</button>
-            <div *ngIf="customerForm.dirty || (tempVehicles && tempVehicles.length > 0)">
+            <div *ngIf="customerForm.dirty || (tempVehicles && tempVehicles.length > 0)" style="width: 45%;">
                 <button *ngIf="!(savingCustomer$ | async)" mat-raised-button type="submit" (click)="onSubmit()"
-                    style="background-color: #ED2D89; color: white">
+                    style="background-color: #ED2D89; color: white; width: 100%;">
                     Save
                 </button>
                 <button *ngIf="savingCustomer$ | async" mat-raised-button disabled
-                    style="background-color: gray; color: white">
+                    style="background-color: gray; color: white; width: 100%;">
                     <mat-icon *ngIf="savingCustomer$">
                         <mat-spinner diameter="18"></mat-spinner>
                     </mat-icon>

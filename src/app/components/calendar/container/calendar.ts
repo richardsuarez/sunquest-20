@@ -24,8 +24,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    CalendarViewComponent,
-    CalendarPopoverComponent
+    CalendarViewComponent
   ],
   templateUrl: './calendar.html',
   styleUrl: './calendar.css',

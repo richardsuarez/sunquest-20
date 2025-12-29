@@ -102,3 +102,63 @@
 ::ng-deep mat-form-field{
   max-width: 100% !important
 }
+
+.booking-card {
+  padding: 16px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vehicles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.vehicle-item {
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  border-left: 4px solid #2196F3;
+  display: flex;
+  align-items: center;
+}
+
+.vehicle-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  padding: 1px;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #666;
+  min-width: 60px;
+}
+
+.detail-value {
+  color: #333;
+  text-align: right;
+  flex: 1;
+  padding-left: 8px;
+  word-break: break-word;
+}
+
+.card-actions {
+  padding: 10px;
+}
+
