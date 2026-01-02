@@ -113,6 +113,7 @@ mat-select{
 
 .season-actions {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 10px
 }
@@ -160,7 +161,7 @@ mat-select{
     justify-content: space-between;
   }
 
-  .action-button {
+  /* .action-button {
     flex: 1;
-  }
+  } */
 }

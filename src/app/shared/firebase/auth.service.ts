@@ -12,14 +12,8 @@ export class AuthService {
     private router: Router,
   ) { }
 
-  async login(email: string, password: string){
-    await this.fireAuth.signInWithEmailAndPassword(email, password).then( () => {
-      localStorage.setItem('token', 'true');
-      this.router.navigate(['/main/calendar'])
-    }, error => {
-      console.error(error);
-      this.router.navigate(['/'])
-    })
+  async login(email: string, password: string): Promise<any>{
+    return this.fireAuth.signInWithEmailAndPassword(email, password);
   }
 
   logout(){
@@ -27,7 +21,7 @@ export class AuthService {
       localStorage.removeItem('token');
       this.router.navigate(['/']);
     }, err => {
-      alert(err.message)
+      alert(err.message);
       console.error(err);
     })
   }

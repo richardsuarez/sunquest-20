@@ -41,3 +41,11 @@ mat-form-field{
     text-align: center;
     margin-top: 30px;
 }
+
+.error{
+    background-color: rgb(249, 227, 225); 
+    padding: 10px; 
+    color: rgb(244, 67, 54); 
+    margin-bottom: 10px;
+    text-align: center;
+}
