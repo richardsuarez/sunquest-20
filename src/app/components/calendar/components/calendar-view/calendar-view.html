@@ -60,7 +60,7 @@
   <div class="day-cell-mobile" [class.other-month]="!selectedDay.isCurrentMonth" [class.today]="selectedDay.isToday">
 
     <!-- Day number -->
-    <div class="day-number">{{ selectedDay.date.getDate() }}</div>
+    <div class="day-number-mobile">{{ selectedDay.date.getDate() }}</div>
 
     <!-- Events in this day -->
     <div *ngIf="selectedDay.isCurrentMonth" class="events-container">

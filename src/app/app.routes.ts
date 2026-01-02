@@ -14,10 +14,16 @@ import { mainReducer } from './components/main/store/main.reducers';
 import { MainEffects } from './components/main/store/main.effects';
 import { reportReducer } from './components/report/store/report.reducers';
 import { ReportEffects } from './components/report/store/report.effects';
+import { loginReducers } from './components/login/store/login.reducers';
+import { LoginEffects } from './components/login/store/login.effects';
 
 export const routes: Routes = [
     {
         path: '',
+        providers: [
+            provideState('login', loginReducers),
+            provideEffects([LoginEffects]),
+        ],
         loadComponent() {
             return import('./components/login/login').then(m => m.Login);
         },

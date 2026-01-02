@@ -98,7 +98,7 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
         {
           data: {
             title: 'Cancel Booking',
-            message: `Are you sure you want to cancel booking ${booking.id}?`,
+            message: `Are you sure you want to cancel booking for ${booking.customer?.primaryFirstName} ${booking.customer?.primaryLastName}?`,
             cancelButton: 'No',
             successButton: 'Yes',
           }
