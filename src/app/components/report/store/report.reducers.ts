@@ -7,18 +7,17 @@ export const reportReducer = createReducer(
     initialReportState,
     on(ReportActions.loadBookingsStart, (state) => ({
         ...state,
-        loadingBookReport: true,
+        loading: true,
         appError: null
     })),
     on(ReportActions.loadBookingsSuccess, (state, action) => ({
         ...state,
-        loadingBookReport: false,
+        loading: false,
         bookings: action.bookings
     })),
     on(ReportActions.fail, (state, action) => ({
         ...state,
         loading: false,
-        loadingBookReport: false,
         appError: action.error.message
     })),
 
@@ -37,17 +36,29 @@ export const reportReducer = createReducer(
 
     on(ReportActions.getBookReport, (state) => ({
         ...state,
-        loadingBookReport: true,
+        loading: true,
         appError: null,
     })),
     on(ReportActions.getBookReportSuccess, (state, action) => ({
         ...state,
-        loadingBookReport: false,
+        loading: false,
         bookReport: action.bookReport,
     })),
 
     on(ReportActions.clearBookReport, (state) => ({
         ...state,
         bookReport: null,
+    })),
+
+    on(ReportActions.getCustomersStart, (state) => ({
+        ...state,
+        loading: true,
+        appError: null,
+    })),
+
+    on(ReportActions.getCustomerSuccess, (state, action) => ({
+        ...state,
+        loading: false,
+        customerList: action.customerList,
     }))
 );

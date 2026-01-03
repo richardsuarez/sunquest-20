@@ -1,5 +1,5 @@
 <div class="container">
-    <div class="sub-container">
+    <div id="sub-container" class="sub-container">
         <div style="cursor: pointer" routerLink="/main/calendar">
             <img src="../../../../assets/logo.png" alt="Sun Quest logo" width="150px">
         </div>
@@ -7,7 +7,8 @@
             <div class="shortcut" routerLink="/main/calendar">Calendar</div>
             <div class="shortcut" routerLink="/main/customer">Customers</div>
             <div class="shortcut" routerLink="/main/truck">Trucks</div>
-            <div class="shortcut" routerLink="/main/report/book">Book Report</div>
+            <div id="report-menu-header" class="shortcut" (click)="toggleReportMenu()">Report</div>
+            <!--<div class="shortcut" routerLink="/main/report/book">Report</div>-->
             
         </nav>
         <nav *ngIf="!isMobile" class="menu">
@@ -32,6 +33,14 @@
     <button mat-menu-item routerLink="/main/calendar" (click)="toggleMobileMainMenu()">Calendar</button>
     <button mat-menu-item routerLink="/main/customer" (click)="toggleMobileMainMenu()">Customers</button>
     <button mat-menu-item routerLink="/main/truck" (click)="toggleMobileMainMenu()">Trucks</button>
-    <button mat-menu-item routerLink="/main/report/book" (click)="toggleMobileMainMenu()">Book Reports</button>
-    <button mat-menu-item routerLink="/main/report/book" (click)="openSeasonPopup()">Season</button>
+    <button mat-menu-item routerLink="/main/report/work" (click)="toggleMobileMainMenu()">Work Order</button>
+    <button mat-menu-item (click)="openSeasonPopup()">Season</button>
+</div>
+
+<div id="report-menu" *ngIf="!isMobile && showReportMenu"
+    style="width: 150px;"
+    [style.top.px]="reportMenuPosition.top" 
+    [style.left.px]="reportMenuPosition.left">
+    <div style="width: 100%; padding: 10px; cursor: pointer" routerLink="/main/report/work" (click)="toggleReportMenu()">Work Order</div>
+    <div style="width: 100%; padding: 10px; cursor: pointer" routerLink="/main/report/customer" (click)="toggleReportMenu()">Customer Report</div>
 </div>

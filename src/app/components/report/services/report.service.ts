@@ -5,6 +5,7 @@ import { from, Observable, of } from "rxjs";
 import { Booking } from "../../book/model/booking.model";
 import { BookingGroup, BookReport, TruckReport } from "../models/report.models";
 import { Truck } from "../../truck/model/truck.model";
+import { Customer } from "../../customer/model/customer.model";
 
 @Injectable(
     { providedIn: 'root' }
@@ -55,14 +56,6 @@ export class ReportService {
                 catch (error) {
                     throw error;
                 }
-            })());
-        });
-    }
-
-    getTrucks() {
-        return runInInjectionContext(this.injector, () => {
-            return from((async () => {
-
             })());
         });
     }
@@ -140,6 +133,37 @@ export class ReportService {
                 );
                 return trucksWithTrips;
             })());
+        });
+    }
+
+    getCustomerList(searchFrom: string, to: string): Promise<Customer[]> {
+        return runInInjectionContext(this.injector, async () => {
+            const customerRef = collection(this.firestore, 'customers');
+            const q = query(customerRef, orderBy('primaryLastName', 'asc'), orderBy('primaryFirstName', 'asc'));
+            let customerList: Customer[] = [];
+            let snapshot;
+
+            // ✅ Try network first, fallback to cache if offline
+            try {
+                snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+            } catch (error) {
+                snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
+            }
+
+            snapshot.docs.map(doc => {
+                const lastName = (doc.data() as Customer).primaryLastName?.toLowerCase() || '';
+                if (lastName.startsWith(searchFrom.toLowerCase()) ||
+                    lastName.startsWith(to.toLowerCase())
+                ) {
+                    customerList.push({
+                        ...doc.data() as Customer,
+                        DocumentID: doc.id,
+                    })
+                }
+
+            });
+            console.log(customerList);
+            return customerList;
         });
     }
 
