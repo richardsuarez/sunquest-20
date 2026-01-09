@@ -19,15 +19,16 @@
                     equal</mat-error>
             </mat-form-field>
             <button type="submit" *ngIf="!(loading$ | async)" mat-raised-button type="submit" (click)="searchResult()"
-                style="background-color: #ED2D89; color: white">
+                style="background-color: #ED2D89; color: white; width: 75%">
                 Search
             </button>
-            <button *ngIf="loading$ | async" mat-raised-button disabled style="background-color: gray; color: white">
-                <mat-icon>
-                    <mat-spinner diameter="18"></mat-spinner>
-                </mat-icon>
-                Searching...
-            </button>
+            <button *ngIf="loading$ | async" mat-raised-button disabled
+                    style="background-color: gray; color: white; width: 75%;">
+                    <mat-icon *ngIf="loading$">
+                        <mat-spinner diameter="18"></mat-spinner>
+                    </mat-icon>
+                    Searching...
+                </button>
         </form>
     </div>
     <mat-progress-bar *ngIf="loading$ | async" class="indeterminate"></mat-progress-bar>
