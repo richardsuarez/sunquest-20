@@ -2,9 +2,8 @@
     display: flex;
     justify-content: center;
     max-width: 1500px;
-    margin: 0 auto;
-    position: relative;
-    top: 90px;
+    margin: 0;
+    /*top: 90px;*/
 }
 
 .container{

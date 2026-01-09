@@ -22,7 +22,7 @@
         </div>
         <div class="info-item">
           <span class="label">Phone</span>
-          <span class="value">{{ getCustomerContact().phone || getCustomerContact().telephone || 'Not provided' }}</span>
+          <span class="value">{{ getCustomerContact().primaryPhone || getCustomerContact().secondaryPhone || 'Not provided' }}</span>
         </div>
       </div>
     </div>

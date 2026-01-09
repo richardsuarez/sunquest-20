@@ -201,7 +201,10 @@ export class CustomerService {
   addCustomer(customer: Partial<Customer>): Observable<any> {
     return runInInjectionContext(this.injector, () => {
       const newCustomerRef = collection(this.firestore, this.collectionName);
-      return from(addDoc(newCustomerRef, customer));
+      return from(addDoc(newCustomerRef, customer).then(docRef => ({
+        ...customer,
+        DocumentID: docRef.id
+      })));
     });
   }
 

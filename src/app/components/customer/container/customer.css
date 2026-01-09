@@ -60,21 +60,6 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.female-customer-avatar {
-  background-color: #e91e63;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-.male-customer-avatar {
-  background-color: #1e7de9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
 .info-section {
   margin: 1rem 0;
 }
@@ -83,6 +68,14 @@
   vertical-align: middle;
   margin-right: 8px;
   color: #555;
+}
+
+.info-section p{
+  margin: 0px 0px 3px 0px;;
+}
+
+.info-section h4 {
+  margin-bottom: 10px;
 }
 
 mat-card-title {

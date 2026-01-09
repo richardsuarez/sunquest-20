@@ -48,11 +48,7 @@
                         <input type="text" matInput formControlName="phone" required placeholder="##########"
                             appAllowOnlyNumbers>
                     </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline">
-                        <mat-label>Telephone</mat-label>
-                        <input type="text" matInput formControlName="telephone" placeholder="##########"
-                            appAllowOnlyNumbers>
-                    </mat-form-field>
+
                 </div>
             </div>
             <div class="information-region">
@@ -83,6 +79,11 @@
                         </mat-select>
                     </mat-form-field>
                 </div>
+                <mat-form-field floatLabel="always" appearance="outline">
+                    <mat-label>secondaryPhone</mat-label>
+                    <input type="text" matInput formControlName="secondaryPhone" placeholder="##########"
+                        appAllowOnlyNumbers>
+                </mat-form-field>
             </div>
 
             <div class="information-region">
@@ -363,11 +364,7 @@
                     <input type="text" matInput formControlName="phone" required placeholder="##########"
                         appAllowOnlyNumbers>
                 </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Telephone</mat-label>
-                    <input type="text" matInput formControlName="telephone" placeholder="##########"
-                        appAllowOnlyNumbers>
-                </mat-form-field>
+
             </div>
 
             <h3>Secondary Customer</h3>
@@ -396,6 +393,11 @@
                     </mat-select>
                 </mat-form-field>
             </div>
+            <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                <mat-label>secondaryPhone</mat-label>
+                <input type="text" matInput formControlName="secondaryPhone" placeholder="##########"
+                    appAllowOnlyNumbers>
+            </mat-form-field>
 
             <h3>Florida Address</h3>
             <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
@@ -500,8 +502,7 @@
                         </div>
                     </div>
                     <div class="card-actions" style="width: 25%">
-                        <button mat-button style="color: red;"
-                            (click)="deleteVehicle(vehicle.id)">Delete</button>
+                        <button mat-button style="color: red;" (click)="deleteVehicle(vehicle.id)">Delete</button>
                     </div>
                 </div>
             </div>
@@ -541,12 +542,11 @@
                         </div>
                     </div>
                     <div class="card-actions" style="width: 25%">
-                        <button mat-button style="color: red;"
-                            (click)="deleteTempVehicle(vehicle)">Delete</button>
+                        <button mat-button style="color: red;" (click)="deleteTempVehicle(vehicle)">Delete</button>
                     </div>
                 </div>
             </div>
-            
+
 
             <form [formGroup]="vehicleForm" style="width: 100%">
                 <div style="display: flex; justify-content: space-between; width: 100%">

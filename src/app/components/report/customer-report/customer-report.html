@@ -1,0 +1,141 @@
+<div id="print-area">
+    <div class="header">
+        <div style="width: 33%"></div>
+        <div style="width: 33%; text-align: center">
+            <h1>Customer Report</h1>
+        </div>
+        <form style="display: flex; align-items: center; width: 33%; gap: 10px;" [formGroup]="searchForm"
+            (ngSubmit)="searchResult()">
+            <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                <mat-label>From</mat-label>
+                <input type="text" matInput formControlName="fromCriteria" appAllowOnlyAlphaChar maxlength="1" required>
+                <mat-error *ngIf="searchForm.controls.fromCriteria.hasError('novalid')">Must comes earlier than To or
+                    equal</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                <mat-label>To</mat-label>
+                <input type="text" matInput formControlName="toCriteria" appAllowOnlyAlphaChar maxlength="1" required>
+                <mat-error *ngIf="searchForm.controls.toCriteria.hasError('novalid')">Must comes later than From or
+                    equal</mat-error>
+            </mat-form-field>
+            <button type="submit" *ngIf="!(loading$ | async)" mat-raised-button type="submit" (click)="searchResult()"
+                style="background-color: #ED2D89; color: white">
+                Search
+            </button>
+            <button *ngIf="loading$ | async" mat-raised-button disabled style="background-color: gray; color: white">
+                <mat-icon>
+                    <mat-spinner diameter="18"></mat-spinner>
+                </mat-icon>
+                Searching...
+            </button>
+        </form>
+    </div>
+    <mat-progress-bar *ngIf="loading$ | async" class="indeterminate"></mat-progress-bar>
+
+    <div *ngIf="(customerList$ | async) && (customerList$ | async)?.length === 0" class="no-results">
+        <p>No customers found for the selected characters.</p>
+    </div>
+
+    <!-- Report Body -->
+    <div *ngIf="(customerList$ | async) as customers">
+        <div class="printable" *ngIf="(customerList$ | async) && (customerList$ | async)?.length !== 0">
+            <!-- Print Buttons (hidden on print) -->
+            <div class="print-controls " *ngIf="customers.length > 0">
+                <h3>Showing {{ totalOfRecords(customers) }} records</h3>
+                <button mat-raised-button (click)="printFullReport()" style="background-color: #ED2D89; color: white">
+                    <mat-icon>print</mat-icon>
+                    Print Full Report
+                </button>
+            </div>
+
+            <div *ngFor="let c of customers" class="customer-section">
+                <div class="customer-header ">
+                    <h2>
+                        <span style="color: #0571b4;">{{ c.recNo }}</span> &nbsp;&nbsp;|&nbsp;&nbsp; {{
+                        c.primaryFirstName
+                        }} {{ c.primaryLastName }}
+                    </h2>
+                    <button mat-stroked-button (click)="printRecord(c.recNo)">
+                        <mat-icon>print</mat-icon>
+                        Print All Records
+                    </button>
+                </div>
+
+                <!-- Trips for this Truck -->
+                <div *ngFor="let v of c.vehicles" class="rec-section">
+                    <!-- Trip Header -->
+                    <div class="rec-header">
+                        <button mat-stroked-button (click)="printRecord(v.recNo ?? '')">
+                            <mat-icon>print</mat-icon>
+                            Print Record
+                        </button>
+                    </div>
+
+                    <div class="page" [style.display]="isPrinting && !v.recNo?.startsWith(printFilterRecNo) ? 'none' : 'block'">
+                        <p><span style="font-weight: bold">Rec No:</span> {{ v.recNo }}</p>
+                        <p><span style="font-weight: bold">First Name 1:</span> {{ c.primaryFirstName }}</p>
+                        <p><span style="font-weight: bold">Last Name 1:</span> {{ c.primaryLastName }}</p>
+                        <p><span style="font-weight: bold">First Name 2:</span> {{ c.secondaryFirstName }}</p>
+                        <p><span style="font-weight: bold">Last Name 2:</span> {{ c.secondaryLastName }}</p>
+                        <p><span style="font-weight: bold">Title:</span> {{ c.primaryTitle }} / {{
+                            c.secondaryTitle }}</p>
+                        <p><span style="font-weight: bold">Email:</span> {{ c.email }}</p>
+                        <p><span style="font-weight: bold">Primary Cell:</span> {{ c.primaryPhone }}</p>
+                        <p style="margin-bottom: 20px"><span style="font-weight: bold">Secondary Cell:</span> {{
+                            c.secondaryPhone }}</p>
+                        <p><span style="font-weight: bold">Car:</span> {{ v.make }}</p>
+                        <p><span style="font-weight: bold">Model:</span> {{ v.model }}</p>
+                        <p><span style="font-weight: bold">Year:</span> {{ v.year }}</p>
+                        <p><span style="font-weight: bold">Plate:</span> {{ v.plate }}</p>
+                        <p><span style="font-weight: bold">State:</span> {{ v.state }}</p>
+                        <p><span style="font-weight: bold">VIN:</span> {{ v.vin }}</p>
+                        <p><span style="font-weight: bold">Color:</span> {{ v.color }}</p>
+                        <p style="margin-bottom: 20px;"><span style="font-weight: bold">Weight:</span> {{
+                            v.weight }}</p>
+                        <p><span style="font-weight: bold">NY Address:</span> {{ c.newYorkAddress.address1 }} {{
+                            c.newYorkAddress.address2 }}</p>
+                        <p><span style="font-weight: bold">NY Town:</span> {{ c.newYorkAddress.city }}</p>
+                        <p><span style="font-weight: bold">NY State:</span> {{ c.newYorkAddress.state }}</p>
+                        <p><span style="font-weight: bold">NY Zip:</span> {{ c.newYorkAddress.zipCode }}</p>
+                        <p><span style="font-weight: bold">NY Apt:</span> {{ c.newYorkAddress.apt }}</p>
+                        <p><span style="font-weight: bold">NY Bldg:</span> {{ c.newYorkAddress.bldg }}</p>
+                        <p style="margin-bottom: 60px"><span style="font-weight: bold">NY Notes:</span></p>
+                        <p><span style="font-weight: bold">FL Address:</span> {{ c.floridaAddress.address1 }} {{
+                            c.newYorkAddress.address2 }}</p>
+                        <p><span style="font-weight: bold">FL Town:</span> {{ c.floridaAddress.city }}</p>
+                        <p><span style="font-weight: bold">FL State:</span> {{ c.floridaAddress.state }}</p>
+                        <p><span style="font-weight: bold">FL Zip:</span> {{ c.floridaAddress.zipCode }}</p>
+                        <p><span style="font-weight: bold">FL Apt:</span> {{ c.floridaAddress.apt }}</p>
+                        <p><span style="font-weight: bold">FL Bldg:</span> {{ c.floridaAddress.bldg }}</p>
+                        <p style="margin-bottom: 60px"><span style="font-weight: bold">FL Notes:</span> </p>
+                        <div style="display: flex;">
+                            <p style="margin-right: 150px"><span style="font-weight: bold">Check No:</span></p>
+                            <p><span style="font-weight: bold">Bank:</span></p>
+                        </div>
+                        <p><span style="font-weight: bold">Price:</span></p>
+                        <p><span style="font-weight: bold">Customer Arriving:</span></p>
+                        <div style="display: flex; margin-bottom: 20px">
+                            <p style="margin-right: 150px"><span style="font-weight: bold">Date:</span></p>
+                            <p><span style="font-weight: bold">Time:</span></p>
+                        </div>
+                        <div style="display: flex">
+                            <p style="margin-right: 150px"><span style="font-weight: bold">PU Date:</span></p>
+                            <p><span style="font-weight: bold">PU Time:</span></p>
+                        </div>
+                        <p><span style="font-weight: bold">Origin:</span></p>
+                        <p><span style="font-weight: bold">Destination:</span></p>
+                        <p><span style="font-weight: bold">Delay Date:</span></p>
+                        <div style="display: flex;">
+                            <p style="margin-right: 150px"><span style="font-weight: bold">Truck #:</span></p>
+                            <p><span style="font-weight: bold">Company Name:</span></p>
+                        </div>
+                        <div style="display: flex;">
+                            <p style="margin-right: 150px"><span style="font-weight: bold">Departure:</span></p>
+                            <p><span style="font-weight: bold">Arrival:</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

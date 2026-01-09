@@ -1,13 +1,24 @@
-@media print{
-    * {
-        visibility: hidden;
+@media print {
+    body * {
+        margin: 0;
+        padding: 0;
+        display: none !important;
     }
 
-    #printable{
-        visibility: visible;
+    app-header {
+        display: none !important;
     }
 
-    app-header{
-        visibility: hidden;
+    .no-printable{
+        display: none !important;
+        margin: 0px !important;
+        padding: 0px !important;
     }
+
+    .wrapper{
+        margin: 0px;
+        padding: 0px;
+        display: none !important;
+    }
+
 }

@@ -1,4 +1,5 @@
 export interface Customer {
+    recNo: string;
     DocumentID: string;
     primaryFirstName: string | null;
     primaryLastName: string | null;
@@ -9,8 +10,8 @@ export interface Customer {
     secondaryMiddleName: string | null;
     secondaryTitle: string | null;
     email: string | null;
-    telephone: string | null;
-    phone: string | null;
+    primaryPhone: string | null;
+    secondaryPhone: string | null;
     floridaAddress: Address;
     newYorkAddress: Address;
     joinedOn: Date | null;
@@ -33,6 +34,7 @@ export interface Address{
 }
 
 export interface Vehicle {
+    recNo: string | null;
     id?: string;
     make: string | null;
     model: string | null;
