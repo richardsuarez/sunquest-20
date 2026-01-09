@@ -22,7 +22,6 @@
 
 .customer-section {
     margin-bottom: 30px;
-    page-break-inside: avoid;
 }
 
 .customer-header {
@@ -80,6 +79,7 @@ p {
 }
 
 @media print {
+
     .header,
     .rec-header,
     .print-controls,
@@ -88,6 +88,7 @@ p {
     mat-progress-bar,
     .no-results {
         display: none !important;
+        visibility: hidden
     }
 
     body {
@@ -102,12 +103,19 @@ p {
     }
 
     .rec-section {
-        padding: 5px 15px 0px 15px !important;
+        padding: 0px 15px 0px 15px !important;
         border: none !important;
         background: white !important;
+        margin: 0px;
     }
 
     .page{
+        height: 1044px;
         font-size: 14px;
+        margin: 0px;
+    }
+
+    .customer-section {
+        margin: 0px !important;
     }
 }

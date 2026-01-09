@@ -49,7 +49,7 @@
             </div>
 
             <div *ngFor="let c of customers" class="customer-section">
-                <div class="customer-header ">
+                <div class="customer-header">
                     <h2>
                         <span style="color: #0571b4;">{{ c.recNo }}</span> &nbsp;&nbsp;|&nbsp;&nbsp; {{
                         c.primaryFirstName
@@ -71,7 +71,9 @@
                         </button>
                     </div>
 
-                    <div class="page" [style.display]="isPrinting && !v.recNo?.startsWith(printFilterRecNo) ? 'none' : 'block'">
+                    <div class="page" [style.display]="isPrinting && !v.recNo?.startsWith(printFilterRecNo) ? 'none' : 'block'"
+                        [style.visibility]="isPrinting && !v.recNo?.startsWith(printFilterRecNo) ? 'hidden' : 'visible'"
+                    >
                         <p><span style="font-weight: bold">Rec No:</span> {{ v.recNo }}</p>
                         <p><span style="font-weight: bold">First Name 1:</span> {{ c.primaryFirstName }}</p>
                         <p><span style="font-weight: bold">Last Name 1:</span> {{ c.primaryLastName }}</p>
