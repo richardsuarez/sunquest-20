@@ -10,19 +10,21 @@ body {
 }
 
 /* styles.scss (global) */
+@page {
+  margin: 0;
+  padding: 0;
+}
+
 @media print {
-  /* hide everything by default */
   body * {
     visibility: hidden !important;
   }
 
-  /* show only the print area */
   #print-area,
   #print-area * {
     visibility: visible !important;
   }
 
-  /* place print area at top-left so it prints nicely */
   #print-area {
     position: absolute;
     left: 0;
@@ -30,10 +32,8 @@ body {
     width: 100%;
   }
 
-  /* common fixes */
-  .app-header,
-  .app-sidebar,
-  .no-print {
+  app-header * {
     display: none !important;
+    visibility: hidden !important;
   }
 }

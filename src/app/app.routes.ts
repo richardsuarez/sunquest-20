@@ -107,9 +107,15 @@ export const routes: Routes = [
                 path: 'report',
                 children: [
                     {
-                        path: 'book',
+                        path: 'work',
                         loadComponent() {
-                            return import('./components/report/container/report').then(m => m.Report);
+                            return import('./components/report/work-order/container/work-order').then(m => m.WorkOrder);
+                        },
+                    },
+                    {
+                        path: 'customer',
+                        loadComponent() {
+                            return import('./components/report/customer-report/customer-report').then((m => m.CustomerReport))
                         },
                     }
                 ],

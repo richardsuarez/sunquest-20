@@ -27,11 +27,11 @@ export class BookingDetailsPopupComponent {
       .join(' ');
   }
 
-  getCustomerContact(): { email: string | null; phone: string | null; telephone: string | null } {
+  getCustomerContact(): { email: string | null; primaryPhone: string | null; secondaryPhone: string | null } {
     return {
       email: this.booking.customer?.email || null,
-      phone: this.booking.customer?.phone || null,
-      telephone: this.booking.customer?.telephone || null
+      primaryPhone: this.booking.customer?.primaryPhone || null,
+      secondaryPhone: this.booking.customer?.secondaryPhone || null
     };
   }
 

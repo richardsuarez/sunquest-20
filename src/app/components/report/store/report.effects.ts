@@ -4,7 +4,7 @@ import { Actions, createEffect, ofType } from "@ngrx/effects";
 import * as ReportActions from "./report.actions";
 import { ReportService } from "../services/report.service";
 import { map, switchMap, catchError } from "rxjs/operators";
-import { of } from "rxjs";
+import { from, of } from "rxjs";
 
 @Injectable()
 export class ReportEffects {
@@ -48,6 +48,18 @@ export class ReportEffects {
                     catchError((error) =>
                         of(ReportActions.fail({ error }))
                     )
+                )
+            )
+        )
+    );
+
+    customerList$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(ReportActions.getCustomersStart),
+            switchMap((action) => 
+                from(this.reportService.getCustomerList(action.from, action.to)).pipe(
+                    map((customerList) => ReportActions.getCustomerSuccess({customerList})),
+                    catchError((error) => of(ReportActions.fail({error})))
                 )
             )
         )

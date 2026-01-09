@@ -8,7 +8,7 @@ import { Observable, Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
 
@@ -28,7 +28,6 @@ import { error, signing } from './store/login.selectors';
     MatInput,
     MatButton,
     MatProgressSpinnerModule,
-    MatIconButton
 ],
   templateUrl: 'login.html',
   styleUrls: ['login.css']

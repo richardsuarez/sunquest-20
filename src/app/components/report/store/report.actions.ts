@@ -3,6 +3,7 @@ import { Booking } from "../../book/model/booking.model";
 import { Season } from "../../season/models/season.model";
 import { Truck } from "../../truck/model/truck.model";
 import { BookReport } from "../models/report.models";
+import { Customer } from "../../customer/model/customer.model";
 
 export const loadBookingsStart = createAction(
     '[Report] Start loading booking report',
@@ -42,3 +43,17 @@ export const getBookReportSuccess = createAction(
 export const clearBookReport = createAction(
     '[Report] Set as null bookReport property'
 );
+
+// #region customer-report
+
+export const getCustomersStart = createAction(
+    '[Report] Start fetch customer list',
+    props<{from: string, to: string}>()
+);
+
+export const getCustomerSuccess = createAction(
+    '[Report] Successsful fetch customer list',
+    props<{customerList: Customer[]}>(),
+);
+
+// #endregion customer-report

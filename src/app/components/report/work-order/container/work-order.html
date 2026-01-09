@@ -1,28 +1,35 @@
 <div *ngIf="!printing">
     <div class="header">
-        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
-            <mat-label>Date range</mat-label>
-            <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
-                <input matStartDate required placeholder="Start date" formControlName="start">
-                <input matEndDate required placeholder="End date" formControlName="end">
-            </mat-date-range-input>
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-date-range-picker #picker></mat-date-range-picker>
-            <mat-error *ngIf="dateRange.hasError('required')">Please select a range</mat-error>
-        </mat-form-field>
-        <button *ngIf="!(loadingBookReport$ | async)" mat-raised-button type="submit" (click)="searchResult()"
-            style="background-color: #ED2D89; color: white">
-            Search
-        </button>
-        <button *ngIf="loadingBookReport$ | async" mat-raised-button disabled
-            style="background-color: gray; color: white">
-            <mat-icon>
-                <mat-spinner diameter="18"></mat-spinner>
-            </mat-icon>
-            Searching...
-        </button>
+        <div style="width: 33%"></div>
+        <div style="width: 33%; text-align: center">
+            <h1>Work Order</h1>
+        </div>
+        <div style="display: flex; align-items: center; width: 33%; gap: 10px;">
+            <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                <mat-label>Date range</mat-label>
+                <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
+                    <input matStartDate required placeholder="Start date" formControlName="start">
+                    <input matEndDate required placeholder="End date" formControlName="end">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-date-range-picker #picker></mat-date-range-picker>
+                <mat-error *ngIf="dateRange.hasError('required')">Please select a range</mat-error>
+            </mat-form-field>
+            <button *ngIf="!(loading$ | async)" mat-raised-button type="submit" (click)="searchResult()"
+                style="background-color: #ED2D89; color: white">
+                Search
+            </button>
+            <button *ngIf="loading$ | async" mat-raised-button disabled
+                style="background-color: gray; color: white">
+                <mat-icon>
+                    <mat-spinner diameter="18"></mat-spinner>
+                </mat-icon>
+                Searching...
+            </button>
+        </div>
+
     </div>
-    <mat-progress-bar *ngIf="loadingBookReport$ | async" class="indeterminate"></mat-progress-bar>
+    <mat-progress-bar *ngIf="loading$ | async" class="indeterminate"></mat-progress-bar>
 
     <div *ngIf="(bookings$ | async) && (bookings$ | async)?.length === 0" class="no-results">
         <p>No bookings found for the selected date range.</p>
@@ -53,7 +60,7 @@
                 </div>
             </ng-container>
 
-            <ng-template  #reportGlobalInfo>
+            <ng-template #reportGlobalInfo>
                 <div>
                     <p><strong>Trucks:</strong> {{ report.trucks.length }}</p>
                     <p><strong>Trips:</strong> {{ allTrips() }}</p>
@@ -152,10 +159,12 @@
                                 <td>
                                     <div>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon *ngIf="!isMobile">location_on</mat-icon>{{ formatAddress(booking.pickupAddress) }}
+                                            <mat-icon *ngIf="!isMobile">location_on</mat-icon>{{
+                                            formatAddress(booking.pickupAddress) }}
                                         </p>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon *ngIf="!isMobile">calendar_month</mat-icon>{{ booking.pickupAt | date: 'MM/dd/yyyy'
+                                            <mat-icon *ngIf="!isMobile">calendar_month</mat-icon>{{ booking.pickupAt |
+                                            date: 'MM/dd/yyyy'
                                             }}
                                         </p>
                                     </div>
@@ -163,10 +172,12 @@
                                 <td>
                                     <div>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon *ngIf="!isMobile">location_on</mat-icon>{{ formatAddress(booking.arrivalAddress) }}
+                                            <mat-icon *ngIf="!isMobile">location_on</mat-icon>{{
+                                            formatAddress(booking.arrivalAddress) }}
                                         </p>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon *ngIf="!isMobile">calendar_month</mat-icon>{{ booking.arrivalAt | date: 'MM/dd/yyyy'
+                                            <mat-icon *ngIf="!isMobile">calendar_month</mat-icon>{{ booking.arrivalAt |
+                                            date: 'MM/dd/yyyy'
                                             }}
                                         </p>
                                     </div>
@@ -190,5 +201,5 @@
 
 
 <!-- Print View Component -->
-<app-print-view *ngIf="printing" [bookReport]="printingData.bookReport" [truckTrips]="printingData.truckTrips"
-    [bookingGroup]="printingData.bookingGroup"></app-print-view>
+<app-print-view-work-order *ngIf="printing" [bookReport]="printingData.bookReport"
+    [truckTrips]="printingData.truckTrips" [bookingGroup]="printingData.bookingGroup"></app-print-view-work-order>

@@ -88,7 +88,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
     secondaryMiddleName: new FormControl<string | null>(''),
     secondaryTitle: new FormControl<string | null>(''),
     email: new FormControl<string | null>('', Validators.email),
-    telephone: new FormControl<string | null>(''),
+    secondaryPhone: new FormControl<string | null>(''),
     phone: new FormControl<string | null>('', Validators.required),
     floridaAddress: new FormGroup({
       address1: new FormControl<string | null>('', Validators.required),

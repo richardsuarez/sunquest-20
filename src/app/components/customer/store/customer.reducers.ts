@@ -85,6 +85,7 @@ export const customerReducer = createReducer(
     on(CustomerActions.createCustomer, (state) => ({
         ...state,
         customerViewModel: {
+            recNo: '',
             DocumentID: new Date().toISOString(),
             primaryFirstName: '',
             primaryLastName: '',
@@ -95,8 +96,8 @@ export const customerReducer = createReducer(
             secondaryMiddleName: '',
             secondaryTitle: '',
             email: '',
-            telephone: '',
-            phone: '',
+            primaryPhone: '',
+            secondaryPhone: '',
             floridaAddress: {
                 address1: '',
                 address2: '',

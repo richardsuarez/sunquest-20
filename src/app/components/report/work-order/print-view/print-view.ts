@@ -8,7 +8,7 @@ import { Booking } from '../../../book/model/booking.model';
 import { Address } from '../../../customer/model/customer.model';
 
 @Component({
-  selector: 'app-print-view',
+  selector: 'app-print-view-work-order',
   imports: [
     CommonModule,
     DatePipe,
@@ -19,7 +19,7 @@ import { Address } from '../../../customer/model/customer.model';
   styleUrl: './print-view.css',
   providers: [provideNativeDateAdapter()],
 })
-export class PrintView implements AfterViewInit {
+export class PrintViewWorkOrder implements AfterViewInit {
 
   @Input() bookReport: BookReport | null = null;
   @Input() truckTrips: TruckReport | null = null;

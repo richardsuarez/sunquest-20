@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Season } from '../../season/models/season.model';
+import { Season } from '../../../season/models/season.model';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { MatError, MatFormFieldModule } from "@angular/material/form-field";
+import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { provideNativeDateAdapter } from '@angular/material/core';
@@ -10,17 +10,17 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AsyncPipe, CommonModule } from '@angular/common';
 
-import * as MainSelectors from '../../main/store/main.selectors';
-import * as ReportActions from '../store/report.actions';
-import * as ReportSelectors from '../store/report.selectors';
+import * as MainSelectors from '../../../main/store/main.selectors';
+import * as ReportActions from '../../store/report.actions';
+import * as ReportSelectors from '../../store/report.selectors';
 import { MatButtonModule } from '@angular/material/button';
-import { Truck } from '../../truck/model/truck.model';
+import { Truck } from '../../../truck/model/truck.model';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { BookReport, TruckReport, BookingGroup } from '../models/report.models';
-import { Booking } from '../../book/model/booking.model';
-import { Address } from '../../customer/model/customer.model';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { PrintView } from '../components/print-view/print-view';
+import { BookReport, TruckReport, BookingGroup } from '../../models/report.models';
+import { Booking } from '../../../book/model/booking.model';
+import { Address } from '../../../customer/model/customer.model';
+import { MatDialogModule } from '@angular/material/dialog';
+import { PrintViewWorkOrder } from '../print-view/print-view';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
@@ -36,18 +36,16 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
     ReactiveFormsModule,
     AsyncPipe,
     MatDialogModule,
-    PrintView
+    PrintViewWorkOrder
 ],
-  templateUrl: './report.html',
-  styleUrl: './report.css',
+  templateUrl: './work-order.html',
+  styleUrl: './work-order.css',
   providers: [provideNativeDateAdapter()],
 })
-export class Report implements OnInit, OnDestroy {
+export class WorkOrder implements OnInit, OnDestroy {
   
   isMobile!: boolean;
   today = new Date();
-  month = this.today.getMonth();
-  year = this.today.getFullYear();
   readonly dateRange = new FormGroup({
     start: new FormControl(null),
     end: new FormControl(null),
@@ -56,7 +54,6 @@ export class Report implements OnInit, OnDestroy {
   activeSeason: Season | null = null;
   seasons$!: Observable<Season[]>;
   loading$!: Observable<boolean>;
-  loadingBookReport$!: Observable<boolean>;
   bookReport$!: Observable<BookReport | null>;
   bookings$!: Observable<Booking[] | null>;
   trucks$!: Observable<Truck[] | null>;
@@ -82,7 +79,6 @@ export class Report implements OnInit, OnDestroy {
     this.store.dispatch(ReportActions.clearBookReport())
     this.seasons$ = this.store.select(MainSelectors.selectSeasons);
     this.loading$ = this.store.select(ReportSelectors.loading);
-    this.loadingBookReport$ = this.store.select(ReportSelectors.loadingBookReport);
     this.bookings$ = this.store.select(ReportSelectors.bookings);
     this.trucks$ = this.store.select(ReportSelectors.trucks);
     this.bookReport$ = this.store.select(ReportSelectors.bookingReport);

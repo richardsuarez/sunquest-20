@@ -5,6 +5,7 @@ import { from, Observable, of } from "rxjs";
 import { Booking } from "../../book/model/booking.model";
 import { BookingGroup, BookReport, TruckReport } from "../models/report.models";
 import { Truck } from "../../truck/model/truck.model";
+import { Customer, Vehicle } from "../../customer/model/customer.model";
 
 @Injectable(
     { providedIn: 'root' }
@@ -55,14 +56,6 @@ export class ReportService {
                 catch (error) {
                     throw error;
                 }
-            })());
-        });
-    }
-
-    getTrucks() {
-        return runInInjectionContext(this.injector, () => {
-            return from((async () => {
-
             })());
         });
     }
@@ -139,6 +132,88 @@ export class ReportService {
                     })
                 );
                 return trucksWithTrips;
+            })());
+        });
+    }
+
+    getCustomerList(searchFrom: string, searchTo: string) {
+        return runInInjectionContext(this.injector, () => {
+            return from((async () => {
+                const alphabet = [
+                    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+                    "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
+                    "u", "v", "w", "x", "y", "z"
+                ];
+                // loading trucks
+                let customerList: Customer[] = [];
+                try {
+                    const trucksCollection = collection(this.firestore, 'customers');
+                    const q = query(
+                        trucksCollection,
+                        orderBy('primaryLastName', 'asc'),
+                        orderBy('primaryFirstName', 'asc')
+                    );
+                    let snapshot;
+                    try {
+                        snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+                    } catch (error) {
+                        snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
+                    }
+                    alphabet.forEach((letter) => {
+                        //logic to search from searchFrom to searchTo
+                        if (letter.localeCompare(searchFrom.toLowerCase()) >= 0 && letter.localeCompare(searchTo.toLowerCase()) <= 0) {
+                            snapshot.docs.map(doc => {
+                                if ((doc.data() as Customer).primaryLastName?.toLowerCase().startsWith(letter.toLowerCase())) {
+                                    customerList.push({
+                                        ...(doc.data() as any),
+                                        DocumentId: doc.id,
+                                    });
+                                }
+                            });
+                        }
+                    })
+                }
+                catch (error) {
+                    throw error;
+                }
+
+                //loading vehicels
+                const customersWithVehicles = await Promise.all(
+                    customerList.map(async (customer) => {
+                        try {
+                            const vehiclesCollection = collection(this.firestore, `customers/${customer.DocumentID}/vehicles`);
+                            const q = query(
+                                vehiclesCollection,
+                                orderBy('recNo', 'asc')
+                            );
+                            let snapshot;
+                            try {
+                                snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+                            } catch (error) {
+                                snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
+                            }
+                            let vehicles: Vehicle[] = [];
+                            snapshot.forEach(doc => {
+                                const data = doc.data() as any;
+                                const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+
+                                vehicles.push({
+                                    ...data,
+                                    id: doc.id,
+                                    createdAt,
+                                });
+                            });
+                            return {
+                                ...customer,
+                                vehicles,
+                            };
+                        }
+                        catch (error) {
+                            throw error;
+                        }
+                    })
+                );
+                return customersWithVehicles;
             })());
         });
     }

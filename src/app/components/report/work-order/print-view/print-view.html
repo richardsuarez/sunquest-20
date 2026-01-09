@@ -1,5 +1,4 @@
 <div id="print-area" class="print-preview-modal">
-
     <!-- Modal Body - Print Content -->
     <div id="printable" class="print-preview-content">
         <!-- Full Report Preview -->
@@ -46,8 +45,7 @@
                                                     booking.customer?.primaryLastName }}
                                                 </p>
                                                 <p style="display: flex; align-items: center; gap: 4px">
-                                                    <mat-icon>phone</mat-icon>{{
-                                                    booking.customer?.phone }}
+                                                    <mat-icon>phone</mat-icon>{{ booking.customer?.primaryPhone }}, {{ booking.customer?.secondaryPhone }} 
                                                 </p>
                                             </div>
                                         </td>
@@ -143,8 +141,7 @@
                                                     booking.customer?.primaryLastName }}
                                                 </p>
                                                 <p style="display: flex; align-items: center; gap: 4px">
-                                                    <mat-icon>phone</mat-icon>{{
-                                                    booking.customer?.phone }}
+                                                    <mat-icon>phone</mat-icon>{{ booking.customer?.primaryPhone }}, {{ booking.customer?.secondaryPhone }}
                                                 </p>
                                             </div>
                                         </td>
@@ -233,8 +230,7 @@
                                             }}
                                         </p>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon>phone</mat-icon>{{
-                                            booking.customer?.phone }}
+                                            <mat-icon>phone</mat-icon>{{ booking.customer?.primaryPhone }}, {{ booking.customer?.secondaryPhone }}
                                         </p>
                                     </div>
                                 </td>
