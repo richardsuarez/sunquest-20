@@ -1,5 +1,6 @@
+import { Booking } from "../../book/model/booking.model";
+
 export interface Customer {
-    recNo: string;
     DocumentID: string;
     primaryFirstName: string | null;
     primaryLastName: string | null;
@@ -45,4 +46,11 @@ export interface Vehicle {
     color: string | null;
     weight: number | null;
     createdAt?: any;
+}
+
+export interface Record {
+    recNo: string;
+    customer: Customer;
+    vehicle: Vehicle;
+    bookings: Booking[];
 }

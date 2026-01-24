@@ -1,10 +1,10 @@
 import { inject, Injectable, runInInjectionContext, EnvironmentInjector } from '@angular/core';
-import { Firestore, collection, query, orderBy, limit, startAfter, doc, addDoc, deleteDoc, updateDoc, or, where, getDocFromServer, endAt, getDocsFromServer, getDocsFromCache, and, getCountFromServer, endBefore, limitToLast } from '@angular/fire/firestore';
-import { collectionData } from '@angular/fire/firestore';
+import { Firestore, collection, query, orderBy, limit, startAfter, doc, addDoc, deleteDoc, updateDoc, or, where, getDocFromServer, endAt, getDocsFromServer, getDocsFromCache, and, getCountFromServer, endBefore, limitToLast, getDocs } from '@angular/fire/firestore';
 import { from, Observable, of } from 'rxjs';
 import { Customer, SearchCriteria } from '../model/customer.model';
 import { Vehicle } from '../model/customer.model';
-import { collection as collectionRef, doc as docRef, addDoc as addDocument, deleteDoc as deleteDocument, collectionData as collectionDataFn } from '@angular/fire/firestore';
+import { Season } from '../../season/models/season.model';
+import { Booking } from '../../book/model/booking.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
@@ -51,10 +51,7 @@ export class CustomerService {
     });
   }
 
-  async getNextCustomerList(
-    criteria: SearchCriteria,
-    lastCustomer: Customer | null | undefined
-  ): Promise<Observable<Customer[]>> {
+  async getNextCustomerList(criteria: SearchCriteria, lastCustomer: Customer | null | undefined): Promise<Observable<Customer[]>> {
     return runInInjectionContext(this.injector, async () => {
       const pageSize = criteria.pageSize;
       const customerRef = collection(this.firestore, this.collectionName);
@@ -63,20 +60,26 @@ export class CustomerService {
 
       // ✅ CASE 1: Search text provided (prefix search)
       if (filter) {
-        const firstNameQuery = and(
-          where('primaryFirstName', '>=', filter),
-          where('primaryFirstName', '<=', filter + '\uf8ff')
-        );
-        const lastNameQuery = and(
-          where('primaryLastName', '>=', filter),
-          where('primaryLastName', '<=', filter + '\uf8ff')
+        let auxQ = or(
+          and(
+            where('primaryLastName', '>=', filter),
+            where('primaryLastName', '<=', filter + '\uf8ff')
+          ),
+          and(
+            where('primaryPhone', '>=', filter),
+            where('primaryPhone', '<=', filter + '\uf8ff')
+          ),
+          and(
+            where('secondaryPhone', '>=', filter),
+            where('secondaryPhone', '<=', filter + '\uf8ff')
+          )
         );
 
         if (!lastCustomer) {
           // First page — starts-with search
           q = query(
             customerRef,
-            or(firstNameQuery, lastNameQuery),
+            auxQ,
             orderBy('primaryLastName'),
             orderBy('primaryFirstName'),
             limit(pageSize)
@@ -86,7 +89,7 @@ export class CustomerService {
           const docRef = await getDocFromServer(doc(customerRef, `${lastCustomer.DocumentID}`));
           q = query(
             customerRef,
-            or(firstNameQuery, lastNameQuery),
+            auxQ,
             orderBy('primaryLastName'),
             orderBy('primaryFirstName'),
             startAfter(docRef),
@@ -112,28 +115,33 @@ export class CustomerService {
       }
 
       // ✅ Try network first, fallback to cache if offline
+      let customers: Customer[] = [];
       try {
         const snapshot = await getDocsFromServer(q);
-        const customers = snapshot.docs.map(doc => ({
+        customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,
           DocumentID: doc.id,
         }));
-        return of(customers);
       } catch (error) {
-        console.warn('⚠️ Firestore server unreachable, falling back to cache:', error);
         const snapshot = await getDocsFromCache(q);
-        const customers = snapshot.docs.map(doc => ({
+        customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,
           DocumentID: doc.id,
         }));
-        return of(customers);
       }
+      const auxCustomers = await Promise.all(
+        customers.map(async customer => {
+          const vehicles = await from(this.getVehicles(customer.DocumentID!)).toPromise();
+          return { ...customer, vehicles };
+        })
+      );
+      return of(auxCustomers);
     });
   }
 
   async getPreviousCustomerList(
     criteria: SearchCriteria,
-    firstCustomer: Customer 
+    firstCustomer: Customer
   ): Promise<Observable<Customer[]>> {
     return runInInjectionContext(this.injector, async () => {
       const pageSize = criteria.pageSize;
@@ -143,19 +151,25 @@ export class CustomerService {
 
       // ✅ CASE 1: Search with filter
       if (filter) {
-        const firstNameQuery = and(
-          where('primaryFirstName', '>=', filter),
-          where('primaryFirstName', '<=', filter + '\uf8ff')
-        );
-        const lastNameQuery = and(
-          where('primaryLastName', '>=', filter),
-          where('primaryLastName', '<=', filter + '\uf8ff')
+        let auxQ = or(
+          and(
+            where('primaryLastName', '>=', filter),
+            where('primaryLastName', '<=', filter + '\uf8ff')
+          ),
+          and(
+            where('primaryPhone', '>=', filter),
+            where('primaryPhone', '<=', filter + '\uf8ff')
+          ),
+          and(
+            where('secondaryPhone', '>=', filter),
+            where('secondaryPhone', '<=', filter + '\uf8ff')
+          )
         );
 
         const docRef = await getDocFromServer(doc(customerRef, `${firstCustomer.DocumentID}`));
         q = query(
           customerRef,
-          or(firstNameQuery, lastNameQuery),
+          auxQ,
           orderBy('primaryLastName'),
           orderBy('primaryFirstName'),
           endBefore(docRef),
@@ -176,25 +190,28 @@ export class CustomerService {
       }
 
       // ✅ Server-first, cache fallback
+      let customers: Customer[] = [];
       try {
         const snapshot = await getDocsFromServer(q);
-        const customers = snapshot.docs.map(doc => ({
+        customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,
           DocumentID: doc.id,
         }));
-
-        // Reverse the result since we’re paginating backwards
-        return of(customers);
       } catch (error) {
         console.warn('⚠️ Firestore server unreachable, falling back to cache:', error);
         const snapshot = await getDocsFromCache(q);
-        const customers = snapshot.docs.map(doc => ({
+        customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,
           DocumentID: doc.id,
         }));
-
-        return of(customers);
       }
+      const auxCustomers = await Promise.all(
+        customers.map(async customer => {
+          const vehicles = await from(this.getVehicles(customer.DocumentID!)).toPromise();
+          return { ...customer, vehicles };
+        })
+      );
+      return of(auxCustomers);
     });
   }
 
@@ -255,4 +272,59 @@ export class CustomerService {
   }
 
   // #endregion Vehicle
+
+  getBookingList(customers: Customer[]): Promise<Observable<Booking[]>> {
+    const auxCustomers: string[] = [];
+    for(let c of customers){
+      auxCustomers.push(c.DocumentID!);
+    }
+    return runInInjectionContext(this.injector, async () => {
+      const bookingsRef = collection(this.firestore, `bookings`);
+      const q = query(
+        bookingsRef,
+        where('customer.DocumentID', 'in', auxCustomers),
+      );
+      const p = getDocsFromServer(q)
+        .then(snapshot => {
+          return snapshot.docs.map(d => {
+            const data = d.data() as any;
+            // Normalize Firestore Timestamps to JS Date
+            const arrivalAt = data.arrivalAt ? (typeof data.arrivalAt.toDate === 'function' ? data.arrivalAt.toDate() : new Date(data.arrivalAt)) : null;
+            const pickupAt = data.pickupAt ? (typeof data.pickupAt.toDate === 'function' ? data.pickupAt.toDate() : new Date(data.pickupAt)) : null;
+            const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+            const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+            return {
+              ...data,
+              id: d.id,
+              arrivalAt,
+              pickupAt,
+              createdAt,
+              departureDate
+            } as Booking;
+          });
+        })
+        .catch(async (err) => {
+          console.warn('[BookingService] getBookingsForDateRange() - server query failed', err);
+          const snapshot = await getDocsFromCache(q);
+          return snapshot.docs.map(d => {
+            const data = d.data() as any;
+            const arrivalAt = data.arrivalAt ? (typeof data.arrivalAt.toDate === 'function' ? data.arrivalAt.toDate() : new Date(data.arrivalAt)) : null;
+            const pickupAt = data.pickupAt ? (typeof data.pickupAt.toDate === 'function' ? data.pickupAt.toDate() : new Date(data.pickupAt)) : null;
+            const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+            const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+            return {
+              ...data,
+              id: d.id,
+              arrivalAt,
+              pickupAt,
+              createdAt,
+              departureDate
+            } as Booking;
+          });
+        });
+
+      return from(p) as Observable<Booking[]>;
+    });
+  }
+
 }

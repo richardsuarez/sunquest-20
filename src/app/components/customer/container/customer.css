@@ -1,67 +1,62 @@
-.headers{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1500px;
-    width: 100%;
-    
-    h1{
-        margin-left: 20px;
-    }
-    button{
-        margin-right: 20px;
-    }
+.headers {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1500px;
+  width: 100%;
+
+  h1 {
+    margin-left: 20px;
+  }
+
+  button {
+    margin-right: 20px;
+  }
 }
 
-.form-field{
-    width: 500px;
+.form-field {
+  width: 500px;
 }
 
-.form-field-mobile{ 
-    height: 50px;
+.form-field-mobile {
+  height: 50px;
 }
 
-.search{
-    display: flex;
-    justify-content: center;
-    padding: 0px 10px 0px 10px;
-    margin-bottom: 15px;
+.search {
+  display: flex;
+  justify-content: center;
+  padding: 0px 10px 0px 10px;
+  margin-bottom: 15px;
 }
 
-.search-button{
-    width: 50px;
-    height: 50px;
-    border-radius: 25px !important;
+.search-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px !important;
 
-    mat-icon{
-        top: 3px;
-        right: -2px
-    }
+  mat-icon {
+    top: 3px;
+    right: -2px
+  }
 }
 
-.body{
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 30px;
+.body {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
 }
 
-.customer-card-desktop {
-  width: 400px;
+.record-card-desktop {
   margin: 1rem auto;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
 }
 
-.customer-card-mobile {
-  width: 90%;
+.record-card-mobile {
   margin: 1rem auto;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.info-section {
-  margin: 1rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .info-section mat-icon {
@@ -70,22 +65,45 @@
   color: #555;
 }
 
-.info-section p{
-  margin: 0px 0px 3px 0px;;
+.info-section p {
+  margin: 0px 0px 3px 0px;
+  ;
 }
 
 .info-section h4 {
   margin-bottom: 10px;
+  color: #203d72;
+}
+
+mat-card {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+mat-card-header {
+  background-color: #2664b4;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+mat-card-content {
+  display: flex;
+  justify-content: space-between;
 }
 
 mat-card-title {
   font-size: 1.3rem;
   font-weight: bold;
+  padding: 5px;
+  color: #273c5c;
 }
 
 mat-card-subtitle {
   font-size: 1rem;
-  color: #666;
+  padding: 5px;
+  color: #273c5c;
 }
 
 mat-card-actions {
@@ -94,8 +112,38 @@ mat-card-actions {
   padding: 20px;
 }
 
-.pagination{
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.customer-info {
+  max-width: 20%;
+  border-radius: 5px;
+  border: 3px solid darkgray;
+  padding: 5px;
+  margin-top: 10px;
+}
+
+table {
+  font-size: 24px !important;
+  td {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    border-right: 1px solid darkgray !important;
+    background-color: white;
+  }
+
+  th {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    border-right: 1px solid darkgray !important;
+    text-align: center;
+  }
+}
+
+.currentSeason { 
+  color: green;
+  font-weight: bold;
 }

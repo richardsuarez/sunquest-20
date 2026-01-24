@@ -35,14 +35,14 @@
                     <div style="display: flex; gap: 25px">
                         <p>
                             <mat-icon>phone</mat-icon>
-                            <a *ngIf="customer.phone" [href]="'tel:' + customer.phone">{{ customer.phone }}</a>
-                            <span *ngIf="!customer.phone">No provided</span>
+                            <a *ngIf="customer.primaryPhone" [href]="'tel:' + customer.primaryPhone">{{ customer.primaryPhone }}</a>
+                            <span *ngIf="!customer.primaryPhone">No provided</span>
                         </p>
-                        <p *ngIf="customer.telephone">
+                        <p *ngIf="customer.secondaryPhone">
                             <mat-icon>phone</mat-icon>
-                            <a *ngIf="!customer.telephone" [href]="'tel:' + customer.telephone">{{ customer.telephone
+                            <a *ngIf="!customer.secondaryPhone" [href]="'tel:' + customer.secondaryPhone">{{ customer.secondaryPhone
                                 }}</a>
-                            <span *ngIf="!customer.telephone">No provided</span>
+                            <span *ngIf="!customer.secondaryPhone">No provided</span>
                     </div>
 
                 </section>

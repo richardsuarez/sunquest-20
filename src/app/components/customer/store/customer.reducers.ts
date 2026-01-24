@@ -7,8 +7,9 @@ export const CUSTOMER_FEATURE_KEY = 'customer';
 
 const initialState: CustomerState = {
     loading: false,
-    customerList: [],
+    customerList: null,
     customerViewModel: null,
+    bookingList: [],
     searchCriteria: {
         searchValue: '',
         pageSize: 20,
@@ -152,5 +153,16 @@ export const customerReducer = createReducer(
                 vehicles: action.vehicles 
               }
             : state.customerViewModel,
-    }))
+    })),
+
+    on(CustomerActions.getBookingsStart, (state) => ({
+        ...state,
+        loading: true,  
+        appError: null,
+    })),
+    on(CustomerActions.getBookingsEnd, (state, action) => ({    
+        ...state,
+        loading: false,
+        bookingList: action.bookings,
+    })),
 )
