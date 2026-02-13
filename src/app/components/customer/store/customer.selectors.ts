@@ -6,6 +6,7 @@ export const customerFeature = createFeatureSelector<CustomerState>('customer')
 export const loading = createSelector(customerFeature, (state) => {return state.loading});
 export const customerList = createSelector(customerFeature, (state) => {return state.customerList});
 export const customerViewModel = createSelector(customerFeature, (state) => {return state.customerViewModel});
+export const bookings = createSelector(customerFeature, (state) => {return state.bookingList});
 export const searchCriteria = createSelector(customerFeature, (state) => {return state.searchCriteria});
 export const firstCustomer = createSelector(customerFeature, (state) => {return state.firstCustomerViewed});
 export const lastCustomer = createSelector(customerFeature, (state) => {return state.lastCustomerViewed});

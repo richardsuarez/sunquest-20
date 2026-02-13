@@ -27,7 +27,7 @@ export class BookingDetailsPopupComponent {
       .join(' ');
   }
 
-  getCustomerContact(): { email: string | null; primaryPhone: string | null; secondaryPhone: string | null } {
+  getCustomerContact(){
     return {
       email: this.booking.customer?.email || null,
       primaryPhone: this.booking.customer?.primaryPhone || null,

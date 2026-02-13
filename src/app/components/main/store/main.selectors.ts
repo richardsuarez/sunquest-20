@@ -5,6 +5,11 @@ export const MAIN_FEATURE_KEY = 'main';
 
 export const selectMainState = createFeatureSelector<MainState>(MAIN_FEATURE_KEY);
 
+export const allCustomer = createSelector(
+  selectMainState,
+  (state: MainState) => state.customers
+)
+
 export const selectSeasons = createSelector(
   selectMainState,
   (state: MainState) => state.seasons

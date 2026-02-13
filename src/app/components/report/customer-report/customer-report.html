@@ -23,12 +23,12 @@
                 Search
             </button>
             <button *ngIf="loading$ | async" mat-raised-button disabled
-                    style="background-color: gray; color: white; width: 75%;">
-                    <mat-icon *ngIf="loading$">
-                        <mat-spinner diameter="18"></mat-spinner>
-                    </mat-icon>
-                    Searching...
-                </button>
+                style="background-color: gray; color: white; width: 75%;">
+                <mat-icon *ngIf="loading$">
+                    <mat-spinner diameter="18"></mat-spinner>
+                </mat-icon>
+                Searching...
+            </button>
         </form>
     </div>
     <mat-progress-bar *ngIf="loading$ | async" class="indeterminate"></mat-progress-bar>
@@ -51,20 +51,13 @@
 
             <div *ngFor="let c of customers" class="customer-section">
                 <div class="customer-header">
-                    <h2>
-                        <span style="color: #0571b4;">{{ c.recNo }}</span> &nbsp;&nbsp;|&nbsp;&nbsp; {{
-                        c.primaryFirstName
-                        }} {{ c.primaryLastName }}
-                    </h2>
-                    <button mat-stroked-button (click)="printRecord(c.recNo)">
+                    <h2>{{ c.primaryFirstName }} {{ c.primaryLastName }}</h2>
+                    <button mat-stroked-button (click)="printRecord(c.DocumentID)">
                         <mat-icon>print</mat-icon>
                         Print All Records
                     </button>
                 </div>
-
-                <!-- Trips for this Truck -->
                 <div *ngFor="let v of c.vehicles" class="rec-section">
-                    <!-- Trip Header -->
                     <div class="rec-header">
                         <button mat-stroked-button (click)="printRecord(v.recNo ?? '')">
                             <mat-icon>print</mat-icon>
@@ -72,9 +65,9 @@
                         </button>
                     </div>
 
-                    <div class="page" [style.display]="isPrinting && !v.recNo?.startsWith(printFilterRecNo) ? 'none' : 'block'"
-                        [style.visibility]="isPrinting && !v.recNo?.startsWith(printFilterRecNo) ? 'hidden' : 'visible'"
-                    >
+                    <div class="page"
+                        [style.display]="isPrinting && (!v.recNo?.startsWith(printFilter) && c.DocumentID !== printFilter) ? 'none' : 'block'"
+                        [style.visibility]="isPrinting && (!v.recNo?.startsWith(printFilter) || c.DocumentID !== printFilter) ? 'hidden' : 'visible'">
                         <p><span style="font-weight: bold">Rec No:</span> {{ v.recNo }}</p>
                         <p><span style="font-weight: bold">First Name 1:</span> {{ c.primaryFirstName }}</p>
                         <p><span style="font-weight: bold">Last Name 1:</span> {{ c.primaryLastName }}</p>

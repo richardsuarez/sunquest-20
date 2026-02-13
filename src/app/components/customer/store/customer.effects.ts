@@ -8,20 +8,22 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import * as CustomerActions from './customer.actions';
 import { Customer, SearchCriteria } from '../model/customer.model';
 import { Router } from '@angular/router';
+import { selectSeasons } from '../../main/store/main.selectors';
 
 @Injectable()
 export class CustomerEffects {
     private injector = inject(EnvironmentInjector);
     readonly getNextCustomerList$;
     readonly getPreviousCustomerList$;
+    readonly getBookingList$;
     readonly addCustomerStart$;
     readonly addCustomerEnd$;
     readonly addVehicleStart$;
     readonly getVehicles$;
     readonly deleteVehicleStart$;
-    readonly deleteCustomerStart$; 
-    readonly deleteCustomerEnd$; 
-    readonly updateCustomerStart$; 
+    readonly deleteCustomerStart$;
+    readonly deleteCustomerEnd$;
+    readonly updateCustomerStart$;
     readonly updateCustomerEnd$;
 
 
@@ -73,6 +75,27 @@ export class CustomerEffects {
                                     catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                                 )
                             )
+                        )
+                    )
+                )
+            )
+        );
+
+        this.getBookingList$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(CustomerActions.getBookingsStart),
+                switchMap((action) =>
+                    runInInjectionContext(this.injector, () =>
+                        from(this.customerService.getBookingList(action.customers)).pipe(
+                            switchMap((response) =>
+                                response.pipe(
+                                    map((bookings) =>
+                                        CustomerActions.getBookingsEnd({ bookings })
+                                    ),
+                                    catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
+                                )
+                            ),
+                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )
                     )
                 )
@@ -194,8 +217,6 @@ export class CustomerEffects {
                 ])
             )
         );
-
-        
 
         this.updateCustomerStart$ = createEffect(() =>
             this.actions$.pipe(

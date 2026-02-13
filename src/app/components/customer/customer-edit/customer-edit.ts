@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { map, Observable, Subject, takeUntil, withLatestFrom } from 'rxjs';
 import { PopupComponent } from '../../../shared/popup/popup.component';
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatOption, MatSelect } from '@angular/material/select';
@@ -44,6 +44,7 @@ import { MatCardModule } from '@angular/material/card';
     MatListModule,
     MatCardModule,
     MatCheckboxModule,
+    MatHint,
     MatTableModule,
     AllowAlphanumericDirective,
     AllowAlphaAndSpecificCharDirective,
@@ -65,7 +66,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   vehicles$!: Observable<Vehicle[]>;
   // temporary vehicles list stored until the user clicks Save
   tempVehicles: Partial<Vehicle>[] = [];
-  vehiclesProperties = ['year', 'make', 'model', 'plate', 'state', 'weight', 'vin', 'actions'];
+  vehiclesProperties = ['recNo', 'color', 'year', 'make', 'model', 'plate', 'state', 'weight', 'vin', 'actions'];
 
   vehicleForm = new FormGroup({
     make: new FormControl<string | null>('', Validators.required),
@@ -76,9 +77,11 @@ export class CustomerEdit implements OnInit, OnDestroy {
     vin: new FormControl<string | null>(''),
     color: new FormControl<string | null>(''),
     weight: new FormControl<number | null>(null),
+    recNo: new FormControl<string | null>(''),
   })
 
   customerForm = new FormGroup({
+    recNo: new FormControl<string | null>('', Validators.required),
     primaryFirstName: new FormControl<string | null>('', Validators.required),
     primaryLastName: new FormControl<string | null>('', Validators.required),
     primaryMiddleName: new FormControl<string | null>(''),
@@ -89,7 +92,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
     secondaryTitle: new FormControl<string | null>(''),
     email: new FormControl<string | null>('', Validators.email),
     secondaryPhone: new FormControl<string | null>(''),
-    phone: new FormControl<string | null>('', Validators.required),
+    primaryPhone: new FormControl<string | null>('', Validators.required),
     floridaAddress: new FormGroup({
       address1: new FormControl<string | null>('', Validators.required),
       address2: new FormControl<string | null>(''),
@@ -216,7 +219,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   }
 
   deleteTempVehicle(vehicle: Partial<Vehicle>) {
-    this.tempVehicles = this.tempVehicles.filter((tempVeh) => tempVeh !== vehicle);
+    this.tempVehicles = this.tempVehicles.filter((tempVeh) => tempVeh.id !== vehicle.id);
   }
 }
 

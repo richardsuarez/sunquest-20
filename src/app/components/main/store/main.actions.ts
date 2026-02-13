@@ -1,5 +1,20 @@
 import { createAction, props } from '@ngrx/store';
 import { Season } from '../../season/models/season.model';
+import { Customer } from '../../customer/model/customer.model';
+
+export const loadCustomers = createAction(
+  '[Main] Load Customer'
+);
+
+export const loadCustomersSuccess = createAction(
+  '[Main] Load Customers Success',
+  props<{ seasons: Customer[] }>()
+);
+
+export const loadCustomersFail = createAction(
+  '[Main] Load Customer Fail',
+  props<{ error: string }>()
+);
 
 export const loadSeasons = createAction(
   '[Main] Load Seasons'

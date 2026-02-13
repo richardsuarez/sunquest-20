@@ -45,7 +45,7 @@ export class CustomerReport implements OnInit, OnDestroy{
     toCriteria: new FormControl<string>(''),
   })
 
-  printFilterRecNo: string = '';
+  printFilter: string = '';
   isPrinting = false;
   
   destroy$ = new Subject<void>()
@@ -93,28 +93,23 @@ export class CustomerReport implements OnInit, OnDestroy{
     this.destroy$.complete();
   }
 
-  printRecord(recNo: string){
-    this.printFilterRecNo = recNo;
+  printRecord(filter: string){
+    this.printFilter = filter;
     this.isPrinting = true;
     setTimeout(() => {
       window.print();
       this.isPrinting = false;
-      this.printFilterRecNo = '';
+      this.printFilter = '';
     }, 300);
   }
 
   printFullReport(){
-    this.printFilterRecNo = '';
+    this.printFilter = '';
     this.isPrinting = true;
     setTimeout(() => {
       window.print();
       this.isPrinting = false;
     }, 300);
-  }
-
-  shouldShowRecord(recNo: string | undefined): boolean {
-    if (!this.printFilterRecNo) return true;
-    return recNo?.startsWith(this.printFilterRecNo) || false;
   }
 
   searchResult(){

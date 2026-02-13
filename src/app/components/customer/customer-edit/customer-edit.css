@@ -74,6 +74,15 @@
   margin-bottom: 20px;
 }
 
+.vehicle-region {
+  border: 1px solid lightgray;
+  padding: 0px 10px;
+  border-radius: 5px;
+  box-sizing: border-box;
+  /*width: 700px;*/
+  margin-bottom: 20px;
+}
+
 /* reusable row used where you had display:flex inline */
 .row {
   display: flex;

@@ -93,6 +93,7 @@ export class Book implements OnInit, OnDestroy {
   pickupAddress: Address | null = null;
   pickupAt!: Date;
   crud = '';
+  isMadeChange = false;
 
   bookingVM$!: Observable<Booking | null>;
 
@@ -116,7 +117,7 @@ export class Book implements OnInit, OnDestroy {
   form = new FormGroup({
     checkNumber: new FormControl<string | null>(null),
     bankName: new FormControl<string | null>(null),
-    amount: new FormControl<number | null>(0, [Validators.required]),
+    amount: new FormControl<number | null>(0),
     origin: new FormControl<string | null>(null),
     destination: new FormControl<string | null>(null),
     notes: new FormControl<string | null>(null),
@@ -144,6 +145,9 @@ export class Book implements OnInit, OnDestroy {
 
   activeSeason: Season | null = null;
   seasons$!: Observable<Season[]>;
+  originalBooking: Booking | null = null;
+  originalTrip: Trip | null = null;
+  originalTruckId: string | null = null;
 
   constructor(
     private readonly breakpoints: BreakpointObserver,
@@ -226,17 +230,60 @@ export class Book implements OnInit, OnDestroy {
 
     this.tripsMap$.pipe(takeUntil(this.destroy$)).subscribe((tripMap) => {
       this.trips = tripMap;
-      
+
     });
 
     this.tripForm.controls.truckId.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((truckId) => {
       this.onSelectTruck(truckId);
     })
+
+    this.bookingVM$.pipe(takeUntil(this.destroy$)).subscribe((booking) => {
+      if (booking) {
+        this.originalBooking = booking;
+        this.form.controls.checkNumber.setValue(booking.paycheck?.checkNumber || null);
+        this.form.controls.bankName.setValue(booking.paycheck?.bankName || null);
+        this.form.controls.amount.setValue(booking.paycheck?.amount || 0);
+        this.form.controls.origin.setValue(booking.from || null);
+        this.form.controls.destination.setValue(booking.to || null);
+        this.form.controls.notes.setValue(booking.notes || null);
+
+        this.arrivalAt = booking.arrivalAt || new Date();
+        this.pickupAt = booking.pickupAt || new Date();
+        this.currentSelectedTruckId = booking.truckId || null;
+        this.arrivalAddress = booking.arrivalAddress || null;
+        this.pickupAddress = booking.pickupAddress || null;
+        if (this.arrivalAddress) {
+          this.deliveryAddressForm.patchValue(this.arrivalAddress);
+        }
+        if (this.pickupAddress) {
+          this.pickupAddressForm.patchValue(this.pickupAddress);
+        }
+        if (booking.vehicleIds) {
+          booking.vehicleIds.forEach(id => {
+            this.vehicleSelection[id] = true;
+          });
+        }
+
+        if (booking.truckId && this.trips[booking.truckId]) {
+          for (const trip of this.trips[booking.truckId]) {
+            if (trip.id === booking.tripId) {
+              this.originalTrip = trip;
+              this.originalTruckId = booking.truckId;
+              this.currentSelectedTrip = trip;
+              this.currentSelectedTruckId = booking.truckId;
+              break;
+            }
+          }
+        }
+      } else {
+        this.router.navigate(['main/customer/']);
+      }
+    });
   }
 
   ngOnDestroy(): void {
-      this.destroy$.next();
-      this.destroy$.complete();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   addTrip() {
@@ -273,12 +320,12 @@ export class Book implements OnInit, OnDestroy {
     this.tripForm.reset();
   }
 
-  allTripsAreUpcoming(trips: Trip[]){
-    if(trips.length === 0) return false;
+  allTripsAreUpcoming(trips: Trip[]) {
+    if (trips.length === 0) return false;
     const now = new Date();
     let aux = true;
     trips.forEach((t) => {
-      if(t.departureDate > now){
+      if (t.departureDate > now) {
         aux = false;
       }
     });
@@ -292,7 +339,7 @@ export class Book implements OnInit, OnDestroy {
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
     // only show the popup if the user modifies any fields AND DISCREPANCY VIEW MODAL IN STATE IS NOT NULL 
     // when discrepancyViewModel is null means user SUBMITS form for add/edit discrepancy and we won't show popup message when submit
-    if ((this.tripForm && !this.tripForm.pristine) || (this.form && !this.form.pristine) || this.currentSelectedTrip || Object.values(this.vehicleSelection).some(selected => selected)) {
+    if ((this.tripForm && !this.tripForm.pristine) || (this.form && !this.form.pristine) || this.isMadeChange) {
       const dialogRef = this.matDialog.open(
         PopupComponent,
         {
@@ -335,11 +382,29 @@ export class Book implements OnInit, OnDestroy {
     }
   }
 
-  clickOnDisabledCheckbox(trip: Trip) {
-    const routeOrigin = this.form.controls.origin.value
+  clickOnCheckbox(trip: Trip, truckId: string) {
+    this.isMadeChange = true;
+    const routeOrigin = this.form.controls.origin.value;
     if (routeOrigin && routeOrigin !== trip.origin) {
       this.snackBar.open(`Selected trip origin (${trip.origin}) does not match route origin (${routeOrigin})`, 'Close', { duration: 5000 });
-      return;
+    } else if (trip.remCarCap < Object.values(this.vehicleSelection).length) {
+      this.snackBar.open(`Selected trip only allows ${trip.remCarCap} more vehicle(s)`, 'Close', { duration: 5000 });
+    } else if (trip.remLoadCap < this.selectedVehiclesLoad()) {
+      this.snackBar.open(`Selected trip does not have enough load capacity`, 'Close', { duration: 5000 });
+    } else if (this.arrivalAt && trip.departureDate > this.arrivalAt) {
+      this.snackBar.open(`Selected trip departs after the desired arrival date`, 'Close', { duration: 5000 });
+    } else if (this.pickupAt && trip.departureDate < this.pickupAt) {
+      this.snackBar.open(`Selected trip departs before the desired pickup date`, 'Close', { duration: 5000 });
+    } else {
+      // if user checks the checkbox then this currentSelectedTrip = trip, 
+      // if user unchecks the checkbox then currentSelectedTrip = null
+      if (this.currentSelectedTrip?.id === trip.id) {
+        this.currentSelectedTrip = null;
+        this.currentSelectedTruckId = null;
+      } else {
+        this.currentSelectedTrip = trip;
+        this.currentSelectedTruckId = truckId;
+      }
     }
   }
 
@@ -351,7 +416,7 @@ export class Book implements OnInit, OnDestroy {
     this.router.navigate(['main/customer'])
   }
 
-  nextTrips(trips: any[]){
+  nextTrips(trips: any[]) {
     const now = new Date();
     return trips.filter(t => t.departureDate >= now);
   }
@@ -369,14 +434,10 @@ export class Book implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.currentSelectedTrip) {
-      this.snackBar.open('Please select a trip to book', 'Close', { duration: 5000 });
-      return;
-    }
-
     const arrivalAt = this.arrivalAt || new Date();
     const pickupAt = this.pickupAt || new Date();
     const booking = {
+      id: this.originalBooking? this.originalBooking.id : undefined,
       customer: this.currentCustomer,
       vehicleIds: selectedVehicleIds,
       paycheck: {
@@ -401,12 +462,47 @@ export class Book implements OnInit, OnDestroy {
     };
 
     // dispatch booking action — effect will persist and handle snackbar/navigation
-    this.store.dispatch(BookActions.addBookingStart({ booking, trip: this.currentSelectedTrip }));
+    if (this.crud === 'new') {
+      this.store.dispatch(BookActions.addBookingStart({ booking, trip: this.currentSelectedTrip }));
+    } else {
+      if (this.originalTrip && this.currentSelectedTrip) {
+        if (this.originalTrip.id !== this.currentSelectedTrip.id) {
+          // if user changes trip, then we need to update the original trip capacity by adding back the booked load and cars before updating booking with new trip
+          this.updateOriginalTrip();
+        }
+      } else {
+        // if user unselects the trip, then we need to update the original trip capacity by adding back the booked load and cars before updating booking with no trip
+        if(this.originalTrip && !this.currentSelectedTrip) {
+          this.updateOriginalTrip();
+        } 
+      }
+      // whatever the case, we always update the booking and if there's a trip change, the effects will handle updating the trips capacity
+      this.store.dispatch(BookActions.updateBookingStart({ booking, trip: this.currentSelectedTrip }));
+    }
 
     this.tripForm.reset();
     this.form.reset();
     this.currentSelectedTrip = null;
     this.vehicleSelection = {};
+    this.isMadeChange = false;
+  }
+
+  private updateOriginalTrip() {
+    if (this.originalTrip) {
+      let originalBookingVehicleLoad = 0;
+      if (this.originalBooking && this.originalBooking.vehicleIds) {
+        originalBookingVehicleLoad = this.originalBooking.vehicleIds.reduce((totalLoad, vehicleId) => {
+          const vehicle = this.originalBooking?.customer?.vehicles?.find(v => v.id === vehicleId);
+          return totalLoad + (vehicle?.weight || 0);
+        }, 0);
+      }
+      const originalTripForUpdate = {
+        ...this.originalTrip,
+        remLoadCap: this.originalTrip.remLoadCap + originalBookingVehicleLoad,
+        remCarCap: this.originalTrip.remCarCap + (this.originalBooking?.vehicleIds?.length || 0)
+      }
+      this.store.dispatch(BookActions.updateTripStart({ truckId: this.originalTruckId!, trip: originalTripForUpdate }));
+    }
   }
 
   onSelectTruck(truckId: string | null) {

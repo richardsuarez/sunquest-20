@@ -1,11 +1,12 @@
 .wrapper{
     display: flex;
     justify-content: center;
-    max-width: 1500px;
+    width: 100%;
     margin: 0;
     /*top: 90px;*/
 }
 
 .container{
-    width: 100%;
+    max-width: 1500px;
+    flex:1;
 }

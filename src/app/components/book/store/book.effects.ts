@@ -20,6 +20,7 @@ export class BookEffects {
 
     readonly addBookingStart$;
     readonly addBookingEnd$;
+    readonly updateBookingStart$;
     readonly addTrip$;
     readonly loadTrucks$;
     readonly loadTrips$;
@@ -33,6 +34,9 @@ export class BookEffects {
                     runInInjectionContext(this.injector, () =>
                         this.bookingService.addBooking(action.booking).pipe(
                             switchMap(() => {
+                                if (!action.trip) {
+                                    return of(BookActions.addBookingEnd());
+                                }
                                 const carsBooked = action.booking.vehicleIds || [];
                                 let totalWeight = 0
                                 for (let carId of carsBooked) {
@@ -46,7 +50,8 @@ export class BookEffects {
                                 const updatedTrip = {
                                     ...action.trip,
                                     remCarCap: remCarCapDelta,
-                                    remLoadCap: remWeightCapDelta
+                                    remLoadCap: remWeightCapDelta,
+                                    loadNumber: action.trip?.loadNumber || ''
                                 }
                                 return runInInjectionContext(this.injector, () =>
                                     this.bookingService.updateTrip(action.booking.truckId, updatedTrip).pipe(
@@ -65,6 +70,54 @@ export class BookEffects {
                 )
             )
         );
+
+        this.updateBookingStart$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(BookActions.updateBookingStart),
+                switchMap((action) =>
+                    runInInjectionContext(this.injector, () =>
+                        this.bookingService.updateBooking(action.booking).pipe(
+                            switchMap(() => {
+                                if (!action.trip) {
+                                    // save a booking without trip
+                                    return of(BookActions.addBookingEnd());
+                                }
+                                const carsBooked = action.booking.vehicleIds || [];
+                                let totalWeight = 0
+                                for (let carId of carsBooked) {
+                                    const vehicle = action.booking.customer?.vehicles?.find(v => v.id === carId);
+                                    if (vehicle && vehicle.weight) {
+                                        totalWeight = totalWeight + vehicle.weight;
+                                    }
+                                }
+                                const updatedTrip = {
+                                    remCarCap: action.trip?.remCarCap + carsBooked.length,
+                                    remLoadCap: action.trip.remLoadCap + totalWeight,
+                                    loadNumber: action.trip?.loadNumber || '',
+                                    departureDate: action.trip?.departureDate || new Date(),
+                                    id: action.trip?.id || '',
+                                    arrivalDate: action.trip?.arrivalDate || new Date(),
+                                    origin: action.trip?.origin || '',
+                                    destination: action.trip?.destination || '',
+                                    delayDate: action.trip?.delayDate || null,
+                                    season: action.trip?.season || null,
+                                }
+                                return runInInjectionContext(this.injector, () =>
+                                    this.bookingService.updateTrip(action.booking.truckId, updatedTrip).pipe(
+                                        map(() => {
+                                            return BookActions.addBookingEnd();
+                                        }),
+                                        catchError((err: Error) => of(BookActions.addBookingFail({ error: err })))
+                                    )
+                                )
+                            }),
+                            catchError((err: Error) => of(BookActions.addBookingFail({ error: err })))
+                        )
+                    )
+                )
+            )
+        );
+
 
         this.addBookingEnd$ = createEffect(() =>
             this.actions$.pipe(
