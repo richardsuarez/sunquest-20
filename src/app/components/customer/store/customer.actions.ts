@@ -54,6 +54,7 @@ export const deleteCustomerStart = createAction(
 
 export const deleteCustomerEnd = createAction(
     '[Customer] End delete customer',
+    props<{customerId: string}>(),
 );
 
 export const createCustomer = createAction(

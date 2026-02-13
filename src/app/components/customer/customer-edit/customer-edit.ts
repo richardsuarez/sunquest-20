@@ -81,7 +81,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   })
 
   customerForm = new FormGroup({
-    recNo: new FormControl<string | null>('', Validators.required),
+    recNo: new FormControl<string | null>({value: '', disabled: this.calculateDisable()}),
     primaryFirstName: new FormControl<string | null>('', Validators.required),
     primaryLastName: new FormControl<string | null>('', Validators.required),
     primaryMiddleName: new FormControl<string | null>(''),
@@ -153,6 +153,11 @@ export class CustomerEdit implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private calculateDisable(): boolean {
+    // disable recNo field when editing an existing customer, enable it when creating a new customer
+    return this.crud === 'edit';
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {

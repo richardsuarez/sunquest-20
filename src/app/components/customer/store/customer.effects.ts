@@ -108,20 +108,19 @@ export class CustomerEffects {
                 switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
                         this.customerService.addCustomer(action.customer).pipe(
-                            concatMap((docRef: any) => {
-                                // docRef is the DocumentReference returned by addDoc
-                                const newCustomerId = docRef?._key.path.segments[1];
+                            concatMap((customer) => {
                                 const baseActions: any[] = [
                                     CustomerActions.resetCustomerViewModel(),
                                     CustomerActions.addCustomerEnd({ customer: action.customer }),
                                 ];
 
                                 // If the action included vehicles, dispatch addVehicleStart for each one
-                                if (action.vehicles && action.vehicles.length && newCustomerId) {
+                                if (action.vehicles && action.vehicles.length && customer?.DocumentID) {
                                     const vehicleActions = action.vehicles.map((v: any) =>
-                                        CustomerActions.addVehicleStart({ customerId: newCustomerId, vehicle: v })
+                                        CustomerActions.addVehicleStart({ customerId: customer.DocumentID, vehicle: v })
                                     );
-                                    return [...baseActions, ...vehicleActions];
+                                    baseActions.push(...vehicleActions);
+                                    return baseActions;
                                 }
 
                                 return baseActions;
@@ -154,7 +153,7 @@ export class CustomerEffects {
                 switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
                         this.customerService.deleteCustomer(action.id).pipe(
-                            map(() => CustomerActions.deleteCustomerEnd()),
+                            map(() => CustomerActions.deleteCustomerEnd({customerId: action.id})),
                             catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )
                     )

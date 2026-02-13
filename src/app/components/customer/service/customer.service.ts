@@ -216,16 +216,50 @@ export class CustomerService {
   }
 
   addCustomer(customer: Partial<Customer>): Observable<any> {
-    return runInInjectionContext(this.injector, () => {
+    return from(runInInjectionContext(this.injector, async () => {
       const newCustomerRef = collection(this.firestore, this.collectionName);
-      return from(addDoc(newCustomerRef, customer).then(docRef => {
+
+      // Validate recNo
+      let customerToAdd = { ...customer };
+      
+      if (customerToAdd.recNo) {
+        // If recNo is provided, verify it doesn't belong to any other customer
+        const existingRecNo = await this.doesRecNoExist(customerToAdd.recNo);
+        if (existingRecNo) {
+          throw new Error(`RecNo '${customerToAdd.recNo}' already belongs to another customer in the database.`);
+        }
+      } else {
+        // If recNo is not provided, generate a random 3-digit number and ensure uniqueness
+        let randomRecNo = this.generateRandomRecNo();
+        while (await this.doesRecNoExist(randomRecNo)) {
+          randomRecNo = this.generateRandomRecNo();
+        }
+        customerToAdd.recNo = randomRecNo;
+      }
+
+      // If validation passes, proceed with adding the customer
+      return addDoc(newCustomerRef, customerToAdd).then(docRef => {
         // Update the document to include its DocumentID
         return updateDoc(docRef, { DocumentID: docRef.id }).then(() => ({
-          ...customer,
+          ...customerToAdd,
           DocumentID: docRef.id
         }));
-      }));
+      });
+    }));
+  }
+
+  private async doesRecNoExist(recNo: string): Promise<boolean> {
+    return runInInjectionContext(this.injector, async () => {
+      const customerRef = collection(this.firestore, this.collectionName);
+      const q = query(customerRef, where('recNo', '==', recNo));
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
     });
+  }
+
+  private generateRandomRecNo(): string {
+    // Generate a random 3-digit number (000-999)
+    return Math.floor(Math.random() * 1000).toString().padStart(3, '0');
   }
 
   deleteCustomer(id: string): Observable<any> {

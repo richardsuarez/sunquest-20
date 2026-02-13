@@ -47,21 +47,20 @@
                                 <mat-icon>email</mat-icon>
                                 <a *ngIf="record.customer.email" [href]="'mailto:' + record.customer.email">{{
                                     record.customer.email }}</a>
-                                <span *ngIf="!record.customer.email">No provided</span>
+                                <span *ngIf="!record.customer.email" style="color: darkgray;">No provided</span>
                             </p>
                             <p>
                                 <mat-icon>phone</mat-icon>
                                 <a *ngIf="record.customer.primaryPhone"
                                     [href]="'tel:' + record.customer.primaryPhone">{{
                                     record.customer.primaryPhone }}</a>
-                                <span *ngIf="!record.customer.primaryPhone">No provided</span>
+                                <span *ngIf="!record.customer.primaryPhone"  style="color: darkgray;">No provided</span>
                             </p>
                             <p *ngIf="record.customer.secondaryPhone">
                                 <mat-icon>phone</mat-icon>
                                 <a *ngIf="!record.customer.secondaryPhone"
                                     [href]="'tel:' + record.customer.secondaryPhone">{{
                                     record.customer.secondaryPhone }}</a>
-                                <span *ngIf="!record.customer.secondaryPhone">No provided</span>
                             </p>
                         </div>
                     </section>
