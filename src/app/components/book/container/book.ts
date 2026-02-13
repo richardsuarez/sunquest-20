@@ -93,6 +93,7 @@ export class Book implements OnInit, OnDestroy {
   pickupAddress: Address | null = null;
   pickupAt!: Date;
   crud = '';
+  isMadeChange = false;
 
   bookingVM$!: Observable<Booking | null>;
 
@@ -116,7 +117,7 @@ export class Book implements OnInit, OnDestroy {
   form = new FormGroup({
     checkNumber: new FormControl<string | null>(null),
     bankName: new FormControl<string | null>(null),
-    amount: new FormControl<number | null>(0, [Validators.required]),
+    amount: new FormControl<number | null>(0),
     origin: new FormControl<string | null>(null),
     destination: new FormControl<string | null>(null),
     notes: new FormControl<string | null>(null),
@@ -338,7 +339,7 @@ export class Book implements OnInit, OnDestroy {
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
     // only show the popup if the user modifies any fields AND DISCREPANCY VIEW MODAL IN STATE IS NOT NULL 
     // when discrepancyViewModel is null means user SUBMITS form for add/edit discrepancy and we won't show popup message when submit
-    if ((this.tripForm && !this.tripForm.pristine) || (this.form && !this.form.pristine) || this.currentSelectedTrip || Object.values(this.vehicleSelection).some(selected => selected)) {
+    if ((this.tripForm && !this.tripForm.pristine) || (this.form && !this.form.pristine) || this.isMadeChange) {
       const dialogRef = this.matDialog.open(
         PopupComponent,
         {
@@ -382,6 +383,7 @@ export class Book implements OnInit, OnDestroy {
   }
 
   clickOnCheckbox(trip: Trip, truckId: string) {
+    this.isMadeChange = true;
     const routeOrigin = this.form.controls.origin.value;
     if (routeOrigin && routeOrigin !== trip.origin) {
       this.snackBar.open(`Selected trip origin (${trip.origin}) does not match route origin (${routeOrigin})`, 'Close', { duration: 5000 });
@@ -389,11 +391,11 @@ export class Book implements OnInit, OnDestroy {
       this.snackBar.open(`Selected trip only allows ${trip.remCarCap} more vehicle(s)`, 'Close', { duration: 5000 });
     } else if (trip.remLoadCap < this.selectedVehiclesLoad()) {
       this.snackBar.open(`Selected trip does not have enough load capacity`, 'Close', { duration: 5000 });
-    } else if(this.arrivalAt && trip.departureDate > this.arrivalAt) {
+    } else if (this.arrivalAt && trip.departureDate > this.arrivalAt) {
       this.snackBar.open(`Selected trip departs after the desired arrival date`, 'Close', { duration: 5000 });
-    } else if(this.pickupAt && trip.departureDate < this.pickupAt) {
+    } else if (this.pickupAt && trip.departureDate < this.pickupAt) {
       this.snackBar.open(`Selected trip departs before the desired pickup date`, 'Close', { duration: 5000 });
-    } else{
+    } else {
       // if user checks the checkbox then this currentSelectedTrip = trip, 
       // if user unchecks the checkbox then currentSelectedTrip = null
       if (this.currentSelectedTrip?.id === trip.id) {
@@ -432,14 +434,10 @@ export class Book implements OnInit, OnDestroy {
       return;
     }
 
-    /* if (!this.currentSelectedTrip) {
-      this.snackBar.open('Please select a trip to book', 'Close', { duration: 5000 });
-      return;
-    } */
-
     const arrivalAt = this.arrivalAt || new Date();
     const pickupAt = this.pickupAt || new Date();
     const booking = {
+      id: this.originalBooking? this.originalBooking.id : undefined,
       customer: this.currentCustomer,
       vehicleIds: selectedVehicleIds,
       paycheck: {
@@ -464,19 +462,47 @@ export class Book implements OnInit, OnDestroy {
     };
 
     // dispatch booking action — effect will persist and handle snackbar/navigation
-    console.log('Current selected trip:', this.currentSelectedTrip);
-    console.log('Current selected truck id:', this.currentSelectedTruckId);
-    /*  if(!this.originalBooking?.id){
-       this.store.dispatch(BookActions.addBookingStart({ booking, trip: this.currentSelectedTrip }));
-     } else {
-       this.store.dispatch(BookActions.updateBookingStart({ originalTrip: this.originalTrip, originalTruckId: this.originalTruckId, originalBooking: this.originalBooking, booking, trip: this.currentSelectedTrip }));
-     }
-     
- 
-     this.tripForm.reset();
-     this.form.reset();
-     this.currentSelectedTrip = null;
-     this.vehicleSelection = {}; */
+    if (this.crud === 'new') {
+      this.store.dispatch(BookActions.addBookingStart({ booking, trip: this.currentSelectedTrip }));
+    } else {
+      if (this.originalTrip && this.currentSelectedTrip) {
+        if (this.originalTrip.id !== this.currentSelectedTrip.id) {
+          // if user changes trip, then we need to update the original trip capacity by adding back the booked load and cars before updating booking with new trip
+          this.updateOriginalTrip();
+        }
+      } else {
+        // if user unselects the trip, then we need to update the original trip capacity by adding back the booked load and cars before updating booking with no trip
+        if(this.originalTrip && !this.currentSelectedTrip) {
+          this.updateOriginalTrip();
+        } 
+      }
+      // whatever the case, we always update the booking and if there's a trip change, the effects will handle updating the trips capacity
+      this.store.dispatch(BookActions.updateBookingStart({ booking, trip: this.currentSelectedTrip }));
+    }
+
+    this.tripForm.reset();
+    this.form.reset();
+    this.currentSelectedTrip = null;
+    this.vehicleSelection = {};
+    this.isMadeChange = false;
+  }
+
+  private updateOriginalTrip() {
+    if (this.originalTrip) {
+      let originalBookingVehicleLoad = 0;
+      if (this.originalBooking && this.originalBooking.vehicleIds) {
+        originalBookingVehicleLoad = this.originalBooking.vehicleIds.reduce((totalLoad, vehicleId) => {
+          const vehicle = this.originalBooking?.customer?.vehicles?.find(v => v.id === vehicleId);
+          return totalLoad + (vehicle?.weight || 0);
+        }, 0);
+      }
+      const originalTripForUpdate = {
+        ...this.originalTrip,
+        remLoadCap: this.originalTrip.remLoadCap + originalBookingVehicleLoad,
+        remCarCap: this.originalTrip.remCarCap + (this.originalBooking?.vehicleIds?.length || 0)
+      }
+      this.store.dispatch(BookActions.updateTripStart({ truckId: this.originalTruckId!, trip: originalTripForUpdate }));
+    }
   }
 
   onSelectTruck(truckId: string | null) {

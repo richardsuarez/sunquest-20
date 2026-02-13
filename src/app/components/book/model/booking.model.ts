@@ -1,5 +1,4 @@
-import { Address, Customer, Vehicle } from '../../customer/model/customer.model';
-import { Trip } from '../../trip/model/trip.model';
+import { Address, Customer } from '../../customer/model/customer.model';
 
 export interface Paycheck {
   checkNumber: string | null;

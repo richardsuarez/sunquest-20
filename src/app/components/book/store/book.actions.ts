@@ -10,15 +10,7 @@ export const addBookingStart = createAction('[Book] Add booking start', props<{ 
 export const addBookingEnd = createAction('[Book] Add booking end');
 export const addBookingFail = createAction('[Book] Add booking fail', props<{ error: Error }>());
 
-export const updateBookingStart = createAction(
-    '[Book] Update booking start', 
-    props<{ 
-        originalTrip: Trip | null, 
-        originalBooking: Booking | null, 
-        originalTruckId: string | null,
-        booking: Partial<Booking>, 
-        trip: Trip | null 
-    }>());
+export const updateBookingStart = createAction('[Book] Update booking start', props<{ booking: Partial<Booking>, trip: Trip | null }>());
 export const updateBookingEnd = createAction('[Book] Update booking end');
 export const updateBookingFail = createAction('[Book] Update booking fail', props<{ error: Error }>());
 

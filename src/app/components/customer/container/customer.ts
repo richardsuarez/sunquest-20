@@ -229,9 +229,9 @@ export class CustomerComponent implements OnInit, OnDestroy {
     }
   }
 
-  editBooking(booking: Booking) {
+  editBooking(booking: Booking, customer: Customer) {
     if (booking.customer) {
-      this.store.dispatch(CustomerActions.loadCustomer({ customer: booking.customer }));
+      this.store.dispatch(CustomerActions.loadCustomer({ customer }));
       this.store.dispatch(BookAction.loadBooking({ booking }));
       this.router.navigate(['main/book/edit']);
     }
@@ -239,10 +239,10 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
   editableBooking(booking: Booking): boolean {
     const today = new Date();
-    if (booking.departureDate) {
-      return new Date(booking.departureDate) >= today;
+    if (!booking.departureDate) {
+      return true;
     }
-    return false;
+    return new Date(booking.departureDate) >= today;
   }
 
   onPageChange(event: any) {
