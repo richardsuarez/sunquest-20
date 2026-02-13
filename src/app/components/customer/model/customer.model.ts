@@ -1,6 +1,7 @@
 import { Booking } from "../../book/model/booking.model";
 
 export interface Customer {
+    recNo: string | null;
     DocumentID: string;
     primaryFirstName: string | null;
     primaryLastName: string | null;
@@ -49,8 +50,8 @@ export interface Vehicle {
 }
 
 export interface Record {
-    recNo: string;
+    recNo: string | null;
     customer: Customer;
-    vehicle: Vehicle;
+    vehicle: Vehicle | null;
     bookings: Booking[];
 }

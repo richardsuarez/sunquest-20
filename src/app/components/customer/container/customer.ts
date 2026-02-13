@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { bookings, customerList, loading, searchCriteria, totalPagination } from '../store/customer.selectors';
-import { Customer } from '../model/customer.model';
+import { Customer, Vehicle } from '../model/customer.model';
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -44,7 +44,6 @@ import { BookingDetailsPopupComponent } from '../../calendar/components/booking-
     MatProgressBar,
     MatSuffix,
     MatTableModule,
-    MatTooltipModule,
   ],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
@@ -99,7 +98,6 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
     this.customerList$.pipe(takeUntil(this.destroy$)).subscribe(customers => {
       if (customers) {
-        console.log('Customers updated', customers);
         this.customerList = customers;
         this.store.dispatch(CustomerActions.getBookingsStart({ customers }));
       }
@@ -111,25 +109,31 @@ export class CustomerComponent implements OnInit, OnDestroy {
         for (let customer of this.customerList) {
           const customerBookings = bookings.filter(b =>
             b.customer?.DocumentID === customer.DocumentID);
-          if (customer.vehicles) {
+          let record = {
+            recNo: customer.recNo,
+            customer: customer,
+            vehicle: null as Vehicle | null,
+            bookings: [] as Booking[]
+          }
+          if (customer.vehicles && customer.vehicles.length > 0) {
             for (let vehicle of customer.vehicles) {
-              let record = {
-                recNo: vehicle.recNo!,
-                customer: customer,
-                vehicle: vehicle,
-                bookings: [] as Booking[]
-              }
+              record.vehicle = vehicle;
               for (let booking of customerBookings) {
                 if (booking.vehicleIds) {
                   for (let v of booking.vehicleIds) {
                     if (v === vehicle.id) {
+                      record.recNo = vehicle.recNo;
                       record.bookings.push(booking);
+                      break;
                     }
                   }
                 }
               }
               this.records.push(record);
             }
+          } else {
+            record.bookings = customerBookings ?? [];
+            this.records.push(record);
           }
         }
       }
@@ -226,8 +230,11 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   editBooking(booking: Booking) {
-    this.store.dispatch(BookAction.loadBooking({ booking }));
-    this.router.navigate(['main/book/edit']);
+    if (booking.customer) {
+      this.store.dispatch(CustomerActions.loadCustomer({ customer: booking.customer }));
+      this.store.dispatch(BookAction.loadBooking({ booking }));
+      this.router.navigate(['main/book/edit']);
+    }
   }
 
   editableBooking(booking: Booking): boolean {

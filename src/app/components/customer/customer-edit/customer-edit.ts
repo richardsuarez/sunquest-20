@@ -81,6 +81,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   })
 
   customerForm = new FormGroup({
+    recNo: new FormControl<string | null>('', Validators.required),
     primaryFirstName: new FormControl<string | null>('', Validators.required),
     primaryLastName: new FormControl<string | null>('', Validators.required),
     primaryMiddleName: new FormControl<string | null>(''),

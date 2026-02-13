@@ -67,13 +67,19 @@
                     </section>
                     <section class="info-section">
                         <h4>Vehicle</h4>
-                        <div *ngIf="record.vehicle" style="margin-left: 20px;">
-                            <p><strong>Make:</strong> {{ record.vehicle.make }}</p>
-                            <p><strong>Model:</strong> {{ record.vehicle.model }}</p>
-                            <p><strong>Year:</strong> {{ record.vehicle.year }}</p>
-                            <p><strong>Plate:</strong> {{ record.vehicle.plate }}</p>
-                            <p><strong>State:</strong> {{ record.vehicle.state }}</p>
+                        <div style="margin-left: 20px;">
+                            <ng-container *ngIf="record.vehicle else novehicle">
+                                <p><strong>Make:</strong> {{ record.vehicle.make }}</p>
+                                <p><strong>Model:</strong> {{ record.vehicle.model }}</p>
+                                <p><strong>Year:</strong> {{ record.vehicle.year }}</p>
+                                <p><strong>Plate:</strong> {{ record.vehicle.plate }}</p>
+                                <p><strong>State:</strong> {{ record.vehicle.state }}</p>
+                            </ng-container>
+                            <ng-template #novehicle>
+                                <p>No vehicle available.</p>
+                            </ng-template>
                         </div>
+
                     </section>
                     <section class="info-section">
                         <h4>Florida Address</h4>
@@ -101,7 +107,7 @@
                     <button mat-button style="color: red;" (click)="deleteCustomer(record.customer)">Delete</button>
                 </mat-card-actions>
             </div>
-            <div style="border-radius: 5px; min-width: 80%">
+            <div style="border-radius: 5px; width: 77%">
                 <div style=" margin: 10px 0px 10px 0px; padding: 2px;">
                     <h3 style="text-align: center; margin: 0px;">Bookings</h3>
                 </div>
@@ -110,7 +116,8 @@
 
                     <ng-container matColumnDef="season">
                         <th mat-header-cell *matHeaderCellDef> Season </th>
-                        <td [class.currentSeason]="currentSeason?.seasonName" mat-cell *matCellDef="let element"> {{element.season}} </td>
+                        <td [class.currentSeason]="currentSeason?.seasonName" mat-cell *matCellDef="let element">
+                            {{element.season}} </td>
                     </ng-container>
 
                     <ng-container matColumnDef="departureDate">
@@ -151,10 +158,12 @@
 
                     <ng-container matColumnDef="actions">
                         <th mat-header-cell *matHeaderCellDef></th>
-                        <td mat-cell *matCellDef="let element"> 
-                            <button *ngIf="editableBooking(element)" mat-button color="primary" (click)="editBooking(element)" matTooltip="Cannot edit past bookings">Edit</button>
-                            <button *ngIf="!editableBooking(element)" mat-button color="primary" (click)="viewBooking(element)">View</button>
-                            <button mat-button style="color: red;" (click)="deleteBooking(element)">Delete</button>    
+                        <td mat-cell *matCellDef="let element">
+                            <button *ngIf="editableBooking(element)" mat-button color="primary"
+                                (click)="editBooking(element)">Edit</button>
+                            <button *ngIf="!editableBooking(element)" mat-button color="primary"
+                                (click)="viewBooking(element)">View</button>
+                            <button mat-button style="color: red;" (click)="deleteBooking(element)">Delete</button>
                         </td>
                     </ng-container>
 

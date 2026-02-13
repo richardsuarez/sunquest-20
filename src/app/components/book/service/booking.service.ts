@@ -92,13 +92,24 @@ export class BookingService {
     });
   }
 
-  updateTrip(truckId: string | null | undefined, trip: Trip): Observable<void> {
+  updateTrip(truckId: string | null | undefined, trip: Trip | null): Observable<void> {
     return runInInjectionContext(this.injector, () => {
-      if(!trip.id) {
+      if(!trip || !trip.id) {
         throw new Error('Trip ID is required for update');
       }
       const dref = doc(this.firestore, `trucks/${truckId}/trips`, trip.id);
       const p = updateDoc(dref, trip as any);
+      return from(p) as Observable<void>;
+    });
+  }
+
+  updateBooking(booking: Partial<Booking>): Observable<void> {
+    return runInInjectionContext(this.injector, () => {
+      if(!booking || !booking.id) {
+        throw new Error('Booking ID is required for update');
+      }
+      const dref = doc(this.firestore, `bookings/${booking.id}`);
+      const p = updateDoc(dref, booking as any);
       return from(p) as Observable<void>;
     });
   }

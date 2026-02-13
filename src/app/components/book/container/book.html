@@ -403,9 +403,8 @@
                                             <ng-container matColumnDef="checkbox">
                                                 <th mat-header-cell *matHeaderCellDef> </th>
                                                 <td mat-cell *matCellDef="let trip"
-                                                    (click)="clickOnDisabledCheckbox(trip)">
+                                                    (click)="clickOnCheckbox(trip, truck.id)">
                                                     <mat-checkbox [checked]="currentSelectedTrip?.id === trip.id"
-                                                        (change)="currentSelectedTrip = trip; currentSelectedTruckId = truck.id"
                                                         [disabled]="!selectableTrip(trip)">
                                                     </mat-checkbox>
                                                 </td>

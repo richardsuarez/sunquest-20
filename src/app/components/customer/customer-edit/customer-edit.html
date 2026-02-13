@@ -48,7 +48,10 @@
                         <input type="text" matInput formControlName="primaryPhone" required placeholder="##########"
                             appAllowOnlyNumbers>
                     </mat-form-field>
-
+                    <mat-form-field floatLabel="always" appearance="outline">
+                        <mat-label style="color: red; font-weight: bold">Rec No.</mat-label>
+                        <input type="text" matInput formControlName="recNo" required appAllowOnlyNumbers>
+                    </mat-form-field>
                 </div>
             </div>
             <div class="information-region">
@@ -380,7 +383,10 @@
                     <input type="text" matInput formControlName="primaryPhone" required placeholder="##########"
                         appAllowOnlyNumbers>
                 </mat-form-field>
-
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label style="color: red; font-weight: bold">Rec No.</mat-label>
+                    <input type="text" matInput formControlName="recNo" required appAllowOnlyNumbers>
+                </mat-form-field>
             </div>
 
             <h3>Secondary Customer</h3>
