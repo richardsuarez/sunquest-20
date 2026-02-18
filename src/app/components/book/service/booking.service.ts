@@ -1,6 +1,5 @@
 import { inject, Injectable, runInInjectionContext, EnvironmentInjector } from '@angular/core';
 import { Firestore, collection, addDoc, getDocsFromCache, getDocsFromServer, query, where, orderBy, doc, updateDoc } from '@angular/fire/firestore';
-import { increment } from 'firebase/firestore';
 import { from, Observable } from 'rxjs';
 import { Booking } from '../model/booking.model';
 import { Trip } from '../../trip/model/trip.model';
@@ -15,7 +14,8 @@ export class BookingService {
   addBooking(b: Partial<Booking>): Observable<any> {
     return runInInjectionContext(this.injector, () => {
       const bookingsRef = collection(this.firestore, this.collectionName);
-      return from(addDoc(bookingsRef, { ...b, createdAt: new Date() }));
+      const { id, ...bookingData } = b;
+      return from(addDoc(bookingsRef, { ...bookingData, createdAt: new Date() }));
     });
   }
 

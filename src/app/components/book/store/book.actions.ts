@@ -1,5 +1,4 @@
 import { createAction, props } from '@ngrx/store';
-import { CalendarEvent } from '../../calendar/model/calendar-event.model';
 import { Booking } from '../model/booking.model';
 import { Trip } from '../../trip/model/trip.model';
 import { Truck } from '../../truck/model/truck.model';

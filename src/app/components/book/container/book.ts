@@ -37,6 +37,7 @@ import { Booking } from '../model/booking.model';
 import { AllowOnlyNumbersDirective } from '../../../shared/directives/allow-only-numbers.directive';
 import { AllowAlphanumericDirective } from '../../../shared/directives/allow-alphanumeric.directive';
 import { Season } from '../../season/models/season.model';
+import { selectIsMobile } from '../../main/store/main.selectors';
 
 @Component({
   selector: 'app-book-edit',
@@ -80,7 +81,7 @@ export class Book implements OnInit, OnDestroy {
   truckList: Truck[] = [];
   currentCustomer: Customer | null = null;
   private requestedTrips = new Set<string>();
-  isMobile!: boolean;
+  isMobile$!: Observable<boolean>;
   savingBooking$!: Observable<boolean>;
   destroy$ = new Subject<void>()
   currentSelectedTrip: Trip | null = null;
@@ -161,15 +162,11 @@ export class Book implements OnInit, OnDestroy {
     this.tripsMap$ = this.store.select(sortedTripsMap);
     this.bookingVM$ = this.store.select(bookingVM);
     this.seasons$ = this.store.select(MainSelectors.selectSeasons);
+    this.isMobile$ = this.store.select(selectIsMobile);
   }
 
   async ngOnInit() {
     this.crud = this.route.snapshot.paramMap.get('crud') ?? '';
-    this.breakpoints.observe([
-      Breakpoints.HandsetPortrait,
-    ]).subscribe(res => {
-      this.isMobile = res.matches
-    });
 
     // ask truck feature to load truck list
     this.store.dispatch(getTruckListStart());
@@ -190,6 +187,7 @@ export class Book implements OnInit, OnDestroy {
       }
 
       if (!customer) {
+        console.log('No customer found, navigating back to customer list');
         this.router.navigate(['main/customer/']);
       }
     });
@@ -275,8 +273,6 @@ export class Book implements OnInit, OnDestroy {
             }
           }
         }
-      } else {
-        this.router.navigate(['main/customer/']);
       }
     });
   }
@@ -352,7 +348,6 @@ export class Book implements OnInit, OnDestroy {
         }
       );
       return dialogRef.afterClosed().pipe(
-        takeUntil(this.destroy$),
         map(result => {
           switch (result) {
             case 'Success': this.save(); return false;
@@ -477,7 +472,7 @@ export class Book implements OnInit, OnDestroy {
         } 
       }
       // whatever the case, we always update the booking and if there's a trip change, the effects will handle updating the trips capacity
-      this.store.dispatch(BookActions.updateBookingStart({ booking, trip: this.currentSelectedTrip }));
+      this.updateCurrentTrip(booking);
     }
 
     this.tripForm.reset();
@@ -502,6 +497,24 @@ export class Book implements OnInit, OnDestroy {
         remCarCap: this.originalTrip.remCarCap + (this.originalBooking?.vehicleIds?.length || 0)
       }
       this.store.dispatch(BookActions.updateTripStart({ truckId: this.originalTruckId!, trip: originalTripForUpdate }));
+    }
+  }
+
+  private updateCurrentTrip(booking: Partial<Booking>) {
+    if (this.currentSelectedTrip) {
+      let currentBookingVehicleLoad = 0;
+      if (booking && booking.vehicleIds) {
+        currentBookingVehicleLoad = booking.vehicleIds.reduce((totalLoad, vehicleId) => {
+          const vehicle = booking?.customer?.vehicles?.find(v => v.id === vehicleId);
+          return totalLoad + (vehicle?.weight || 0);
+        }, 0);
+      }
+      const currentTripForUpdate = {
+        ...this.currentSelectedTrip,
+        remLoadCap: this.currentSelectedTrip.remLoadCap - currentBookingVehicleLoad,
+        remCarCap: this.currentSelectedTrip.remCarCap - (booking.vehicleIds?.length || 0)
+      }
+      this.store.dispatch(BookActions.updateTripStart({ truckId: this.originalTruckId!, trip: currentTripForUpdate }));
     }
   }
 

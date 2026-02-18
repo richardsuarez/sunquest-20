@@ -19,13 +19,13 @@ export class CustomerEffects {
     readonly addCustomerStart$;
     readonly addCustomerEnd$;
     readonly addVehicleStart$;
+    readonly updateVehicleStart$;
     readonly getVehicles$;
     readonly deleteVehicleStart$;
     readonly deleteCustomerStart$;
     readonly deleteCustomerEnd$;
     readonly updateCustomerStart$;
     readonly updateCustomerEnd$;
-
 
     constructor(
         private readonly actions$: Actions,
@@ -117,7 +117,7 @@ export class CustomerEffects {
                                 // If the action included vehicles, dispatch addVehicleStart for each one
                                 if (action.vehicles && action.vehicles.length && customer?.DocumentID) {
                                     const vehicleActions = action.vehicles.map((v: any) =>
-                                        CustomerActions.addVehicleStart({ customerId: customer.DocumentID, vehicle: v })
+                                        CustomerActions.addVehicleStart({ customer, vehicle: {...v, recNo: customer.recNo }})
                                     );
                                     baseActions.push(...vehicleActions);
                                     return baseActions;
@@ -166,8 +166,22 @@ export class CustomerEffects {
                 ofType(CustomerActions.addVehicleStart),
                 switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
-                        this.customerService.addVehicle(action.customerId, action.vehicle).pipe(
+                        this.customerService.addVehicle(action.customer, action.vehicle).pipe(
                             map(() => CustomerActions.addVehicleEnd()),
+                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
+                        )
+                    )
+                )
+            )
+        );
+
+        this.updateVehicleStart$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(CustomerActions.updateVehicleStart),
+                switchMap((action) =>
+                    runInInjectionContext(this.injector, () =>
+                        this.customerService.updateVehicle(action.customer, action.vehicle).pipe(
+                            map(() => CustomerActions.updateVehicleEnd()),
                             catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )
                     )
@@ -235,7 +249,7 @@ export class CustomerEffects {
                                     // if vehicles are provided, dispatch addVehicleStart for each
                                     if (action.vehicles && action.vehicles.length && customerVM?.DocumentID) {
                                         const vehicleActions = action.vehicles.map((v: any) =>
-                                            CustomerActions.addVehicleStart({ customerId: customerVM.DocumentID!, vehicle: v })
+                                            CustomerActions.updateVehicleStart({ customer: customerVM, vehicle: v })
                                         );
                                         return [...baseActions, ...vehicleActions];
                                     }
@@ -263,5 +277,6 @@ export class CustomerEffects {
             ),
             { dispatch: false }
         );
+
     }
 }

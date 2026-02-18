@@ -24,3 +24,8 @@ export const selectSeasonError = createSelector(
   selectMainState,
   (state: MainState) => state.error
 );
+
+export const selectIsMobile = createSelector(
+  selectMainState,
+  (state: MainState) => state.isMobile
+);

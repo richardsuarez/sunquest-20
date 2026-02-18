@@ -6,11 +6,13 @@ export interface MainState {
   seasons: Season[];
   loading: boolean;
   error: string | null;
+  isMobile: boolean
 }
 
 export const initialMainState: MainState = {
   customers: [],
   seasons: [],
   loading: false,
-  error: null
+  error: null,
+  isMobile: false,
 };

@@ -17,15 +17,14 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { PopupComponent } from '../../../shared/popup/popup.component';
 import { Router } from '@angular/router';
-import { SearchCriteria, Record } from '../model/customer.model';
+import { SearchCriteria, CustomerRecord } from '../model/customer.model';
 import { Store } from '@ngrx/store';
 import * as CustomerActions from '../store/customer.actions'
 import * as  BookAction from '../../book/store/book.actions';
 import { Season } from '../../season/models/season.model';
-import { selectSeasons } from '../../main/store/main.selectors';
+import { selectSeasons, selectIsMobile } from '../../main/store/main.selectors';
 import { Booking } from '../../book/model/booking.model';
 import { MatTableModule } from '@angular/material/table';
-import { MatTooltip, MatTooltipModule } from "@angular/material/tooltip";
 import { BookingDetailsPopupComponent } from '../../calendar/components/booking-details-popup/booking-details-popup.component';
 
 @Component({
@@ -52,7 +51,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
   @ViewChild('paginator') paginator: MatPaginator | undefined;
 
-  isMobile!: boolean;
+  isMobile$!: Observable<boolean>;
   destroy$ = new Subject<void>();
   loading$!: Observable<boolean>;
   customerList$!: Observable<Customer[] | null>;
@@ -63,12 +62,11 @@ export class CustomerComponent implements OnInit, OnDestroy {
   bookings$!: Observable<Booking[]>;
   customerList: Customer[] = [];
   currentSeason!: Season | null;
-  records: Record[] = [];
+  records: CustomerRecord[] = [];
   bookingColumns: string[] = ['season', 'departureDate', 'from', 'to', 'paymentType', 'bank', 'amount', 'notes', 'actions'];
 
-  private store = inject(Store)
   constructor(
-    private readonly breakpoints: BreakpointObserver,
+    private readonly store: Store,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
   ) {
@@ -79,19 +77,11 @@ export class CustomerComponent implements OnInit, OnDestroy {
     this.bookings$ = this.store.select(bookings);
     this.store.select(searchCriteria).pipe(takeUntil(this.destroy$))
       .subscribe((criteria) => this.searchCriteria = criteria)
-
+    this.isMobile$ = this.store.select(selectIsMobile);
   }
 
   ngOnInit() {
-    this.breakpoints.observe([
-      Breakpoints.HandsetPortrait,
-      Breakpoints.HandsetLandscape
-    ]).subscribe(res => {
-      this.isMobile = res.matches
-    });
     //this.store.dispatch(CustomerActions.resetSearchCriteria());
-    this.store.dispatch(CustomerActions.resetLastCustomer());
-    this.store.dispatch(CustomerActions.getNextCustomerListStart());
     this.seasons$.pipe(takeUntil(this.destroy$)).subscribe(seasons => {
       this.currentSeason = seasons.find(s => s.isActive) ?? null;
     });
@@ -99,6 +89,9 @@ export class CustomerComponent implements OnInit, OnDestroy {
     this.customerList$.pipe(takeUntil(this.destroy$)).subscribe(customers => {
       if (customers) {
         this.customerList = customers;
+        if(customers.length === 0) {
+          this.records = [];
+        }
         this.store.dispatch(CustomerActions.getBookingsStart({ customers }));
       }
     });
@@ -109,35 +102,43 @@ export class CustomerComponent implements OnInit, OnDestroy {
         for (let customer of this.customerList) {
           const customerBookings = bookings.filter(b =>
             b.customer?.DocumentID === customer.DocumentID);
-          let record = {
-            recNo: customer.recNo,
-            customer: customer,
-            vehicle: null as Vehicle | null,
-            bookings: [] as Booking[]
-          }
           if (customer.vehicles && customer.vehicles.length > 0) {
             for (let vehicle of customer.vehicles) {
-              record.vehicle = vehicle;
+              const vehicleBookings: Booking[] = [];
               for (let booking of customerBookings) {
                 if (booking.vehicleIds) {
                   for (let v of booking.vehicleIds) {
                     if (v === vehicle.id) {
-                      record.recNo = vehicle.recNo;
-                      record.bookings.push(booking);
+                      vehicleBookings.push(booking);
                       break;
                     }
                   }
                 }
               }
-              this.records.push(record);
+              let record: CustomerRecord = {
+                recNo: vehicle.recNo,
+                customer: customer,
+                vehicle: vehicle,
+                bookings: vehicleBookings
+              }
+              this.records = [...this.records, record];
             }
           } else {
-            record.bookings = customerBookings ?? [];
-            this.records.push(record);
+            let record: CustomerRecord = {
+              recNo: customer.recNo,
+              customer: customer,
+              vehicle: null,
+              bookings: customerBookings ?? []
+            }
+            this.records = [...this.records, record];
           }
         }
       }
     });
+
+    this.store.dispatch(CustomerActions.resetLastCustomer());
+    this.store.dispatch(CustomerActions.getNextCustomerListStart());
+    
   }
 
   ngOnDestroy() {

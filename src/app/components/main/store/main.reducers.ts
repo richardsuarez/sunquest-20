@@ -1,37 +1,37 @@
 import { createReducer, on } from '@ngrx/store';
 import { initialMainState } from './main.state';
-import * as SeasonActions from './main.actions';
+import * as MainActions from './main.actions';
 
 export const mainReducer = createReducer(
   initialMainState,
   // Load Seasons
-  on(SeasonActions.loadSeasons, (state) => ({
+  on(MainActions.loadSeasons, (state) => ({
     ...state,
     loading: true,
     error: null
   })),
 
-  on(SeasonActions.loadSeasonsSuccess, (state, { seasons }) => ({
+  on(MainActions.loadSeasonsSuccess, (state, { seasons }) => ({
     ...state,
     seasons,
     loading: false,
     error: null
   })),
 
-  on(SeasonActions.loadSeasonsFail, (state, { error }) => ({
+  on(MainActions.loadSeasonsFail, (state, { error }) => ({
     ...state,
     loading: false,
     error
   })),
 
   // Activate Season
-  on(SeasonActions.activateSeason, (state) => ({
+  on(MainActions.activateSeason, (state) => ({
     ...state,
     loading: true,
     error: null
   })),
 
-  on(SeasonActions.activateSeasonSuccess, (state, { season }) => ({
+  on(MainActions.activateSeasonSuccess, (state, { season }) => ({
     ...state,
     loading: false,
     error: null,
@@ -41,20 +41,20 @@ export const mainReducer = createReducer(
     ]
   })),
 
-  on(SeasonActions.activateSeasonFail, (state, { error }) => ({
+  on(MainActions.activateSeasonFail, (state, { error }) => ({
     ...state,
     loading: false,
     error
   })),
 
   // Deactivate Season
-  on(SeasonActions.deactivateSeason, (state) => ({
+  on(MainActions.deactivateSeason, (state) => ({
     ...state,
     loading: true,
     error: null
   })),
 
-  on(SeasonActions.deactivateSeasonSuccess, (state, { seasonId }) => {
+  on(MainActions.deactivateSeasonSuccess, (state, { seasonId }) => {
     const updatedSeasons = state.seasons.map(s =>
       s.id === seasonId ? { ...s, isActive: false } : s
     );
@@ -68,9 +68,14 @@ export const mainReducer = createReducer(
     };
   }),
 
-  on(SeasonActions.deactivateSeasonFail, (state, { error }) => ({
+  on(MainActions.deactivateSeasonFail, (state, { error }) => ({
     ...state,
     loading: false,
     error
+  })),
+
+  on(MainActions.setBreakpoint, (state, { isMobile }) => ({
+    ...state,
+    isMobile
   }))
 );

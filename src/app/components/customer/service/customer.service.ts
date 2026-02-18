@@ -5,6 +5,7 @@ import { Customer, SearchCriteria } from '../model/customer.model';
 import { Vehicle } from '../model/customer.model';
 import { Season } from '../../season/models/season.model';
 import { Booking } from '../../book/model/booking.model';
+import { collectionGroup } from 'firebase/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
@@ -63,15 +64,19 @@ export class CustomerService {
         let auxQ = or(
           and(
             where('primaryLastName', '>=', filter),
-            where('primaryLastName', '<=', filter + '\uf8ff')
+            where('primaryLastName', '<', filter + '\uf8ff'),
           ),
           and(
             where('primaryPhone', '>=', filter),
-            where('primaryPhone', '<=', filter + '\uf8ff')
+            where('primaryPhone', '<', filter + '\uf8ff'),
           ),
           and(
             where('secondaryPhone', '>=', filter),
-            where('secondaryPhone', '<=', filter + '\uf8ff')
+            where('secondaryPhone', '<', filter + '\uf8ff'),
+          ),
+          and(
+            where('recNo', '>=', filter),
+            where('recNo', '<', filter + '\uf8ff'),
           )
         );
 
@@ -82,6 +87,9 @@ export class CustomerService {
             auxQ,
             orderBy('primaryLastName'),
             orderBy('primaryFirstName'),
+            orderBy('primaryPhone'),
+            orderBy('secondaryPhone'),
+            orderBy('recNo'),
             limit(pageSize)
           );
         } else {
@@ -92,6 +100,9 @@ export class CustomerService {
             auxQ,
             orderBy('primaryLastName'),
             orderBy('primaryFirstName'),
+            orderBy('primaryPhone'),
+            orderBy('secondaryPhone'),
+            orderBy('recNo'),
             startAfter(docRef),
             limit(pageSize)
           );
@@ -108,6 +119,9 @@ export class CustomerService {
             customerRef,
             orderBy('primaryLastName'),
             orderBy('primaryFirstName'),
+            orderBy('primaryPhone'),
+            orderBy('secondaryPhone'),
+            orderBy('recNo'),
             startAfter(docRef),
             limit(pageSize)
           );
@@ -117,18 +131,39 @@ export class CustomerService {
       // ✅ Try network first, fallback to cache if offline
       let customers: Customer[] = [];
       try {
-        const snapshot = await getDocsFromServer(q);
+        const snapshot = await runInInjectionContext(this.injector, () =>getDocsFromServer(q));
         customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,
           DocumentID: doc.id,
         }));
       } catch (error) {
-        const snapshot = await getDocsFromCache(q);
+        const snapshot = await runInInjectionContext(this.injector, () =>getDocsFromCache(q));
         customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,
           DocumentID: doc.id,
         }));
       }
+      
+      if (filter && !customers.length) {
+        // let's try to search for the recNo of the vehicles
+        const vehicleRef = collectionGroup(this.firestore, 'vehicles');
+        const vehicleQuery = query(vehicleRef, and(where('recNo', '>=', filter), where('recNo', '<', filter + '\uf8ff')), orderBy('recNo'), limit(pageSize));
+        const vehicleSnapshot = await runInInjectionContext(this.injector, () =>getDocs(vehicleQuery));
+        const customerRefs = vehicleSnapshot.docs.map(doc => ({
+          customerReference: doc.ref.parent.parent, //customers/{id}
+        }));
+        
+        if (customerRefs.length) {
+          const customerPromises = customerRefs.map(async (ref) => {
+            const customerDoc = await runInInjectionContext(this.injector, () =>getDocFromServer(ref.customerReference!));
+            return {
+              ...customerDoc.data() as Customer,
+            };
+          });
+          customers = await Promise.all(customerPromises);
+        }
+      }
+      
       const auxCustomers = await Promise.all(
         customers.map(async customer => {
           const vehicles = await from(this.getVehicles(customer.DocumentID!)).toPromise();
@@ -221,7 +256,7 @@ export class CustomerService {
 
       // Validate recNo
       let customerToAdd = { ...customer };
-      
+
       if (customerToAdd.recNo) {
         // If recNo is provided, verify it doesn't belong to any other customer
         const existingRecNo = await this.doesRecNoExist(customerToAdd.recNo);
@@ -257,6 +292,14 @@ export class CustomerService {
     });
   }
 
+  private async doesVehicleExist(customerId: string, vehicelId: string): Promise<boolean> {
+    return runInInjectionContext(this.injector, async () => {
+      const vehicleDocRef = doc(this.firestore, `${this.collectionName}/${customerId}/vehicles/${vehicelId}`);
+      const snapshot = await getDocFromServer(vehicleDocRef);
+      return snapshot.exists();
+    });
+  }
+
   private generateRandomRecNo(): string {
     // Generate a random 3-digit number (000-999)
     return Math.floor(Math.random() * 1000).toString().padStart(3, '0');
@@ -280,11 +323,22 @@ export class CustomerService {
 
   // #region Vehicle (subcollection under customer)
 
-  addVehicle(customerId: string, vehicle: Partial<Vehicle>): Observable<any> {
+  addVehicle(customer: Customer, vehicle: Partial<Vehicle>): Observable<any> {
     return runInInjectionContext(this.injector, () => {
-      const vehiclesRef = collection(this.firestore, `${this.collectionName}/${customerId}/vehicles`);
+      const vehiclesRef = collection(this.firestore, `${this.collectionName}/${customer.DocumentID}/vehicles`);
       return from(addDoc(vehiclesRef, { ...vehicle, createdAt: new Date() }));
     });
+  }
+
+  updateVehicle(customer: Customer, vehicle: Partial<Vehicle>): Observable<any> {
+    return from(runInInjectionContext(this.injector, async () => {
+      const existingVehicle = await this.doesVehicleExist(customer.DocumentID, vehicle.id!);
+      if (!existingVehicle) {
+        return this.addVehicle(customer, vehicle).toPromise();
+      }
+      const vehicleDocRef = doc(this.firestore, `${this.collectionName}/${customer.DocumentID}/vehicles/${vehicle.id}`);
+      return updateDoc(vehicleDocRef, vehicle);
+    }));
   }
 
   getVehicles(customerId: string): Observable<Vehicle[]> {
@@ -312,7 +366,7 @@ export class CustomerService {
 
   getBookingList(customers: Customer[]): Promise<Observable<Booking[]>> {
     const auxCustomers: string[] = [];
-    for(let c of customers){
+    for (let c of customers) {
       auxCustomers.push(c.DocumentID!);
     }
     return runInInjectionContext(this.injector, async () => {

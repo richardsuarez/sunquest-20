@@ -49,7 +49,7 @@ export interface Vehicle {
     createdAt?: any;
 }
 
-export interface Record {
+export interface CustomerRecord {
     recNo: string | null;
     customer: Customer;
     vehicle: Vehicle | null;
