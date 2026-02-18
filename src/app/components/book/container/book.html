@@ -92,15 +92,17 @@
                         <div>
                             @if(isMobile$ | async){
                                 <div class="vehicles-list">
-                                    <div class="vehicle-item" *ngFor="let vehicle of customer?.vehicles">
-                                        <mat-checkbox [checked]="vehicleSelection[vehicle?.id || '']"
-                                            (change)="vehicleSelection[vehicle?.id || ''] = $event.checked; refillCheckAmount()"></mat-checkbox>
-                                        <div style="flex: 1">
-                                            <p class="detail-value">{{ vehicle.color }} {{ vehicle.year }} {{ vehicle.make }} {{
+                                    @for (vehicle of customer?.vehicles || []; track $index) {
+                                        <div class="vehicle-item">
+                                            <mat-checkbox [checked]="vehicleSelection[vehicle?.id || '']"
+                                                (change)="vehicleSelection[vehicle?.id || ''] = $event.checked"></mat-checkbox>
+                                            <div style="flex: 1">
+                                                <p class="detail-value">{{ vehicle.color }} {{ vehicle.year }} {{ vehicle.make }} {{
                                                 vehicle.model }} ({{ vehicle.plate }})</p>
-                                            <p class="detail-value">VIN: {{ vehicle.vin }}</p>
+                                                <p class="detail-value">VIN: {{ vehicle.vin }}</p>
+                                            </div>
                                         </div>
-                                    </div>
+                                    }
                                 </div>
                             } @else {
                                 <table mat-table [dataSource]="customer.vehicles" class="mat-elevation-z8"
@@ -110,7 +112,7 @@
                                         <th mat-header-cell *matHeaderCellDef></th>
                                         <td mat-cell *matCellDef="let element">
                                             <mat-checkbox [checked]="vehicleSelection[element.id]" (click)="isMadeChange = true"
-                                                (change)="vehicleSelection[element.id] = $event.checked; refillCheckAmount()"></mat-checkbox>
+                                                (change)="vehicleSelection[element.id] = $event.checked"></mat-checkbox>
                                         </td>
                                     </ng-container>
 

@@ -1,3 +1,4 @@
+import { Booking } from "../../book/model/booking.model";
 import { Customer } from "../../customer/model/customer.model";
 import { Season } from "../../season/models/season.model";
 
@@ -6,7 +7,9 @@ export interface MainState {
   seasons: Season[];
   loading: boolean;
   error: string | null;
-  isMobile: boolean
+  isMobile: boolean;
+  customerViewModel: Customer | null;
+  bookingViewModel: Booking | null;
 }
 
 export const initialMainState: MainState = {
@@ -15,4 +18,6 @@ export const initialMainState: MainState = {
   loading: false,
   error: null,
   isMobile: false,
+  customerViewModel: null,
+  bookingViewModel: null,
 };

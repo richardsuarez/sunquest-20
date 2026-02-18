@@ -44,12 +44,19 @@ export const bookReducer = createReducer(
   on(BookActions.getTruckListSuccess, (s, a) => ({ ...s, loading: false, trucks: a.trucks })),
   on(BookActions.getTruckListFail, (s, a) => ({ ...s, loading: false, appError: a.error })),
 
-  on(BookActions.createEmptyBooking, (state) => ({
+  
+  on(BookActions.updateBookingStart, (state) => ({
     ...state,
-    bookingViewModel: {} as Booking
+    savingBooking: true,
+    appError: null
   })),
-  on(BookActions.loadBooking, (state, { booking }) => ({
+  on(BookActions.updateBookingEnd, (state) => ({
     ...state,
-    bookingViewModel: booking
-  }))
+    savingBooking: false
+  })),
+  on(BookActions.updateBookingFail, (state, action) => ({
+    ...state,
+    savingBooking: false,
+    appError: action.error
+  })),
 );

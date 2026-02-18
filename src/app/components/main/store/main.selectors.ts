@@ -29,3 +29,13 @@ export const selectIsMobile = createSelector(
   selectMainState,
   (state: MainState) => state.isMobile
 );
+
+export const customerViewModel = createSelector(
+  selectMainState,
+  (state: MainState) => state.customerViewModel
+);
+
+
+export const bookingVM = createSelector(
+  selectMainState,
+  (state: MainState) => state.bookingViewModel);

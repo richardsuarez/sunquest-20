@@ -1,5 +1,3 @@
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { customerViewModel } from '../../customer/store/customer.selectors';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Address, Customer } from '../../customer/model/customer.model';
@@ -26,7 +24,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { PopupComponent } from '../../../shared/popup/popup.component';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { bookingVM, savingBooking, sortedTripsMap, trucks } from '../store/book.selectors';
+import { savingBooking, sortedTripsMap, trucks } from '../store/book.selectors';
 import { Trip } from '../../trip/model/trip.model';
 import { Store } from '@ngrx/store';
 import { Truck } from '../../truck/model/truck.model';
@@ -151,16 +149,15 @@ export class Book implements OnInit, OnDestroy {
   originalTruckId: string | null = null;
 
   constructor(
-    private readonly breakpoints: BreakpointObserver,
     private readonly route: ActivatedRoute,
     private readonly matDialog: MatDialog,
   ) {
-    this.customer$ = this.store.select(customerViewModel);
+    this.customer$ = this.store.select(MainSelectors.customerViewModel);
     // select trucks from the truck feature (not the book feature)
     this.truckList$ = this.store.select(trucks);
     this.savingBooking$ = this.store.select(savingBooking);
     this.tripsMap$ = this.store.select(sortedTripsMap);
-    this.bookingVM$ = this.store.select(bookingVM);
+    this.bookingVM$ = this.store.select(MainSelectors.bookingVM);
     this.seasons$ = this.store.select(MainSelectors.selectSeasons);
     this.isMobile$ = this.store.select(selectIsMobile);
   }
@@ -438,7 +435,7 @@ export class Book implements OnInit, OnDestroy {
       paycheck: {
         checkNumber: this.form.controls.checkNumber.value,
         bankName: this.form.controls.bankName.value,
-        amount: this.form.controls.amount.value || 1200,
+        amount: this.form.controls.amount.value || 0,
       },
       arrivalAt,
       arrivalAddress: this.deliveryAddressForm.getRawValue(),
@@ -462,17 +459,22 @@ export class Book implements OnInit, OnDestroy {
     } else {
       if (this.originalTrip && this.currentSelectedTrip) {
         if (this.originalTrip.id !== this.currentSelectedTrip.id) {
-          // if user changes trip, then we need to update the original trip capacity by adding back the booked load and cars before updating booking with new trip
+          // if user changes trip, then we need to update the original trip and then update new trip
           this.updateOriginalTrip();
+          this.updateCurrentTrip(booking); 
         }
       } else {
-        // if user unselects the trip, then we need to update the original trip capacity by adding back the booked load and cars before updating booking with no trip
+        // if user unselects the original trip and does not select any, then we need to update the original trip capacity by adding back the booked load and cars
         if(this.originalTrip && !this.currentSelectedTrip) {
           this.updateOriginalTrip();
-        } 
+        } else {
+          // if user selects a new trip without having an original trip, then we just need to update the new trip capacity by subtracting the booked load and cars
+          this.updateCurrentTrip(booking); 
+        }
       }
-      // whatever the case, we always update the booking and if there's a trip change, the effects will handle updating the trips capacity
-      this.updateCurrentTrip(booking);
+      // whatever the case, we always update the booking info because user might change other booking info without changing trip (e.g. change notes or change check number, etc..)
+           
+      this.store.dispatch(BookActions.updateBookingStart({ booking }));
     }
 
     this.tripForm.reset();
@@ -514,7 +516,7 @@ export class Book implements OnInit, OnDestroy {
         remLoadCap: this.currentSelectedTrip.remLoadCap - currentBookingVehicleLoad,
         remCarCap: this.currentSelectedTrip.remCarCap - (booking.vehicleIds?.length || 0)
       }
-      this.store.dispatch(BookActions.updateTripStart({ truckId: this.originalTruckId!, trip: currentTripForUpdate }));
+      this.store.dispatch(BookActions.updateTripStart({ truckId: this.currentSelectedTruckId!, trip: currentTripForUpdate }));
     }
   }
 
@@ -531,11 +533,6 @@ export class Book implements OnInit, OnDestroy {
       highestLoadNumber += 1;
       this.tripForm.controls.loadNumber.setValue(highestLoadNumber.toString());
     }
-  }
-
-  refillCheckAmount() {
-    const selectedCars = Object.values(this.vehicleSelection).filter((v) => v).length
-    this.form.controls.amount.setValue(1200 * selectedCars)
   }
 
   selectableTrip(trip: Trip): boolean {

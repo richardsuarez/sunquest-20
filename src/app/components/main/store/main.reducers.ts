@@ -1,6 +1,7 @@
 import { createReducer, on } from '@ngrx/store';
 import { initialMainState } from './main.state';
 import * as MainActions from './main.actions';
+import { Booking } from '../../book/model/booking.model';
 
 export const mainReducer = createReducer(
   initialMainState,
@@ -77,5 +78,17 @@ export const mainReducer = createReducer(
   on(MainActions.setBreakpoint, (state, { isMobile }) => ({
     ...state,
     isMobile
-  }))
+  })),
+  on(MainActions.loadCustomer, (state, action) => ({
+    ...state,
+    customerViewModel: action.customer
+  })),
+  on(MainActions.loadBooking, (state, { booking }) => ({
+    ...state,
+    bookingViewModel: booking
+  })),
+  on(MainActions.createEmptyBooking, (state) => ({
+      ...state,
+      bookingViewModel: {} as Booking
+    })),
 );

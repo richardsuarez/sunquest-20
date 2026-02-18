@@ -1,6 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 import { Season } from '../../season/models/season.model';
 import { Customer } from '../../customer/model/customer.model';
+import { Booking } from '../../book/model/booking.model';
 
 export const loadCustomers = createAction(
   '[Main] Load Customer'
@@ -19,3 +20,7 @@ export const deactivateSeasonSuccess = createAction('[Main] Deactivate Season Su
 export const deactivateSeasonFail = createAction('[Main] Deactivate Season Fail', props<{ error: string }>());
 
 export const setBreakpoint = createAction('[Main] Set Breakpoint', props<{ isMobile: boolean }>());
+export const loadBooking = createAction('[Main] Load booking', props<{ booking: Booking }>());
+export const loadCustomer = createAction('[Main] Load a customer in state', props<{customer: Customer}>());
+
+export const createEmptyBooking = createAction('[Book] Create empty booking');

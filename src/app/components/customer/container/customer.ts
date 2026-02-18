@@ -20,7 +20,7 @@ import { Router } from '@angular/router';
 import { SearchCriteria, CustomerRecord } from '../model/customer.model';
 import { Store } from '@ngrx/store';
 import * as CustomerActions from '../store/customer.actions'
-import * as  BookAction from '../../book/store/book.actions';
+import * as MainAction from '../../main/store/main.actions';
 import { Season } from '../../season/models/season.model';
 import { selectSeasons, selectIsMobile } from '../../main/store/main.selectors';
 import { Booking } from '../../book/model/booking.model';
@@ -200,9 +200,9 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
   createBooking(customer: Customer | undefined) {
     if (customer) {
-      this.store.dispatch(CustomerActions.loadCustomer({ customer }));
-      this.store.dispatch(BookAction.createEmptyBooking());
       this.router.navigate(['main/book/new']);
+      this.store.dispatch(MainAction.loadCustomer({ customer }));
+      this.store.dispatch(MainAction.createEmptyBooking());``
     }
   }
 
@@ -232,9 +232,9 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
   editBooking(booking: Booking, customer: Customer) {
     if (booking.customer) {
-      this.store.dispatch(CustomerActions.loadCustomer({ customer }));
-      this.store.dispatch(BookAction.loadBooking({ booking }));
       this.router.navigate(['main/book/edit']);
+      this.store.dispatch(MainAction.loadCustomer({ customer }));
+      this.store.dispatch(MainAction.loadBooking({ booking }));
     }
   }
 

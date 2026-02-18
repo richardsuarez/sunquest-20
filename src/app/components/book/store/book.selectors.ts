@@ -8,7 +8,6 @@ export const loadingTrucks = createSelector(bookFeature, (s) => s.loading);
 export const trucks = createSelector(bookFeature, (s) => s.trucks);
 export const savingBooking = createSelector(bookFeature, (s) => s.savingBooking);
 export const tripsMap = createSelector(bookFeature, (s) => s.trips);
-export const bookingVM = createSelector(bookFeature, (s) => s.bookingViewModel);
 
 // sorted trips map: returns trips arrays sorted by departureDate ascending
 export const sortedTripsMap = createSelector(tripsMap, (map) => {

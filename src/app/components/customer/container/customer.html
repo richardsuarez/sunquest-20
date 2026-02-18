@@ -1,4 +1,3 @@
-@if(isMobile$ | async; as isMobile){
     <div class="headers">
         <h1>Customers</h1>
         <button mat-button mat-raised-button (click)="addCustomer()" style="background-color: #ED2D89; color: white">
@@ -6,10 +5,10 @@
         </button>
     </div>
     <div class="search">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" [class.form-field]="!isMobile"
-            [class.form-field-mobile]="isMobile">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" [class.form-field]="!(isMobile$ | async)"
+            [class.form-field-mobile]="isMobile$ | async">
             <input type="text" matInput [formControl]="searchCustomer"
-                [placeholder]="!isMobile ? 'Search by Rec No, Last Name or Phone Number' : 'Search customer'"
+                [placeholder]="!(isMobile$ | async) ? 'Search by Rec No, Last Name or Phone Number' : 'Search customer'"
                 (keyup.enter)="onSearch()">
             <button mat-icon-button matSuffix class="search-button" color="primary" (click)="onSearch()">
                 <mat-icon>search</mat-icon>
@@ -21,8 +20,8 @@
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
     }
     <div class="body">
-        <mat-card *ngFor="let record of records" [class.record-card-desktop]="!isMobile"
-            [class.record-card-mobile]="isMobile">
+        <mat-card *ngFor="let record of records" [class.record-card-desktop]="!(isMobile$ | async)"
+            [class.record-card-mobile]="isMobile$ | async">
             <mat-card-header>
                 <div mat-card-avatar style="text-align: center; margin: 0px">
                     <h2 style="margin: 0px; color: white">{{ record.recNo }}</h2>
@@ -204,4 +203,3 @@
     <mat-paginator class="pagination" [length]="totalPagination$ | async" [pageSize]="searchCriteria.pageSize"
         aria-label="Select page" (page)="onPageChange($event)">
     </mat-paginator>
-}

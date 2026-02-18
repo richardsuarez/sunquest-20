@@ -3,13 +3,14 @@ import { Booking } from '../model/booking.model';
 import { Trip } from '../../trip/model/trip.model';
 import { Truck } from '../../truck/model/truck.model';
 import { Season } from '../../season/models/season.model';
+import { Customer } from '../../customer/model/customer.model';
 
 // Booking actions
 export const addBookingStart = createAction('[Book] Add booking start', props<{ booking: Partial<Booking>, trip: Trip | null }>());
 export const addBookingEnd = createAction('[Book] Add booking end');
 export const addBookingFail = createAction('[Book] Add booking fail', props<{ error: Error }>());
 
-export const updateBookingStart = createAction('[Book] Update booking start', props<{ booking: Partial<Booking>, trip: Trip | null }>());
+export const updateBookingStart = createAction('[Book] Update booking start', props<{ booking: Partial<Booking> }>());
 export const updateBookingEnd = createAction('[Book] Update booking end');
 export const updateBookingFail = createAction('[Book] Update booking fail', props<{ error: Error }>());
 
@@ -30,5 +31,3 @@ export const loadTripsStart = createAction('[Book] Load trips start', props<{ tr
 export const loadTripsSuccess = createAction('[Book] Load trips success', props<{ truckId: string, trips: Trip[] }>());
 export const loadTripsFail = createAction('[Book] Load trips fail', props<{ error: Error }>());
 
-export const createEmptyBooking = createAction('[Book] Create empty booking');
-export const loadBooking = createAction('[Book] Load booking', props<{ booking: Booking }>());

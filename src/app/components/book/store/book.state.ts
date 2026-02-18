@@ -2,6 +2,7 @@ import { Trip } from '../../trip/model/trip.model';
 import { Truck } from '../../truck/model/truck.model';
 import { CalendarEventsByDate } from '../../calendar/model/calendar-event.model';
 import { Booking } from '../model/booking.model';
+import { Customer } from '../../customer/model/customer.model';
 
 export interface BookState {
   loading: boolean;
@@ -9,8 +10,7 @@ export interface BookState {
   trips: {[truckId: string]: Trip[]}
   savingBooking: boolean;
   appError: Error | null;
-  calendarEvents: CalendarEventsByDate;
-  bookingViewModel: Booking | null;
+  calendarEvents: CalendarEventsByDate
 }
 
 export const initialBookState: BookState = {
@@ -20,5 +20,4 @@ export const initialBookState: BookState = {
   savingBooking: false,
   appError: null,
   calendarEvents: {},
-  bookingViewModel: null,
 };
