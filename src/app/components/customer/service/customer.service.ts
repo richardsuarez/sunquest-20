@@ -313,26 +313,26 @@ export class CustomerService {
   }
 
   updateCustomer(customer: Partial<Customer>): Observable<any> {
-    return runInInjectionContext(this.injector, () => {
-      const customerDocRef = doc(this.firestore, `${this.collectionName}/${customer.DocumentID}`);
-      return from(updateDoc(customerDocRef, customer));
-    });
+    return from(runInInjectionContext(this.injector, () => {
+      const customerDocRef = doc(this.firestore, `${this.collectionName}/${customer.DocumentID!}`);
+      return updateDoc(customerDocRef, customer);
+    }));
   }
 
   // #endregion Customer
 
   // #region Vehicle (subcollection under customer)
 
-  addVehicle(customer: Customer, vehicle: Partial<Vehicle>): Observable<any> {
+  addVehicle(customer: Partial<Customer>, vehicle: Partial<Vehicle>): Observable<any> {
     return runInInjectionContext(this.injector, () => {
       const vehiclesRef = collection(this.firestore, `${this.collectionName}/${customer.DocumentID}/vehicles`);
       return from(addDoc(vehiclesRef, { ...vehicle, createdAt: new Date() }));
     });
   }
 
-  updateVehicle(customer: Customer, vehicle: Partial<Vehicle>): Observable<any> {
+  updateVehicle(customer: Partial<Customer>, vehicle: Partial<Vehicle>): Observable<any> {
     return from(runInInjectionContext(this.injector, async () => {
-      const existingVehicle = await this.doesVehicleExist(customer.DocumentID, vehicle.id!);
+      const existingVehicle = await this.doesVehicleExist(customer.DocumentID!, vehicle.id!);
       if (!existingVehicle) {
         return this.addVehicle(customer, vehicle).toPromise();
       }

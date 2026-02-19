@@ -37,7 +37,7 @@ export interface Address{
 
 export interface Vehicle {
     recNo: string | null;
-    id?: string;
+    id?: string | null;
     make: string | null;
     model: string | null;
     year: number | null;

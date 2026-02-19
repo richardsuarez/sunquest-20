@@ -93,7 +93,7 @@ export const addVehicleEnd = createAction(
 
 export const updateVehicleStart = createAction(
     '[Customer] Start updating vehicle',
-    props<{ customer: Customer, vehicle: Partial<Vehicle>}>()
+    props<{ customer: Partial<Customer>, vehicle: Partial<Vehicle>}>()
 );
 
 export const updateVehicleEnd = createAction(

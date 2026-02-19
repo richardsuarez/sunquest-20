@@ -26,6 +26,7 @@ export class CustomerEffects {
     readonly deleteCustomerEnd$;
     readonly updateCustomerStart$;
     readonly updateCustomerEnd$;
+    readonly failure$;
 
     constructor(
         private readonly actions$: Actions,
@@ -234,33 +235,46 @@ export class CustomerEffects {
         this.updateCustomerStart$ = createEffect(() =>
             this.actions$.pipe(
                 ofType(CustomerActions.updateCustomerStart),
-                withLatestFrom(this.store.select(customerViewModel)),
-                switchMap(([action, customerVM]) =>
+                switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
-                        this.customerService
-                            .updateCustomer({ ...action.customer, DocumentID: customerVM?.DocumentID })
-                            .pipe(
-                                concatMap(() => {
-                                    const baseActions: any[] = [
+                        this.customerService.updateCustomer(action.customer).pipe(
+                            concatMap(() => {
+                                // if vehicles are provided, dispatch addVehicleStart for each
+                                if (action.vehicles && action.vehicles.length && action.customer?.DocumentID) {
+                                    const vehicleActions = action.vehicles.map((v: any) =>
+                                        CustomerActions.updateVehicleStart({ customer: action.customer, vehicle: v })
+                                    );
+                                    return [
                                         CustomerActions.resetCustomerViewModel(),
-                                        CustomerActions.updateCustomerEnd({ customer: action.customer })
+                                        ...vehicleActions, 
+                                        CustomerActions.updateCustomerEnd({ customer: action.customer }),
                                     ];
+                                }
 
-                                    // if vehicles are provided, dispatch addVehicleStart for each
-                                    if (action.vehicles && action.vehicles.length && customerVM?.DocumentID) {
-                                        const vehicleActions = action.vehicles.map((v: any) =>
-                                            CustomerActions.updateVehicleStart({ customer: customerVM, vehicle: v })
-                                        );
-                                        return [...baseActions, ...vehicleActions];
-                                    }
-
-                                    return baseActions;
-                                }),
-                                catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
-                            )
+                                return [
+                                        CustomerActions.resetCustomerViewModel(), 
+                                        CustomerActions.updateCustomerEnd({ customer: action.customer }),
+                                    ];
+                            }),
+                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
+                        )
                     )
                 )
             )
+        );
+
+        this.failure$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(CustomerActions.failure),
+                tap((action) => {
+                    this._snackBar.open(
+                        `An error occurred: ${action.appError.message}`,
+                        'Close',
+                        { duration: 5000 }
+                    );
+                })
+            ),
+            { dispatch: false }
         );
 
         this.updateCustomerEnd$ = createEffect(() =>

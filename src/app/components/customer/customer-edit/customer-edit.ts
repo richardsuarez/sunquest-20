@@ -68,6 +68,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   vehiclesProperties = ['recNo', 'color', 'year', 'make', 'model', 'plate', 'state', 'weight', 'vin', 'actions'];
 
   vehicleForm = new FormGroup({
+    id: new FormControl<string>(''),
     make: new FormControl<string | null>('', Validators.required),
     model: new FormControl<string | null>('', Validators.required),
     year: new FormControl<number | null>(null, Validators.required),
@@ -113,7 +114,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   })
 
   upperCaseAlphabet: string[] = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
-
+  editingVehicleId: string | null = null;
 
   private store = inject(Store)
 
@@ -227,7 +228,8 @@ export class CustomerEdit implements OnInit, OnDestroy {
   onSubmit() {
     if (this.customerForm.valid && (!this.customerForm.pristine || (this.tempVehicles && this.tempVehicles.length > 0))) {
       if (this.crud === 'edit' && this.currentCustomer) {
-        this.store.dispatch(updateCustomerStart({ customer: this.customerForm.getRawValue(), vehicles: this.tempVehicles }));
+        const auxCustomer = {...this.currentCustomer, ...this.customerForm.getRawValue()};
+        this.store.dispatch(updateCustomerStart({ customer: auxCustomer, vehicles: this.tempVehicles }));
       }
       else if (this.crud === 'new') {
         this.store.dispatch(addCustomerStart({ customer: this.customerForm.getRawValue(), vehicles: this.tempVehicles }));
@@ -246,6 +248,11 @@ export class CustomerEdit implements OnInit, OnDestroy {
     } else {
       this.vehicleForm.markAllAsTouched();
     }
+  }
+
+  editVehicle(vehicle: Vehicle){
+    this.vehicleForm.patchValue(vehicle);
+    this.editingVehicleId = vehicle.id ?? null;
   }
 
   deleteVehicle(vehicleId?: string) {

@@ -53,6 +53,7 @@ export const customerReducer = createReducer(
     on(CustomerActions.failure, (state, action) => ({
         ...state,
         loading: false,
+        savingCustomer: false,
         appError: action.appError
     })),
 
