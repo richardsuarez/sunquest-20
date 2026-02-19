@@ -10,6 +10,7 @@ export interface MainState {
   isMobile: boolean;
   customerViewModel: Customer | null;
   bookingViewModel: Booking | null;
+  deletingBooking: string | null;
 }
 
 export const initialMainState: MainState = {
@@ -20,4 +21,5 @@ export const initialMainState: MainState = {
   isMobile: false,
   customerViewModel: null,
   bookingViewModel: null,
+  deletingBooking: null,
 };

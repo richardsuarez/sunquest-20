@@ -225,7 +225,17 @@ export class Book implements OnInit, OnDestroy {
 
     this.tripsMap$.pipe(takeUntil(this.destroy$)).subscribe((tripMap) => {
       this.trips = tripMap;
-
+      if (this.originalBooking && this.originalBooking.truckId && this.trips[this.originalBooking.truckId]) {
+          for (const trip of this.trips[this.originalBooking.truckId]) {
+            if (trip.id === this.originalBooking.tripId) {
+              this.originalTrip = trip;
+              this.originalTruckId = this.originalBooking.truckId;
+              this.currentSelectedTrip = trip;
+              this.currentSelectedTruckId = this.originalBooking.truckId;
+              break;
+            }
+          }
+        }
     });
 
     this.tripForm.controls.truckId.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((truckId) => {

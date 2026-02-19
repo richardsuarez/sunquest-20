@@ -23,4 +23,11 @@ export const setBreakpoint = createAction('[Main] Set Breakpoint', props<{ isMob
 export const loadBooking = createAction('[Main] Load booking', props<{ booking: Booking }>());
 export const loadCustomer = createAction('[Main] Load a customer in state', props<{customer: Customer}>());
 
-export const createEmptyBooking = createAction('[Book] Create empty booking');
+export const createEmptyBooking = createAction('[Main] Create empty booking');
+export const deleteBookingStart = createAction('[Main] Start deleting booking', props<{ booking: Booking }>());
+export const deleteBookingSuccess = createAction('[Main] End deleting booking');
+export const deleteBookingFail = createAction('[Main] Failed to delete booking', props<{ error: Error }>());
+
+export const updateTripAfterDeleteBooking = createAction('[Main] Update remCarCap and remLoadCap after deleting booking', props<{ tripId: string, truckId: string, booking: Booking }>());
+export const updateTripAfterDeleteBookingSuccess = createAction('[Main] Update remCarCap and remLoadCap after deleting booking success');
+export const updateTripAfterDeleteBookingFail = createAction('[Main] Update remCarCap and remLoadCap after deleting booking fail', props<{ error: Error }>());

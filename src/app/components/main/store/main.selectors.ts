@@ -38,4 +38,10 @@ export const customerViewModel = createSelector(
 
 export const bookingVM = createSelector(
   selectMainState,
-  (state: MainState) => state.bookingViewModel);
+  (state: MainState) => state.bookingViewModel
+);
+
+export const deletingBooking = createSelector(
+  selectMainState,
+  (state: MainState) => state.deletingBooking
+);

@@ -90,5 +90,19 @@ export const mainReducer = createReducer(
   on(MainActions.createEmptyBooking, (state) => ({
       ...state,
       bookingViewModel: {} as Booking
-    })),
-);
+  })),
+  on(MainActions.deleteBookingStart, (state, action) => ({
+      ...state,
+      deletingBooking: action.booking.id ?? null,
+      error: null,
+  })),
+  on(MainActions.deleteBookingSuccess, (state) => ({
+      ...state,
+      deletingBooking: null,
+  })),
+  on(MainActions.deleteBookingFail, (state, { error }) => ({
+      ...state,
+      deletingBooking: null,
+      error: error.message,
+  })),
+)
