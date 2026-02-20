@@ -116,9 +116,9 @@
 
                     </div>
                     <mat-card-actions>
-                        <button mat-button color="warn" (click)="createBooking(record.customer)">Book</button>
-                        <button mat-button color="primary" (click)="toEditCustomer(record.customer)">Edit</button>
-                        <button mat-button style="color: red;" (click)="deleteCustomer(record.customer)">Delete</button>
+                        <button mat-button color="warn" (click)="createBooking(record.customer)" matTooltip="New booking">Book</button>
+                        <button mat-button color="primary" (click)="toEditCustomer(record.customer)" matTooltip="Edit customer">Edit</button>
+                        <button mat-button style="color: red;" (click)="deleteCustomer(record.customer)" matTooltip="Delete customer">Delete</button>
                     </mat-card-actions>
                 </div>
                 <div style="border-radius: 5px; width: 77%">

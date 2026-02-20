@@ -1,14 +1,15 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { withLatestFrom, switchMap, map, catchError, of, tap, filter, combineLatest, concatMap, from } from 'rxjs';
+import { withLatestFrom, switchMap, map, catchError, of, tap, filter, combineLatest, concatMap, from, Observable, concat, endWith } from 'rxjs';
 import { CustomerService } from '../service/customer.service';
 import { searchCriteria, lastCustomer, customerViewModel, firstCustomer } from './customer.selectors';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import * as CustomerActions from './customer.actions';
 import { Customer, SearchCriteria } from '../model/customer.model';
 import { Router } from '@angular/router';
-import { selectSeasons } from '../../main/store/main.selectors';
+import * as MainActions from '../../main/store/main.actions';
+import { Booking } from '../../book/model/booking.model';
 
 @Injectable()
 export class CustomerEffects {
@@ -154,7 +155,30 @@ export class CustomerEffects {
                 switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
                         this.customerService.deleteCustomer(action.id).pipe(
-                            map(() => CustomerActions.deleteCustomerEnd({customerId: action.id})),
+                            switchMap(() => 
+                                from(this.customerService.getNextBookingsForCustomer(action.id)).pipe(
+                                    switchMap((bookings$: Observable<Booking[]>) => 
+                                        bookings$.pipe(
+                                            switchMap((bookings: Booking[]) => {
+                                                // If there are bookings, dispatch deleteBookingStart for each one
+                                                if (bookings && bookings.length > 0) {
+                                                    // Emit a deleteBookingStart action for each booking, then emit deleteCustomerEnd
+                                                    return concat(
+                                                        from(bookings).pipe(
+                                                            concatMap((booking) => 
+                                                                of(MainActions.deleteBookingStart({ booking }))
+                                                            )
+                                                        ),
+                                                        of(CustomerActions.deleteCustomerEnd({customerId: action.id}))
+                                                    );
+                                                }
+                                                // If no bookings, just dispatch deleteCustomerEnd
+                                                return of(CustomerActions.deleteCustomerEnd({customerId: action.id}));
+                                            })
+                                        )
+                                    )
+                                )
+                            ),
                             catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )
                     )
@@ -225,11 +249,15 @@ export class CustomerEffects {
         this.deleteCustomerEnd$ = createEffect(() =>
             this.actions$.pipe(
                 ofType(CustomerActions.deleteCustomerEnd),
-                concatMap(() => [
-                    CustomerActions.resetSearchCriteria(),
-                    CustomerActions.getNextCustomerListStart(),
-                ])
-            )
+                tap(() => {
+                    this._snackBar.open(
+                        `Customer have been deleted`,
+                        'Close',
+                        { duration: 5000 }
+                    );
+                })
+            ),
+            { dispatch: false }
         );
 
         this.updateCustomerStart$ = createEffect(() =>

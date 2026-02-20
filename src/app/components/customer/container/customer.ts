@@ -27,6 +27,7 @@ import { Booking } from '../../book/model/booking.model';
 import { MatTableModule } from '@angular/material/table';
 import { BookingDetailsPopupComponent } from '../../calendar/components/booking-details-popup/booking-details-popup.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltip } from "@angular/material/tooltip";
 
 @Component({
   selector: 'app-customer',
@@ -44,8 +45,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatProgressBar,
     MatSuffix,
     MatTableModule,
-    MatProgressSpinnerModule
-  ],
+    MatProgressSpinnerModule,
+    MatTooltip
+],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
@@ -205,7 +207,8 @@ export class CustomerComponent implements OnInit, OnDestroy {
         {
           data: {
             title: 'Delete Customer',
-            message: `Are you sure you want to delete ${customer.primaryTitle} ${customer.primaryFirstName} ${customer.primaryLastName}?`,
+            message: `Are you sure you want to delete ${customer.primaryTitle} ${customer.primaryFirstName} ${customer.primaryLastName}?.\n
+            All next bookings of this customer will also be deleted. This action cannot be undone.`,
             cancelButton: 'No',
             successButton: 'Yes',
           }

@@ -131,31 +131,31 @@ export class CustomerService {
       // ✅ Try network first, fallback to cache if offline
       let customers: Customer[] = [];
       try {
-        const snapshot = await runInInjectionContext(this.injector, () =>getDocsFromServer(q));
+        const snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
         customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,
           DocumentID: doc.id,
         }));
       } catch (error) {
-        const snapshot = await runInInjectionContext(this.injector, () =>getDocsFromCache(q));
+        const snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
         customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,
           DocumentID: doc.id,
         }));
       }
-      
+
       if (filter && !customers.length) {
         // let's try to search for the recNo of the vehicles
         const vehicleRef = collectionGroup(this.firestore, 'vehicles');
         const vehicleQuery = query(vehicleRef, and(where('recNo', '>=', filter), where('recNo', '<', filter + '\uf8ff')), orderBy('recNo'), limit(pageSize));
-        const vehicleSnapshot = await runInInjectionContext(this.injector, () =>getDocs(vehicleQuery));
+        const vehicleSnapshot = await runInInjectionContext(this.injector, () => getDocs(vehicleQuery));
         const customerRefs = vehicleSnapshot.docs.map(doc => ({
           customerReference: doc.ref.parent.parent, //customers/{id}
         }));
-        
+
         if (customerRefs.length) {
           const customerPromises = customerRefs.map(async (ref) => {
-            const customerDoc = await runInInjectionContext(this.injector, () =>getDocFromServer(ref.customerReference!));
+            const customerDoc = await runInInjectionContext(this.injector, () => getDocFromServer(ref.customerReference!));
             return {
               ...customerDoc.data() as Customer,
             };
@@ -163,7 +163,7 @@ export class CustomerService {
           customers = await Promise.all(customerPromises);
         }
       }
-      
+
       const auxCustomers = await Promise.all(
         customers.map(async customer => {
           const vehicles = await from(this.getVehicles(customer.DocumentID!)).toPromise();
@@ -413,6 +413,81 @@ export class CustomerService {
             } as Booking;
           });
         });
+
+      return from(p) as Observable<Booking[]>;
+    });
+  }
+
+  getNextBookingsForCustomer(customerId: string): Promise<Observable<Booking[]>> {
+    return runInInjectionContext(this.injector, async () => {
+      const bookingsRef = collection(this.firestore, `bookings`);
+      
+      // Query 1: Bookings with null departureDate
+      const q1 = query(
+        bookingsRef,
+        where('customer.DocumentID', '==', customerId),
+        where('departureDate', '==', null)
+      );
+      
+      // Query 2: Bookings with future departureDate
+      const q2 = query(
+        bookingsRef,
+        where('customer.DocumentID', '==', customerId),
+        where('departureDate', '>=', new Date()),
+        orderBy('departureDate', 'asc')
+      );
+      
+      const p = Promise.all([
+        getDocsFromServer(q1).catch(() => getDocsFromCache(q1)),
+        getDocsFromServer(q2).catch(() => getDocsFromCache(q2))
+      ]).then(([snapshot1, snapshot2]) => {
+        const mapBooking = (d: any) => {
+          const data = d.data() as any;
+          const arrivalAt = data.arrivalAt ? (typeof data.arrivalAt.toDate === 'function' ? data.arrivalAt.toDate() : new Date(data.arrivalAt)) : null;
+          const pickupAt = data.pickupAt ? (typeof data.pickupAt.toDate === 'function' ? data.pickupAt.toDate() : new Date(data.pickupAt)) : null;
+          const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+          const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+          return {
+            ...data,
+            id: d.id,
+            arrivalAt,
+            pickupAt,
+            createdAt,
+            departureDate
+          } as Booking;
+        };
+        
+        const bookings1 = snapshot1.docs.map(mapBooking);
+        const bookings2 = snapshot2.docs.map(mapBooking);
+        
+        // Combine results: null dates first, then sorted by departure date
+        return [...bookings1, ...bookings2];
+      })
+      .catch(async (err) => {
+        console.warn('[BookingService] getNextBookingsForCustomer() - query failed', err);
+        const snapshot1 = await getDocsFromCache(q1);
+        const snapshot2 = await getDocsFromCache(q2);
+        
+        const mapBooking = (d: any) => {
+          const data = d.data() as any;
+          const arrivalAt = data.arrivalAt ? (typeof data.arrivalAt.toDate === 'function' ? data.arrivalAt.toDate() : new Date(data.arrivalAt)) : null;
+          const pickupAt = data.pickupAt ? (typeof data.pickupAt.toDate === 'function' ? data.pickupAt.toDate() : new Date(data.pickupAt)) : null;
+          const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+          const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+          return {
+            ...data,
+            id: d.id,
+            arrivalAt,
+            pickupAt,
+            createdAt,
+            departureDate
+          } as Booking;
+        };
+        
+        const bookings1 = snapshot1.docs.map(mapBooking);
+        const bookings2 = snapshot2.docs.map(mapBooking);
+        return [...bookings1, ...bookings2];
+      });
 
       return from(p) as Observable<Booking[]>;
     });
