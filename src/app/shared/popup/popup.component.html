@@ -3,6 +3,10 @@
     <p>{{data.message}}</p>
 </mat-dialog-content>
 <mat-dialog-actions>
-    <button mat-button mat-raised-button (click)="cancel()" style="color: black">{{data.cancelButton}}</button>
-    <button mat-button mat-raised-button style="background-color: #ED2D89; color: white" (click)="save()">{{data.successButton}}</button>
+    @if(data.cancelButton){
+        <button mat-button mat-raised-button (click)="cancel()" style="color: black">{{data.cancelButton}}</button>
+    }
+    @if(data.successButton){
+        <button mat-button mat-raised-button style="background-color: #ED2D89; color: white" (click)="save()">{{data.successButton}}</button>
+    }
 </mat-dialog-actions>

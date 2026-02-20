@@ -47,7 +47,7 @@ import { MatTooltip } from "@angular/material/tooltip";
     MatTableModule,
     MatProgressSpinnerModule,
     MatTooltip
-],
+  ],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
 })
@@ -193,6 +193,11 @@ export class CustomerComponent implements OnInit, OnDestroy {
     return `tel:${phone}`;
   }
 
+  isCurrentSeason(season: string): boolean {
+    const aux = this.currentSeason?.seasonName + '-' + this.currentSeason?.year;
+    return season === aux;
+  }
+
   toEditCustomer(customer: Customer | undefined) {
     if (customer) {
       this.store.dispatch(CustomerActions.loadCustomer({ customer }));
@@ -227,11 +232,25 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   createBooking(customer: Customer | undefined) {
-    if (customer) {
-      this.router.navigate(['main/book/new']);
-      this.store.dispatch(MainAction.loadCustomer({ customer }));
-      this.store.dispatch(MainAction.createEmptyBooking()); ``
+    if (this.currentSeason) {
+      if (customer) {
+        this.router.navigate(['main/book/new']);
+        this.store.dispatch(MainAction.loadCustomer({ customer }));
+        this.store.dispatch(MainAction.createEmptyBooking()); ``
+      }
+    } else {
+      this.matDialog.open(
+        PopupComponent,
+        {
+          data: {
+            title: 'No active season',
+            message: `Cannot create booking because there is no active season. Please create and activate a season first.`,
+            cancelButton: 'OK',
+          }
+        }
+      );
     }
+
   }
 
   deleteBooking(booking: Booking) {

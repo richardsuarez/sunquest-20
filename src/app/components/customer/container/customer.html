@@ -129,7 +129,7 @@
                         <table style="border: 2px solid darkgray;" mat-table [dataSource]="record.bookings" class="mat-elevation-z8">
                             <ng-container matColumnDef="season">
                                 <th mat-header-cell *matHeaderCellDef> Season </th>
-                                <td [class.currentSeason]="currentSeason?.seasonName" mat-cell *matCellDef="let booking">
+                                <td [class.currentSeason]="isCurrentSeason(booking.season)" mat-cell *matCellDef="let booking">
                                     {{booking.season}} </td>
                             </ng-container>
 
