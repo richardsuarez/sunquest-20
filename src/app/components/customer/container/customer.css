@@ -59,6 +59,10 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.info-section {
+  padding: 0px 10px;
+}
+
 .info-section mat-icon {
   vertical-align: middle;
   margin-right: 8px;

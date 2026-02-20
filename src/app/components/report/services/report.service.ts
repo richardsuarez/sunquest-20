@@ -147,9 +147,9 @@ export class ReportService {
                 // loading trucks
                 let customerList: Customer[] = [];
                 try {
-                    const trucksCollection = collection(this.firestore, 'customers');
+                    const customersCollection = collection(this.firestore, 'customers');
                     const q = query(
-                        trucksCollection,
+                        customersCollection,
                         orderBy('primaryLastName', 'asc'),
                         orderBy('primaryFirstName', 'asc')
                     );

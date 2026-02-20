@@ -5,6 +5,7 @@ import { Customer, SearchCriteria } from '../model/customer.model';
 import { Vehicle } from '../model/customer.model';
 import { Season } from '../../season/models/season.model';
 import { Booking } from '../../book/model/booking.model';
+import { collectionGroup } from 'firebase/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
@@ -63,15 +64,19 @@ export class CustomerService {
         let auxQ = or(
           and(
             where('primaryLastName', '>=', filter),
-            where('primaryLastName', '<=', filter + '\uf8ff')
+            where('primaryLastName', '<', filter + '\uf8ff'),
           ),
           and(
             where('primaryPhone', '>=', filter),
-            where('primaryPhone', '<=', filter + '\uf8ff')
+            where('primaryPhone', '<', filter + '\uf8ff'),
           ),
           and(
             where('secondaryPhone', '>=', filter),
-            where('secondaryPhone', '<=', filter + '\uf8ff')
+            where('secondaryPhone', '<', filter + '\uf8ff'),
+          ),
+          and(
+            where('recNo', '>=', filter),
+            where('recNo', '<', filter + '\uf8ff'),
           )
         );
 
@@ -82,6 +87,9 @@ export class CustomerService {
             auxQ,
             orderBy('primaryLastName'),
             orderBy('primaryFirstName'),
+            orderBy('primaryPhone'),
+            orderBy('secondaryPhone'),
+            orderBy('recNo'),
             limit(pageSize)
           );
         } else {
@@ -92,6 +100,9 @@ export class CustomerService {
             auxQ,
             orderBy('primaryLastName'),
             orderBy('primaryFirstName'),
+            orderBy('primaryPhone'),
+            orderBy('secondaryPhone'),
+            orderBy('recNo'),
             startAfter(docRef),
             limit(pageSize)
           );
@@ -108,6 +119,9 @@ export class CustomerService {
             customerRef,
             orderBy('primaryLastName'),
             orderBy('primaryFirstName'),
+            orderBy('primaryPhone'),
+            orderBy('secondaryPhone'),
+            orderBy('recNo'),
             startAfter(docRef),
             limit(pageSize)
           );
@@ -117,18 +131,39 @@ export class CustomerService {
       // ✅ Try network first, fallback to cache if offline
       let customers: Customer[] = [];
       try {
-        const snapshot = await getDocsFromServer(q);
+        const snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
         customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,
           DocumentID: doc.id,
         }));
       } catch (error) {
-        const snapshot = await getDocsFromCache(q);
+        const snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
         customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,
           DocumentID: doc.id,
         }));
       }
+
+      if (filter && !customers.length) {
+        // let's try to search for the recNo of the vehicles
+        const vehicleRef = collectionGroup(this.firestore, 'vehicles');
+        const vehicleQuery = query(vehicleRef, and(where('recNo', '>=', filter), where('recNo', '<', filter + '\uf8ff')), orderBy('recNo'), limit(pageSize));
+        const vehicleSnapshot = await runInInjectionContext(this.injector, () => getDocs(vehicleQuery));
+        const customerRefs = vehicleSnapshot.docs.map(doc => ({
+          customerReference: doc.ref.parent.parent, //customers/{id}
+        }));
+
+        if (customerRefs.length) {
+          const customerPromises = customerRefs.map(async (ref) => {
+            const customerDoc = await runInInjectionContext(this.injector, () => getDocFromServer(ref.customerReference!));
+            return {
+              ...customerDoc.data() as Customer,
+            };
+          });
+          customers = await Promise.all(customerPromises);
+        }
+      }
+
       const auxCustomers = await Promise.all(
         customers.map(async customer => {
           const vehicles = await from(this.getVehicles(customer.DocumentID!)).toPromise();
@@ -216,16 +251,58 @@ export class CustomerService {
   }
 
   addCustomer(customer: Partial<Customer>): Observable<any> {
-    return runInInjectionContext(this.injector, () => {
+    return from(runInInjectionContext(this.injector, async () => {
       const newCustomerRef = collection(this.firestore, this.collectionName);
-      return from(addDoc(newCustomerRef, customer).then(docRef => {
+
+      // Validate recNo
+      let customerToAdd = { ...customer };
+
+      if (customerToAdd.recNo) {
+        // If recNo is provided, verify it doesn't belong to any other customer
+        const existingRecNo = await this.doesRecNoExist(customerToAdd.recNo);
+        if (existingRecNo) {
+          throw new Error(`RecNo '${customerToAdd.recNo}' already belongs to another customer in the database.`);
+        }
+      } else {
+        // If recNo is not provided, generate a random 3-digit number and ensure uniqueness
+        let randomRecNo = this.generateRandomRecNo();
+        while (await this.doesRecNoExist(randomRecNo)) {
+          randomRecNo = this.generateRandomRecNo();
+        }
+        customerToAdd.recNo = randomRecNo;
+      }
+
+      // If validation passes, proceed with adding the customer
+      return addDoc(newCustomerRef, customerToAdd).then(docRef => {
         // Update the document to include its DocumentID
         return updateDoc(docRef, { DocumentID: docRef.id }).then(() => ({
-          ...customer,
+          ...customerToAdd,
           DocumentID: docRef.id
         }));
-      }));
+      });
+    }));
+  }
+
+  private async doesRecNoExist(recNo: string): Promise<boolean> {
+    return runInInjectionContext(this.injector, async () => {
+      const customerRef = collection(this.firestore, this.collectionName);
+      const q = query(customerRef, where('recNo', '==', recNo));
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
     });
+  }
+
+  private async doesVehicleExist(customerId: string, vehicelId: string): Promise<boolean> {
+    return runInInjectionContext(this.injector, async () => {
+      const vehicleDocRef = doc(this.firestore, `${this.collectionName}/${customerId}/vehicles/${vehicelId}`);
+      const snapshot = await getDocFromServer(vehicleDocRef);
+      return snapshot.exists();
+    });
+  }
+
+  private generateRandomRecNo(): string {
+    // Generate a random 3-digit number (000-999)
+    return Math.floor(Math.random() * 1000).toString().padStart(3, '0');
   }
 
   deleteCustomer(id: string): Observable<any> {
@@ -236,21 +313,32 @@ export class CustomerService {
   }
 
   updateCustomer(customer: Partial<Customer>): Observable<any> {
-    return runInInjectionContext(this.injector, () => {
-      const customerDocRef = doc(this.firestore, `${this.collectionName}/${customer.DocumentID}`);
-      return from(updateDoc(customerDocRef, customer));
-    });
+    return from(runInInjectionContext(this.injector, () => {
+      const customerDocRef = doc(this.firestore, `${this.collectionName}/${customer.DocumentID!}`);
+      return updateDoc(customerDocRef, customer);
+    }));
   }
 
   // #endregion Customer
 
   // #region Vehicle (subcollection under customer)
 
-  addVehicle(customerId: string, vehicle: Partial<Vehicle>): Observable<any> {
+  addVehicle(customer: Partial<Customer>, vehicle: Partial<Vehicle>): Observable<any> {
     return runInInjectionContext(this.injector, () => {
-      const vehiclesRef = collection(this.firestore, `${this.collectionName}/${customerId}/vehicles`);
+      const vehiclesRef = collection(this.firestore, `${this.collectionName}/${customer.DocumentID}/vehicles`);
       return from(addDoc(vehiclesRef, { ...vehicle, createdAt: new Date() }));
     });
+  }
+
+  updateVehicle(customer: Partial<Customer>, vehicle: Partial<Vehicle>): Observable<any> {
+    return from(runInInjectionContext(this.injector, async () => {
+      const existingVehicle = await this.doesVehicleExist(customer.DocumentID!, vehicle.id!);
+      if (!existingVehicle) {
+        return this.addVehicle(customer, vehicle).toPromise();
+      }
+      const vehicleDocRef = doc(this.firestore, `${this.collectionName}/${customer.DocumentID}/vehicles/${vehicle.id}`);
+      return updateDoc(vehicleDocRef, vehicle);
+    }));
   }
 
   getVehicles(customerId: string): Observable<Vehicle[]> {
@@ -278,7 +366,7 @@ export class CustomerService {
 
   getBookingList(customers: Customer[]): Promise<Observable<Booking[]>> {
     const auxCustomers: string[] = [];
-    for(let c of customers){
+    for (let c of customers) {
       auxCustomers.push(c.DocumentID!);
     }
     return runInInjectionContext(this.injector, async () => {
@@ -325,6 +413,81 @@ export class CustomerService {
             } as Booking;
           });
         });
+
+      return from(p) as Observable<Booking[]>;
+    });
+  }
+
+  getNextBookingsForCustomer(customerId: string): Promise<Observable<Booking[]>> {
+    return runInInjectionContext(this.injector, async () => {
+      const bookingsRef = collection(this.firestore, `bookings`);
+      
+      // Query 1: Bookings with null departureDate
+      const q1 = query(
+        bookingsRef,
+        where('customer.DocumentID', '==', customerId),
+        where('departureDate', '==', null)
+      );
+      
+      // Query 2: Bookings with future departureDate
+      const q2 = query(
+        bookingsRef,
+        where('customer.DocumentID', '==', customerId),
+        where('departureDate', '>=', new Date()),
+        orderBy('departureDate', 'asc')
+      );
+      
+      const p = Promise.all([
+        getDocsFromServer(q1).catch(() => getDocsFromCache(q1)),
+        getDocsFromServer(q2).catch(() => getDocsFromCache(q2))
+      ]).then(([snapshot1, snapshot2]) => {
+        const mapBooking = (d: any) => {
+          const data = d.data() as any;
+          const arrivalAt = data.arrivalAt ? (typeof data.arrivalAt.toDate === 'function' ? data.arrivalAt.toDate() : new Date(data.arrivalAt)) : null;
+          const pickupAt = data.pickupAt ? (typeof data.pickupAt.toDate === 'function' ? data.pickupAt.toDate() : new Date(data.pickupAt)) : null;
+          const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+          const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+          return {
+            ...data,
+            id: d.id,
+            arrivalAt,
+            pickupAt,
+            createdAt,
+            departureDate
+          } as Booking;
+        };
+        
+        const bookings1 = snapshot1.docs.map(mapBooking);
+        const bookings2 = snapshot2.docs.map(mapBooking);
+        
+        // Combine results: null dates first, then sorted by departure date
+        return [...bookings1, ...bookings2];
+      })
+      .catch(async (err) => {
+        console.warn('[BookingService] getNextBookingsForCustomer() - query failed', err);
+        const snapshot1 = await getDocsFromCache(q1);
+        const snapshot2 = await getDocsFromCache(q2);
+        
+        const mapBooking = (d: any) => {
+          const data = d.data() as any;
+          const arrivalAt = data.arrivalAt ? (typeof data.arrivalAt.toDate === 'function' ? data.arrivalAt.toDate() : new Date(data.arrivalAt)) : null;
+          const pickupAt = data.pickupAt ? (typeof data.pickupAt.toDate === 'function' ? data.pickupAt.toDate() : new Date(data.pickupAt)) : null;
+          const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+          const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+          return {
+            ...data,
+            id: d.id,
+            arrivalAt,
+            pickupAt,
+            createdAt,
+            departureDate
+          } as Booking;
+        };
+        
+        const bookings1 = snapshot1.docs.map(mapBooking);
+        const bookings2 = snapshot2.docs.map(mapBooking);
+        return [...bookings1, ...bookings2];
+      });
 
       return from(p) as Observable<Booking[]>;
     });

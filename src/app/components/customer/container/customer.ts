@@ -2,7 +2,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { bookings, customerList, loading, searchCriteria, totalPagination } from '../store/customer.selectors';
 import { Customer, Vehicle } from '../model/customer.model';
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { map, Observable, Subject, takeUntil } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,16 +17,17 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { PopupComponent } from '../../../shared/popup/popup.component';
 import { Router } from '@angular/router';
-import { SearchCriteria, Record } from '../model/customer.model';
+import { SearchCriteria, CustomerRecord } from '../model/customer.model';
 import { Store } from '@ngrx/store';
 import * as CustomerActions from '../store/customer.actions'
-import * as  BookAction from '../../book/store/book.actions';
+import * as MainAction from '../../main/store/main.actions';
 import { Season } from '../../season/models/season.model';
-import { selectSeasons } from '../../main/store/main.selectors';
+import { selectSeasons, selectIsMobile, deletingBooking } from '../../main/store/main.selectors';
 import { Booking } from '../../book/model/booking.model';
 import { MatTableModule } from '@angular/material/table';
-import { MatTooltip, MatTooltipModule } from "@angular/material/tooltip";
 import { BookingDetailsPopupComponent } from '../../calendar/components/booking-details-popup/booking-details-popup.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltip } from "@angular/material/tooltip";
 
 @Component({
   selector: 'app-customer',
@@ -44,6 +45,8 @@ import { BookingDetailsPopupComponent } from '../../calendar/components/booking-
     MatProgressBar,
     MatSuffix,
     MatTableModule,
+    MatProgressSpinnerModule,
+    MatTooltip
   ],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
@@ -52,7 +55,8 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
   @ViewChild('paginator') paginator: MatPaginator | undefined;
 
-  isMobile!: boolean;
+  isMobile$!: Observable<boolean>;
+  deletingBooking$!: Observable<string | null>;
   destroy$ = new Subject<void>();
   loading$!: Observable<boolean>;
   customerList$!: Observable<Customer[] | null>;
@@ -63,14 +67,16 @@ export class CustomerComponent implements OnInit, OnDestroy {
   bookings$!: Observable<Booking[]>;
   customerList: Customer[] = [];
   currentSeason!: Season | null;
-  records: Record[] = [];
+  records: CustomerRecord[] = [];
   bookingColumns: string[] = ['season', 'departureDate', 'from', 'to', 'paymentType', 'bank', 'amount', 'notes', 'actions'];
+  currentBookings: Booking[] | null = null;
+  bookingTagForDeletion: string | null = null;
 
-  private store = inject(Store)
   constructor(
-    private readonly breakpoints: BreakpointObserver,
+    private readonly store: Store,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.loading$ = this.store.select(loading);
     this.customerList$ = this.store.select(customerList);
@@ -79,19 +85,12 @@ export class CustomerComponent implements OnInit, OnDestroy {
     this.bookings$ = this.store.select(bookings);
     this.store.select(searchCriteria).pipe(takeUntil(this.destroy$))
       .subscribe((criteria) => this.searchCriteria = criteria)
-
+    this.isMobile$ = this.store.select(selectIsMobile);
+    this.deletingBooking$ = this.store.select(deletingBooking);
   }
 
   ngOnInit() {
-    this.breakpoints.observe([
-      Breakpoints.HandsetPortrait,
-      Breakpoints.HandsetLandscape
-    ]).subscribe(res => {
-      this.isMobile = res.matches
-    });
     //this.store.dispatch(CustomerActions.resetSearchCriteria());
-    this.store.dispatch(CustomerActions.resetLastCustomer());
-    this.store.dispatch(CustomerActions.getNextCustomerListStart());
     this.seasons$.pipe(takeUntil(this.destroy$)).subscribe(seasons => {
       this.currentSeason = seasons.find(s => s.isActive) ?? null;
     });
@@ -99,45 +98,33 @@ export class CustomerComponent implements OnInit, OnDestroy {
     this.customerList$.pipe(takeUntil(this.destroy$)).subscribe(customers => {
       if (customers) {
         this.customerList = customers;
+        if (customers.length === 0) {
+          this.records = [];
+        }
         this.store.dispatch(CustomerActions.getBookingsStart({ customers }));
       }
     });
 
     this.bookings$.pipe(takeUntil(this.destroy$)).subscribe(bookings => {
-      this.records = [];
-      if (bookings) {
-        for (let customer of this.customerList) {
-          const customerBookings = bookings.filter(b =>
-            b.customer?.DocumentID === customer.DocumentID);
-          let record = {
-            recNo: customer.recNo,
-            customer: customer,
-            vehicle: null as Vehicle | null,
-            bookings: [] as Booking[]
-          }
-          if (customer.vehicles && customer.vehicles.length > 0) {
-            for (let vehicle of customer.vehicles) {
-              record.vehicle = vehicle;
-              for (let booking of customerBookings) {
-                if (booking.vehicleIds) {
-                  for (let v of booking.vehicleIds) {
-                    if (v === vehicle.id) {
-                      record.recNo = vehicle.recNo;
-                      record.bookings.push(booking);
-                      break;
-                    }
-                  }
-                }
-              }
-              this.records.push(record);
-            }
-          } else {
-            record.bookings = customerBookings ?? [];
-            this.records.push(record);
-          }
-        }
+      this.currentBookings = bookings;
+      this.createRecords(bookings);
+    });
+
+    this.deletingBooking$.pipe(takeUntil(this.destroy$)).subscribe(result => {
+      if (result === null && this.bookingTagForDeletion !== null) {
+        // reset deleting booking state after deletion is done
+        const newBookings = this.currentBookings?.filter(b => b.id !== this.bookingTagForDeletion) ?? null;
+        this.currentBookings = newBookings;
+        this.createRecords(newBookings ?? []);
+        this.bookingTagForDeletion = null;
+      } else {
+        this.bookingTagForDeletion = result;
       }
     });
+
+    this.store.dispatch(CustomerActions.resetLastCustomer());
+    this.store.dispatch(CustomerActions.getNextCustomerListStart());
+
   }
 
   ngOnDestroy() {
@@ -148,6 +135,47 @@ export class CustomerComponent implements OnInit, OnDestroy {
   addCustomer() {
     this.store.dispatch(CustomerActions.createCustomer());
     this.router.navigate(['main/customer/new']);
+  }
+
+  createRecords(bookings: Booking[]) {
+    this.records = [];
+    if (bookings) {
+      for (let customer of this.customerList) {
+        const customerBookings = bookings.filter(b =>
+          b.customer?.DocumentID === customer.DocumentID);
+        if (customer.vehicles && customer.vehicles.length > 0) {
+          for (let vehicle of customer.vehicles) {
+            const vehicleBookings: Booking[] = [];
+            for (let booking of customerBookings) {
+              if (booking.vehicleIds) {
+                for (let v of booking.vehicleIds) {
+                  if (v === vehicle.id) {
+                    vehicleBookings.push(booking);
+                    break;
+                  }
+                }
+              }
+            }
+            let record: CustomerRecord = {
+              recNo: vehicle.recNo,
+              customer: customer,
+              vehicle: vehicle,
+              bookings: vehicleBookings
+            }
+            this.records = [...this.records, record];
+          }
+        } else {
+          let record: CustomerRecord = {
+            recNo: customer.recNo,
+            customer: customer,
+            vehicle: null,
+            bookings: customerBookings ?? []
+          }
+          this.records = [...this.records, record];
+        }
+      }
+    }
+    this.cdr.detectChanges();
   }
 
   deleteBookingTooltip(booking: Booking): string {
@@ -165,6 +193,11 @@ export class CustomerComponent implements OnInit, OnDestroy {
     return `tel:${phone}`;
   }
 
+  isCurrentSeason(season: string): boolean {
+    const aux = this.currentSeason?.seasonName + '-' + this.currentSeason?.year;
+    return season === aux;
+  }
+
   toEditCustomer(customer: Customer | undefined) {
     if (customer) {
       this.store.dispatch(CustomerActions.loadCustomer({ customer }));
@@ -179,7 +212,8 @@ export class CustomerComponent implements OnInit, OnDestroy {
         {
           data: {
             title: 'Delete Customer',
-            message: `Are you sure you want to delete ${customer.primaryTitle} ${customer.primaryFirstName} ${customer.primaryLastName}?`,
+            message: `Are you sure you want to delete ${customer.primaryTitle} ${customer.primaryFirstName} ${customer.primaryLastName}?.\n
+            All next bookings of this customer will also be deleted. This action cannot be undone.`,
             cancelButton: 'No',
             successButton: 'Yes',
           }
@@ -188,7 +222,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
       dialogRef.afterClosed().pipe(
         takeUntil(this.destroy$),
         map(result => {
-          if (result) {
+          if (result === 'Success') {
             this.store.dispatch(CustomerActions.deleteCustomerStart({ id: customer.DocumentID }));
           }  // allow navigation if the user click discard button or click outside modal
         })
@@ -198,11 +232,25 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   createBooking(customer: Customer | undefined) {
-    if (customer) {
-      this.store.dispatch(CustomerActions.loadCustomer({ customer }));
-      this.store.dispatch(BookAction.createEmptyBooking());
-      this.router.navigate(['main/book/new']);
+    if (this.currentSeason) {
+      if (customer) {
+        this.router.navigate(['main/book/new']);
+        this.store.dispatch(MainAction.loadCustomer({ customer }));
+        this.store.dispatch(MainAction.createEmptyBooking()); ``
+      }
+    } else {
+      this.matDialog.open(
+        PopupComponent,
+        {
+          data: {
+            title: 'No active season',
+            message: `Cannot create booking because there is no active season. Please create and activate a season first.`,
+            cancelButton: 'OK',
+          }
+        }
+      );
     }
+
   }
 
   deleteBooking(booking: Booking) {
@@ -212,7 +260,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
         {
           data: {
             title: 'Delete Booking',
-            message: `Are you sure you want to delete this booking from ${booking.from} to ${booking.to} on ${booking.departureDate?.toDateString()}?`,
+            message: `Are you sure you want to delete this booking for ${booking.customer?.primaryFirstName} ${booking.customer?.primaryLastName} from ${booking.from} to ${booking.to} on ${booking.departureDate?.toDateString()}?`,
             cancelButton: 'No',
             successButton: 'Yes',
           }
@@ -221,8 +269,8 @@ export class CustomerComponent implements OnInit, OnDestroy {
       dialogRef.afterClosed().pipe(
         takeUntil(this.destroy$),
         map(result => {
-          if (result) {
-            //this.store.dispatch(BookAction.deleteBookingStart({ id: booking.id! }));
+          if (result === 'Success') {
+            this.store.dispatch(MainAction.deleteBookingStart({ booking }));
           }  // allow navigation if the user click discard button or click outside modal
         })
       ).subscribe();
@@ -231,9 +279,9 @@ export class CustomerComponent implements OnInit, OnDestroy {
 
   editBooking(booking: Booking, customer: Customer) {
     if (booking.customer) {
-      this.store.dispatch(CustomerActions.loadCustomer({ customer }));
-      this.store.dispatch(BookAction.loadBooking({ booking }));
       this.router.navigate(['main/book/edit']);
+      this.store.dispatch(MainAction.loadCustomer({ customer }));
+      this.store.dispatch(MainAction.loadBooking({ booking }));
     }
   }
 

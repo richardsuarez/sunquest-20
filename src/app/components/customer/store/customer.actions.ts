@@ -1,7 +1,6 @@
 import { createAction, props } from "@ngrx/store";
-import { Customer, Record, SearchCriteria, Vehicle } from "../model/customer.model";
+import { Customer, SearchCriteria, Vehicle } from "../model/customer.model";
 import { Booking } from "../../book/model/booking.model";
-import { Season } from "../../season/models/season.model";
 
 
 export const getNextCustomerListStart = createAction(
@@ -54,6 +53,7 @@ export const deleteCustomerStart = createAction(
 
 export const deleteCustomerEnd = createAction(
     '[Customer] End delete customer',
+    props<{customerId: string}>(),
 );
 
 export const createCustomer = createAction(
@@ -84,11 +84,20 @@ export const resetSearchCriteria = createAction(
 
 export const addVehicleStart = createAction(
     '[Customer] Start adding vehicle',
-    props<{ customerId: string, vehicle: Partial<Vehicle>}>()
+    props<{ customer: Customer, vehicle: Partial<Vehicle>}>()
 );
 
 export const addVehicleEnd = createAction(
     '[Customer] End adding vehicle'
+);
+
+export const updateVehicleStart = createAction(
+    '[Customer] Start updating vehicle',
+    props<{ customer: Partial<Customer>, vehicle: Partial<Vehicle>}>()
+);
+
+export const updateVehicleEnd = createAction(
+    '[Customer] End updating vehicle',
 );
 
 export const getVehiclesStart = createAction(

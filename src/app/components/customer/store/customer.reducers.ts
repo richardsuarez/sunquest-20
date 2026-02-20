@@ -53,6 +53,7 @@ export const customerReducer = createReducer(
     on(CustomerActions.failure, (state, action) => ({
         ...state,
         loading: false,
+        savingCustomer: false,
         appError: action.appError
     })),
 
@@ -79,8 +80,9 @@ export const customerReducer = createReducer(
         loading: true,
         appError: null,
     })),
-    on(CustomerActions.deleteCustomerEnd, (state) => ({
+    on(CustomerActions.deleteCustomerEnd, (state, action) => ({
         ...state,
+        customerList: state.customerList ? state.customerList.filter(c => c.DocumentID !== action.customerId) : null,
         loading: false
     })),
     on(CustomerActions.createCustomer, (state) => ({

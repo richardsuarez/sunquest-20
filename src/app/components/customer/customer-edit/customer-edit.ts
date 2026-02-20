@@ -3,7 +3,7 @@ import { Component, inject, Injectable, OnDestroy, OnInit } from '@angular/core'
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map, Observable, Subject, takeUntil, withLatestFrom } from 'rxjs';
+import { map, Observable, Subject, takeUntil } from 'rxjs';
 import { PopupComponent } from '../../../shared/popup/popup.component';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
@@ -19,7 +19,6 @@ import { Store } from '@ngrx/store';
 import { customerViewModel, savingCustomer } from '../store/customer.selectors';
 import { Address, Customer } from '../model/customer.model';
 import { Vehicle } from '../model/customer.model';
-import { CustomerService } from '../service/customer.service';
 import { MatListModule } from '@angular/material/list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { updateCustomerStart, addCustomerStart } from '../store/customer.actions';
@@ -69,6 +68,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   vehiclesProperties = ['recNo', 'color', 'year', 'make', 'model', 'plate', 'state', 'weight', 'vin', 'actions'];
 
   vehicleForm = new FormGroup({
+    id: new FormControl<string>(''),
     make: new FormControl<string | null>('', Validators.required),
     model: new FormControl<string | null>('', Validators.required),
     year: new FormControl<number | null>(null, Validators.required),
@@ -81,7 +81,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
   })
 
   customerForm = new FormGroup({
-    recNo: new FormControl<string | null>('', Validators.required),
+    recNo: new FormControl<string | null>({ value: '', disabled: this.calculateDisable() }),
     primaryFirstName: new FormControl<string | null>('', Validators.required),
     primaryLastName: new FormControl<string | null>('', Validators.required),
     primaryMiddleName: new FormControl<string | null>(''),
@@ -113,6 +113,9 @@ export class CustomerEdit implements OnInit, OnDestroy {
     }),
   })
 
+  upperCaseAlphabet: string[] = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
+  editingVehicleId: string | null = null;
+
   private store = inject(Store)
 
   constructor(
@@ -142,17 +145,49 @@ export class CustomerEdit implements OnInit, OnDestroy {
         if (customer.DocumentID && !customer.vehicles) {
           // load vehicles into state so they can be displayed and managed
           this.store.dispatch(CustomerActions.getVehiclesStart({ customerId: customer.DocumentID }));
+        } else {
+          if (customer.vehicles) {
+            this.suggestNewRecordNumberForVehicle();
+          }
         }
       } else {
         this.router.navigate(['main/customer/']);
       }
-    })
+    });
+
+    this.customerForm.controls.recNo.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.suggestNewRecordNumberForVehicle();
+    });
   }
 
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private calculateDisable(): boolean {
+    // disable recNo field when editing an existing customer, enable it when creating a new customer
+    return this.crud === 'edit';
+  }
+
+  private suggestNewRecordNumberForVehicle() {
+    if (this.currentCustomer && this.currentCustomer.vehicles) {
+      const rec = this.customerForm.controls.recNo.value;
+      if(!rec) return;
+      if(this.currentCustomer.vehicles.length === 0 && this.tempVehicles.length === 0) {
+        this.vehicleForm.controls.recNo.setValue(rec);
+        return;
+      }
+      for (const char of this.upperCaseAlphabet) {
+        const veh = this.currentCustomer.vehicles.find(v => v.recNo?.localeCompare(rec + char) === 0);
+        const tempVeh = this.tempVehicles.find(v => v.recNo?.localeCompare(rec + char) === 0);
+        if (!veh && !tempVeh) {
+          this.vehicleForm.controls.recNo.setValue(rec + char);
+          break;
+        }
+      }
+    }
   }
 
   canDeactivate(): Observable<boolean> | Promise<boolean> | boolean {
@@ -193,7 +228,8 @@ export class CustomerEdit implements OnInit, OnDestroy {
   onSubmit() {
     if (this.customerForm.valid && (!this.customerForm.pristine || (this.tempVehicles && this.tempVehicles.length > 0))) {
       if (this.crud === 'edit' && this.currentCustomer) {
-        this.store.dispatch(updateCustomerStart({ customer: this.customerForm.getRawValue(), vehicles: this.tempVehicles }));
+        const auxCustomer = {...this.currentCustomer, ...this.customerForm.getRawValue()};
+        this.store.dispatch(updateCustomerStart({ customer: auxCustomer, vehicles: this.tempVehicles }));
       }
       else if (this.crud === 'new') {
         this.store.dispatch(addCustomerStart({ customer: this.customerForm.getRawValue(), vehicles: this.tempVehicles }));
@@ -206,11 +242,17 @@ export class CustomerEdit implements OnInit, OnDestroy {
   addVehicle() {
     if (this.vehicleForm.valid) {
       const vehicle: Partial<Vehicle> = this.vehicleForm.getRawValue();
-      this.tempVehicles.push(vehicle);
+      this.tempVehicles = [...this.tempVehicles, vehicle];
       this.vehicleForm.reset();
+      this.suggestNewRecordNumberForVehicle();
     } else {
       this.vehicleForm.markAllAsTouched();
     }
+  }
+
+  editVehicle(vehicle: Vehicle){
+    this.vehicleForm.patchValue(vehicle);
+    this.editingVehicleId = vehicle.id ?? null;
   }
 
   deleteVehicle(vehicleId?: string) {

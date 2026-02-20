@@ -1,5 +1,3 @@
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { customerViewModel } from '../../customer/store/customer.selectors';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Address, Customer } from '../../customer/model/customer.model';
@@ -26,7 +24,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { PopupComponent } from '../../../shared/popup/popup.component';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { bookingVM, savingBooking, sortedTripsMap, trucks } from '../store/book.selectors';
+import { savingBooking, sortedTripsMap, trucks } from '../store/book.selectors';
 import { Trip } from '../../trip/model/trip.model';
 import { Store } from '@ngrx/store';
 import { Truck } from '../../truck/model/truck.model';
@@ -37,6 +35,7 @@ import { Booking } from '../model/booking.model';
 import { AllowOnlyNumbersDirective } from '../../../shared/directives/allow-only-numbers.directive';
 import { AllowAlphanumericDirective } from '../../../shared/directives/allow-alphanumeric.directive';
 import { Season } from '../../season/models/season.model';
+import { selectIsMobile } from '../../main/store/main.selectors';
 
 @Component({
   selector: 'app-book-edit',
@@ -80,7 +79,7 @@ export class Book implements OnInit, OnDestroy {
   truckList: Truck[] = [];
   currentCustomer: Customer | null = null;
   private requestedTrips = new Set<string>();
-  isMobile!: boolean;
+  isMobile$!: Observable<boolean>;
   savingBooking$!: Observable<boolean>;
   destroy$ = new Subject<void>()
   currentSelectedTrip: Trip | null = null;
@@ -150,26 +149,21 @@ export class Book implements OnInit, OnDestroy {
   originalTruckId: string | null = null;
 
   constructor(
-    private readonly breakpoints: BreakpointObserver,
     private readonly route: ActivatedRoute,
     private readonly matDialog: MatDialog,
   ) {
-    this.customer$ = this.store.select(customerViewModel);
+    this.customer$ = this.store.select(MainSelectors.customerViewModel);
     // select trucks from the truck feature (not the book feature)
     this.truckList$ = this.store.select(trucks);
     this.savingBooking$ = this.store.select(savingBooking);
     this.tripsMap$ = this.store.select(sortedTripsMap);
-    this.bookingVM$ = this.store.select(bookingVM);
+    this.bookingVM$ = this.store.select(MainSelectors.bookingVM);
     this.seasons$ = this.store.select(MainSelectors.selectSeasons);
+    this.isMobile$ = this.store.select(selectIsMobile);
   }
 
   async ngOnInit() {
     this.crud = this.route.snapshot.paramMap.get('crud') ?? '';
-    this.breakpoints.observe([
-      Breakpoints.HandsetPortrait,
-    ]).subscribe(res => {
-      this.isMobile = res.matches
-    });
 
     // ask truck feature to load truck list
     this.store.dispatch(getTruckListStart());
@@ -190,6 +184,7 @@ export class Book implements OnInit, OnDestroy {
       }
 
       if (!customer) {
+        console.log('No customer found, navigating back to customer list');
         this.router.navigate(['main/customer/']);
       }
     });
@@ -230,7 +225,17 @@ export class Book implements OnInit, OnDestroy {
 
     this.tripsMap$.pipe(takeUntil(this.destroy$)).subscribe((tripMap) => {
       this.trips = tripMap;
-
+      if (this.originalBooking && this.originalBooking.truckId && this.trips[this.originalBooking.truckId]) {
+          for (const trip of this.trips[this.originalBooking.truckId]) {
+            if (trip.id === this.originalBooking.tripId) {
+              this.originalTrip = trip;
+              this.originalTruckId = this.originalBooking.truckId;
+              this.currentSelectedTrip = trip;
+              this.currentSelectedTruckId = this.originalBooking.truckId;
+              break;
+            }
+          }
+        }
     });
 
     this.tripForm.controls.truckId.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((truckId) => {
@@ -275,8 +280,6 @@ export class Book implements OnInit, OnDestroy {
             }
           }
         }
-      } else {
-        this.router.navigate(['main/customer/']);
       }
     });
   }
@@ -352,7 +355,6 @@ export class Book implements OnInit, OnDestroy {
         }
       );
       return dialogRef.afterClosed().pipe(
-        takeUntil(this.destroy$),
         map(result => {
           switch (result) {
             case 'Success': this.save(); return false;
@@ -443,7 +445,7 @@ export class Book implements OnInit, OnDestroy {
       paycheck: {
         checkNumber: this.form.controls.checkNumber.value,
         bankName: this.form.controls.bankName.value,
-        amount: this.form.controls.amount.value || 1200,
+        amount: this.form.controls.amount.value || 0,
       },
       arrivalAt,
       arrivalAddress: this.deliveryAddressForm.getRawValue(),
@@ -467,17 +469,22 @@ export class Book implements OnInit, OnDestroy {
     } else {
       if (this.originalTrip && this.currentSelectedTrip) {
         if (this.originalTrip.id !== this.currentSelectedTrip.id) {
-          // if user changes trip, then we need to update the original trip capacity by adding back the booked load and cars before updating booking with new trip
+          // if user changes trip, then we need to update the original trip and then update new trip
           this.updateOriginalTrip();
+          this.updateCurrentTrip(booking); 
         }
       } else {
-        // if user unselects the trip, then we need to update the original trip capacity by adding back the booked load and cars before updating booking with no trip
+        // if user unselects the original trip and does not select any, then we need to update the original trip capacity by adding back the booked load and cars
         if(this.originalTrip && !this.currentSelectedTrip) {
           this.updateOriginalTrip();
-        } 
+        } else {
+          // if user selects a new trip without having an original trip, then we just need to update the new trip capacity by subtracting the booked load and cars
+          this.updateCurrentTrip(booking); 
+        }
       }
-      // whatever the case, we always update the booking and if there's a trip change, the effects will handle updating the trips capacity
-      this.store.dispatch(BookActions.updateBookingStart({ booking, trip: this.currentSelectedTrip }));
+      // whatever the case, we always update the booking info because user might change other booking info without changing trip (e.g. change notes or change check number, etc..)
+           
+      this.store.dispatch(BookActions.updateBookingStart({ booking }));
     }
 
     this.tripForm.reset();
@@ -505,6 +512,24 @@ export class Book implements OnInit, OnDestroy {
     }
   }
 
+  private updateCurrentTrip(booking: Partial<Booking>) {
+    if (this.currentSelectedTrip) {
+      let currentBookingVehicleLoad = 0;
+      if (booking && booking.vehicleIds) {
+        currentBookingVehicleLoad = booking.vehicleIds.reduce((totalLoad, vehicleId) => {
+          const vehicle = booking?.customer?.vehicles?.find(v => v.id === vehicleId);
+          return totalLoad + (vehicle?.weight || 0);
+        }, 0);
+      }
+      const currentTripForUpdate = {
+        ...this.currentSelectedTrip,
+        remLoadCap: this.currentSelectedTrip.remLoadCap - currentBookingVehicleLoad,
+        remCarCap: this.currentSelectedTrip.remCarCap - (booking.vehicleIds?.length || 0)
+      }
+      this.store.dispatch(BookActions.updateTripStart({ truckId: this.currentSelectedTruckId!, trip: currentTripForUpdate }));
+    }
+  }
+
   onSelectTruck(truckId: string | null) {
     // Calculate the next load number for the selected truck
     if (truckId) {
@@ -518,11 +543,6 @@ export class Book implements OnInit, OnDestroy {
       highestLoadNumber += 1;
       this.tripForm.controls.loadNumber.setValue(highestLoadNumber.toString());
     }
-  }
-
-  refillCheckAmount() {
-    const selectedCars = Object.values(this.vehicleSelection).filter((v) => v).length
-    this.form.controls.amount.setValue(1200 * selectedCars)
   }
 
   selectableTrip(trip: Trip): boolean {

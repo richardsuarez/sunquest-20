@@ -1,14 +1,15 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { withLatestFrom, switchMap, map, catchError, of, tap, filter, combineLatest, concatMap, from } from 'rxjs';
+import { withLatestFrom, switchMap, map, catchError, of, tap, filter, combineLatest, concatMap, from, Observable, concat, endWith } from 'rxjs';
 import { CustomerService } from '../service/customer.service';
 import { searchCriteria, lastCustomer, customerViewModel, firstCustomer } from './customer.selectors';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import * as CustomerActions from './customer.actions';
 import { Customer, SearchCriteria } from '../model/customer.model';
 import { Router } from '@angular/router';
-import { selectSeasons } from '../../main/store/main.selectors';
+import * as MainActions from '../../main/store/main.actions';
+import { Booking } from '../../book/model/booking.model';
 
 @Injectable()
 export class CustomerEffects {
@@ -19,13 +20,14 @@ export class CustomerEffects {
     readonly addCustomerStart$;
     readonly addCustomerEnd$;
     readonly addVehicleStart$;
+    readonly updateVehicleStart$;
     readonly getVehicles$;
     readonly deleteVehicleStart$;
     readonly deleteCustomerStart$;
     readonly deleteCustomerEnd$;
     readonly updateCustomerStart$;
     readonly updateCustomerEnd$;
-
+    readonly failure$;
 
     constructor(
         private readonly actions$: Actions,
@@ -108,20 +110,19 @@ export class CustomerEffects {
                 switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
                         this.customerService.addCustomer(action.customer).pipe(
-                            concatMap((docRef: any) => {
-                                // docRef is the DocumentReference returned by addDoc
-                                const newCustomerId = docRef?._key.path.segments[1];
+                            concatMap((customer) => {
                                 const baseActions: any[] = [
                                     CustomerActions.resetCustomerViewModel(),
                                     CustomerActions.addCustomerEnd({ customer: action.customer }),
                                 ];
 
                                 // If the action included vehicles, dispatch addVehicleStart for each one
-                                if (action.vehicles && action.vehicles.length && newCustomerId) {
+                                if (action.vehicles && action.vehicles.length && customer?.DocumentID) {
                                     const vehicleActions = action.vehicles.map((v: any) =>
-                                        CustomerActions.addVehicleStart({ customerId: newCustomerId, vehicle: v })
+                                        CustomerActions.addVehicleStart({ customer, vehicle: {...v, recNo: customer.recNo }})
                                     );
-                                    return [...baseActions, ...vehicleActions];
+                                    baseActions.push(...vehicleActions);
+                                    return baseActions;
                                 }
 
                                 return baseActions;
@@ -154,7 +155,30 @@ export class CustomerEffects {
                 switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
                         this.customerService.deleteCustomer(action.id).pipe(
-                            map(() => CustomerActions.deleteCustomerEnd()),
+                            switchMap(() => 
+                                from(this.customerService.getNextBookingsForCustomer(action.id)).pipe(
+                                    switchMap((bookings$: Observable<Booking[]>) => 
+                                        bookings$.pipe(
+                                            switchMap((bookings: Booking[]) => {
+                                                // If there are bookings, dispatch deleteBookingStart for each one
+                                                if (bookings && bookings.length > 0) {
+                                                    // Emit a deleteBookingStart action for each booking, then emit deleteCustomerEnd
+                                                    return concat(
+                                                        from(bookings).pipe(
+                                                            concatMap((booking) => 
+                                                                of(MainActions.deleteBookingStart({ booking }))
+                                                            )
+                                                        ),
+                                                        of(CustomerActions.deleteCustomerEnd({customerId: action.id}))
+                                                    );
+                                                }
+                                                // If no bookings, just dispatch deleteCustomerEnd
+                                                return of(CustomerActions.deleteCustomerEnd({customerId: action.id}));
+                                            })
+                                        )
+                                    )
+                                )
+                            ),
                             catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )
                     )
@@ -167,8 +191,22 @@ export class CustomerEffects {
                 ofType(CustomerActions.addVehicleStart),
                 switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
-                        this.customerService.addVehicle(action.customerId, action.vehicle).pipe(
+                        this.customerService.addVehicle(action.customer, action.vehicle).pipe(
                             map(() => CustomerActions.addVehicleEnd()),
+                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
+                        )
+                    )
+                )
+            )
+        );
+
+        this.updateVehicleStart$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(CustomerActions.updateVehicleStart),
+                switchMap((action) =>
+                    runInInjectionContext(this.injector, () =>
+                        this.customerService.updateVehicle(action.customer, action.vehicle).pipe(
+                            map(() => CustomerActions.updateVehicleEnd()),
                             catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )
                     )
@@ -211,43 +249,60 @@ export class CustomerEffects {
         this.deleteCustomerEnd$ = createEffect(() =>
             this.actions$.pipe(
                 ofType(CustomerActions.deleteCustomerEnd),
-                concatMap(() => [
-                    CustomerActions.resetSearchCriteria(),
-                    CustomerActions.getNextCustomerListStart(),
-                ])
-            )
+                tap(() => {
+                    this._snackBar.open(
+                        `Customer have been deleted`,
+                        'Close',
+                        { duration: 5000 }
+                    );
+                })
+            ),
+            { dispatch: false }
         );
 
         this.updateCustomerStart$ = createEffect(() =>
             this.actions$.pipe(
                 ofType(CustomerActions.updateCustomerStart),
-                withLatestFrom(this.store.select(customerViewModel)),
-                switchMap(([action, customerVM]) =>
+                switchMap((action) =>
                     runInInjectionContext(this.injector, () =>
-                        this.customerService
-                            .updateCustomer({ ...action.customer, DocumentID: customerVM?.DocumentID })
-                            .pipe(
-                                concatMap(() => {
-                                    const baseActions: any[] = [
+                        this.customerService.updateCustomer(action.customer).pipe(
+                            concatMap(() => {
+                                // if vehicles are provided, dispatch addVehicleStart for each
+                                if (action.vehicles && action.vehicles.length && action.customer?.DocumentID) {
+                                    const vehicleActions = action.vehicles.map((v: any) =>
+                                        CustomerActions.updateVehicleStart({ customer: action.customer, vehicle: v })
+                                    );
+                                    return [
                                         CustomerActions.resetCustomerViewModel(),
-                                        CustomerActions.updateCustomerEnd({ customer: action.customer })
+                                        ...vehicleActions, 
+                                        CustomerActions.updateCustomerEnd({ customer: action.customer }),
                                     ];
+                                }
 
-                                    // if vehicles are provided, dispatch addVehicleStart for each
-                                    if (action.vehicles && action.vehicles.length && customerVM?.DocumentID) {
-                                        const vehicleActions = action.vehicles.map((v: any) =>
-                                            CustomerActions.addVehicleStart({ customerId: customerVM.DocumentID!, vehicle: v })
-                                        );
-                                        return [...baseActions, ...vehicleActions];
-                                    }
-
-                                    return baseActions;
-                                }),
-                                catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
-                            )
+                                return [
+                                        CustomerActions.resetCustomerViewModel(), 
+                                        CustomerActions.updateCustomerEnd({ customer: action.customer }),
+                                    ];
+                            }),
+                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
+                        )
                     )
                 )
             )
+        );
+
+        this.failure$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(CustomerActions.failure),
+                tap((action) => {
+                    this._snackBar.open(
+                        `An error occurred: ${action.appError.message}`,
+                        'Close',
+                        { duration: 5000 }
+                    );
+                })
+            ),
+            { dispatch: false }
         );
 
         this.updateCustomerEnd$ = createEffect(() =>
@@ -264,5 +319,6 @@ export class CustomerEffects {
             ),
             { dispatch: false }
         );
+
     }
 }

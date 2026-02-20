@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, switchMap, catchError, tap } from 'rxjs/operators';
+import { map, switchMap, catchError, tap, mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import * as MainActions from './main.actions';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -62,6 +62,95 @@ export class MainEffects {
           })
         )
       )
+    )
+  );
+
+  deleteBookingStart$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(MainActions.deleteBookingStart),
+      switchMap(action =>
+        this.mainService.deleteBooking(action.booking.id!).pipe(
+          switchMap(() => {
+            // After booking is deleted, update the trip with restored capacity
+            const booking = action.booking;
+            const tripId = booking.tripId;
+            const truckId = booking.truckId;
+
+            if (!tripId || !truckId) {
+              console.warn('[MainEffects] Booking does not have tripId or truckId, skipping trip update');
+              return of(MainActions.deleteBookingSuccess());
+            }
+            return of(MainActions.updateTripAfterDeleteBooking({ tripId, truckId, booking }));
+
+          }),
+          catchError((err: Error) => {
+            console.error('[MainEffects] Failed to delete booking:', err);
+            return of(MainActions.deleteBookingFail({ error: err }));
+          })
+        )
+      )
+    )
+  );
+
+  deleteBookingSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(MainActions.deleteBookingSuccess),
+      tap(() => {
+        this.snackBar.open('Booking deleted successfully', 'Close', { duration: 3000 });
+      })
+    ),
+    { dispatch: false }
+  );
+
+  updateTripAfterDeleteBooking$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(MainActions.updateTripAfterDeleteBooking),
+      switchMap(action => {
+        const { tripId, truckId, booking } = action;
+        if (!tripId || !truckId) {
+          console.warn('[MainEffects] updateTripAfterDeleteBooking - missing tripId or truckId, cannot update trip after booking deletion');
+          return of(MainActions.deleteBookingSuccess());
+        }
+        return this.mainService.getTrip(tripId, truckId).pipe(
+          switchMap(trip => {
+            if (!trip) {
+              console.warn(`[MainEffects] Trip with id ${tripId} not found for truck ${truckId}, cannot update after booking deletion`);
+              return of(MainActions.deleteBookingSuccess());
+            }
+            const vehicleIds = booking.vehicleIds || [];
+
+            // Calculate the capacity to restore
+            let totalWeight = trip.remLoadCap;
+            let totalCars = trip.remCarCap;
+            const vehicles = booking.customer?.vehicles || [];
+            for (let vehicleId of vehicleIds) {
+              const vehicle = vehicles.find(v => v.id === vehicleId);
+              if (vehicle && vehicle.weight) {
+                totalWeight += vehicle.weight;
+              }
+            }
+            const remCarCapDelta = totalCars + vehicleIds.length; // Add back the cars
+            const remLoadCapDelta = totalWeight; // Add back the weight
+            const updatedTrip = {
+              ...trip,
+              remCarCap: remCarCapDelta,
+              remLoadCap: remLoadCapDelta
+            };
+
+            return this.mainService.updateTrip(truckId, updatedTrip).pipe(
+              map(() => MainActions.deleteBookingSuccess()),
+              catchError((err: Error) => {
+                console.error('[MainEffects] updateTripAfterDeleteBooking - failed to update trip:', err);
+                return of(MainActions.deleteBookingFail({ error: err }));
+              })
+            );
+          }),
+          catchError((err: Error) => {
+            console.error('[MainEffects] updateTripAfterDeleteBooking - failed to get trip:', err);
+            return of(MainActions.deleteBookingFail({ error: err }));
+          })
+        );
+      })
     )
   );
 }

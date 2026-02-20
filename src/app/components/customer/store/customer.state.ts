@@ -1,5 +1,5 @@
 import { Booking } from "../../book/model/booking.model";
-import { Customer, Record, SearchCriteria } from "../model/customer.model";
+import { Customer, SearchCriteria } from "../model/customer.model";
 
 export interface CustomerState{
     loading: boolean;

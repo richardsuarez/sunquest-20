@@ -171,3 +171,7 @@
   padding: 10px;
 }
 
+::ng-deep .mat-mdc-form-field-hint-wrapper {
+  padding: 5px !important;
+  text-align: center !important;
+}

@@ -18,8 +18,8 @@ export class PopupComponent {
     @Inject(MAT_DIALOG_DATA) readonly data: {
       title: string,
       message: string,
-      cancelButton: string,
-      successButton: string,
+      cancelButton: string | undefined,
+      successButton: string | undefined,
     }
   ) {}
 

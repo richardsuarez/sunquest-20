@@ -24,3 +24,24 @@ export const selectSeasonError = createSelector(
   selectMainState,
   (state: MainState) => state.error
 );
+
+export const selectIsMobile = createSelector(
+  selectMainState,
+  (state: MainState) => state.isMobile
+);
+
+export const customerViewModel = createSelector(
+  selectMainState,
+  (state: MainState) => state.customerViewModel
+);
+
+
+export const bookingVM = createSelector(
+  selectMainState,
+  (state: MainState) => state.bookingViewModel
+);
+
+export const deletingBooking = createSelector(
+  selectMainState,
+  (state: MainState) => state.deletingBooking
+);
