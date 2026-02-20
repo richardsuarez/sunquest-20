@@ -255,7 +255,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
     this.editingVehicleId = vehicle.id ?? null;
   }
 
-  deleteVehicle(vehicleId?: string) {
+  deleteVehicle(vehicleId?: string | null) {
     if (!this.currentCustomer || !this.currentCustomer.DocumentID || !vehicleId) return;
     this.store.dispatch(CustomerActions.deleteVehicleStart({ customerId: this.currentCustomer.DocumentID, vehicleId }));
   }
