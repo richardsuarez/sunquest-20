@@ -53,11 +53,23 @@ export class ReportEffects {
         )
     );
 
-    customerList$ = createEffect(() =>
+    customerListByFromTo$ = createEffect(() =>
         this.actions$.pipe(
-            ofType(ReportActions.getCustomersStart),
+            ofType(ReportActions.getCustomersByFromTo),
             switchMap((action) => 
                 from(this.reportService.getCustomerList(action.from, action.to)).pipe(
+                    map((customerList) => ReportActions.getCustomerSuccess({customerList})),
+                    catchError((error) => of(ReportActions.fail({error})))
+                )
+            )
+        )
+    );
+
+    customerListByRecNo$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(ReportActions.getCustomersByRecNo),
+            switchMap((action) => 
+                from(this.reportService.getCustomerListByRecNo(action.recNo)).pipe(
                     map((customerList) => ReportActions.getCustomerSuccess({customerList})),
                     catchError((error) => of(ReportActions.fail({error})))
                 )

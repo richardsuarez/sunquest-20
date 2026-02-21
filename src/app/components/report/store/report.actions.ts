@@ -46,7 +46,7 @@ export const clearBookReport = createAction(
 
 // #region customer-report
 
-export const getCustomersStart = createAction(
+export const getCustomersByFromTo = createAction(
     '[Report] Start fetch customer list',
     props<{from: string, to: string}>()
 );
@@ -54,6 +54,11 @@ export const getCustomersStart = createAction(
 export const getCustomerSuccess = createAction(
     '[Report] Successsful fetch customer list',
     props<{customerList: Customer[]}>(),
+);
+
+export const getCustomersByRecNo = createAction(
+    '[Report] Start fetch customer list by recNo',
+    props<{recNo: string}>()
 );
 
 // #endregion customer-report
