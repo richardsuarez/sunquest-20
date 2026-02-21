@@ -50,7 +50,13 @@ export const reportReducer = createReducer(
         bookReport: null,
     })),
 
-    on(ReportActions.getCustomersStart, (state) => ({
+    on(ReportActions.getCustomersByFromTo, (state) => ({
+        ...state,
+        loading: true,
+        appError: null,
+    })),
+
+    on(ReportActions.getCustomersByRecNo, (state) => ({
         ...state,
         loading: true,
         appError: null,
