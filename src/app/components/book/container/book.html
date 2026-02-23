@@ -643,7 +643,7 @@
     }
 
     <div style="display: flex; width: 100%; justify-content: end; margin-top:16px; gap: 20px">
-        <button mat-button (click)="router.navigate(['/main/customer'])">Cancel</button>
+        <button mat-button (click)="location.back()">Cancel</button>
         @if(!(savingBooking$ | async)){
             <button mat-raised-button class="primary-button" (click)="save()">Save
                 Booking</button>

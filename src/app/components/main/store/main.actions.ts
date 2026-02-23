@@ -31,3 +31,6 @@ export const deleteBookingFail = createAction('[Main] Failed to delete booking',
 export const updateTripAfterDeleteBooking = createAction('[Main] Update remCarCap and remLoadCap after deleting booking', props<{ tripId: string, truckId: string, booking: Booking }>());
 export const updateTripAfterDeleteBookingSuccess = createAction('[Main] Update remCarCap and remLoadCap after deleting booking success');
 export const updateTripAfterDeleteBookingFail = createAction('[Main] Update remCarCap and remLoadCap after deleting booking fail', props<{ error: Error }>());
+
+export const getPaidBookings = createAction('[Main] Get how many bookings are paid in the current season', props<{season: Season}>());
+export const getPaidBookingsSuccess = createAction('[Main] Success on getting paid bookings amount', props<{paidBookings: string}>());

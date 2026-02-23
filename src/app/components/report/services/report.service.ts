@@ -427,19 +427,6 @@ export class ReportService {
     }
 
     /**
-     * Get bookings for a specific trip
-     */
-    private getBookingsForTrip(tripId: string, bookings: Booking[]): Booking[] {
-        return bookings
-            .filter(b => b.tripId === tripId)
-            .sort((a, b) => {
-                const nameA = (a.customer?.primaryFirstName || '') + (a.customer?.primaryLastName || '');
-                const nameB = (b.customer?.primaryFirstName || '') + (b.customer?.primaryLastName || '');
-                return nameA.localeCompare(nameB);
-            });
-    }
-
-    /**
      * Format date for display
      */
     formatDate(date: Date | null): string {
@@ -470,7 +457,21 @@ export class ReportService {
                     }
                     let bookings: Booking[] = [];
                     snapshot.forEach(doc => {
-                        bookings.push(doc.data() as Booking);
+                        const data = doc.data() as any;
+                        const arrivalAt = data.arrivalAt ? (typeof data.arrivalAt.toDate === 'function' ? data.arrivalAt.toDate() : new Date(data.arrivalAt)) : null;
+                        const pickupAt = data.pickupAt ? (typeof data.pickupAt.toDate === 'function' ? data.pickupAt.toDate() : new Date(data.pickupAt)) : null;
+                        const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+                        const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+
+                        
+                        bookings.push({
+                            ...doc.data() as Booking,
+                            id: doc.id,
+                            arrivalAt,
+                            pickupAt,
+                            departureDate,
+                            createdAt
+                        });
                     });
                     return bookings;
                 } catch (error) {

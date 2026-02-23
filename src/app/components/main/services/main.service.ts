@@ -1,8 +1,9 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
-import { Firestore, collection, query, updateDoc, doc, getDocsFromServer, getDocsFromCache, orderBy, addDoc, deleteDoc, getDoc, getDocFromCache } from '@angular/fire/firestore';
+import { Firestore, collection, query, updateDoc, doc, getDocsFromServer, getDocsFromCache, orderBy, addDoc, deleteDoc, getDoc, getDocFromCache, where } from '@angular/fire/firestore';
 import { Observable, from } from 'rxjs';
 import { Season } from '../../season/models/season.model';
 import { Trip } from '../../trip/model/trip.model';
+import { Booking } from '../../book/model/booking.model';
 
 @Injectable({
   providedIn: 'root'
@@ -153,6 +154,48 @@ export class MainService {
       const dref = doc(this.firestore, `trucks/${truckId}/trips`, trip.id);
       const p = updateDoc(dref, trip as any);
       return from(p) as Observable<void>;
+    });
+  }
+
+  /**
+   * Get paid bookings count for a given season
+   * Returns a string in format: "<paid bookings>of<total of bookings>"
+   */
+  getPaidBookings(season: Season): Observable<string> {
+    return runInInjectionContext(this.injector, () => {
+      return from((async () => {
+        try {
+          const bookingsCollection = collection(this.firestore, 'bookings');
+          const q = query(
+            bookingsCollection,
+            where('season', '==', `${season.seasonName}-${season.year}`)
+          );
+
+          let querySnapshot;
+          try {
+            querySnapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+          } catch(error) {
+            console.error('Error getting bookings from server, trying cache...', error);
+            querySnapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
+          }
+
+          const bookings: Booking[] = [];
+          querySnapshot.forEach(doc => {
+            bookings.push({
+              ...doc.data() as Booking,
+              id: doc.id,
+            });
+          });
+
+          const totalBookings = bookings.length;
+          const paidBookings = bookings.filter(b => b.paycheck && b.paycheck.amount > 0).length;
+
+          return `${paidBookings} of ${totalBookings}`;
+        } catch (error) {
+          console.error('[MainService] getPaidBookings() - failed to get paid bookings for season:', season.id, 'Error:', error);
+          throw error;
+        }
+      })());
     });
   }
 }

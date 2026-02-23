@@ -45,3 +45,13 @@ export const deletingBooking = createSelector(
   selectMainState,
   (state: MainState) => state.deletingBooking
 );
+
+export const gettingPaidBookings = createSelector(
+  selectMainState,
+  (state: MainState) => state.gettingPaidBookings
+);
+
+export const paidBookings = createSelector(
+  selectMainState,
+  (state: MainState) => state.paidBookings
+);

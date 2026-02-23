@@ -17,7 +17,7 @@ import { Season } from '../../season/models/season.model';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
-  selector: 'app-book',
+  selector: 'app-calendar',
   standalone: true,
   imports: [
     CommonModule,

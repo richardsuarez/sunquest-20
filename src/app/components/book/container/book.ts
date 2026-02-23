@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Address, Customer } from '../../customer/model/customer.model';
 import { getTruckListStart } from '../store/book.actions';
 import { getVehiclesStart } from '../../customer/store/customer.actions';
@@ -151,6 +151,7 @@ export class Book implements OnInit, OnDestroy {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly matDialog: MatDialog,
+    readonly location: Location
   ) {
     this.customer$ = this.store.select(MainSelectors.customerViewModel);
     // select trucks from the truck feature (not the book feature)
@@ -184,8 +185,7 @@ export class Book implements OnInit, OnDestroy {
       }
 
       if (!customer) {
-        console.log('No customer found, navigating back to customer list');
-        this.router.navigate(['main/customer/']);
+        this.location.back();
       }
     });
 
@@ -415,7 +415,7 @@ export class Book implements OnInit, OnDestroy {
   }
 
   navigateBack() {
-    this.router.navigate(['main/customer'])
+    this.location.back();
   }
 
   nextTrips(trips: any[]) {

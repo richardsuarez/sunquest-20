@@ -153,4 +153,19 @@ export class MainEffects {
       })
     )
   );
+
+  getPaidBookings$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(MainActions.getPaidBookings),
+      switchMap((action) =>
+        this.mainService.getPaidBookings(action.season).pipe(
+          map(paidBookings => MainActions.getPaidBookingsSuccess({ paidBookings })),
+          catchError(error => {
+            console.error('Error loading seasons:', error);
+            return of(MainActions.loadSeasonsFail({ error: error.message }));
+          })
+        )
+      )
+    )
+  );
 }

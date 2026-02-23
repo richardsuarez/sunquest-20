@@ -9,13 +9,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TruckService } from '../../truck/services/truck.service';
 import { Truck } from '../../truck/model/truck.model';
+import { Location } from '@angular/common';
 
 @Injectable()
 export class BookEffects {
     private injector = inject(EnvironmentInjector);
     private bookingService = inject(BookingService);
     private snackBar = inject(MatSnackBar);
-    private router = inject(Router);
+    private location = inject(Location);
     private truckService = inject(TruckService);
 
     readonly addBookingStart$;
@@ -121,7 +122,7 @@ export class BookEffects {
                 ofType(BookActions.addBookingEnd),
                 tap(() => {
                     this.snackBar.open('Booking saved', 'Close', { duration: 3000 });
-                    this.router.navigate(['/main/customer']);
+                    this.location.back();
                 })
             ),
             { dispatch: false }
