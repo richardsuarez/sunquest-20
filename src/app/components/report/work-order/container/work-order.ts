@@ -109,11 +109,10 @@ export class WorkOrder implements OnInit, OnDestroy {
     this.seasons$.pipe(takeUntil(this.destroy$)).subscribe((seasons) => {
       this.activeSeason = seasons.find(season => season.isActive) || null;
       if (this.activeSeason) {
-        this.store.dispatch(ReportActions.loadTruckTrips({
+        this.store.dispatch(ReportActions.loadTruckTripsBySeason({
           season: this.activeSeason,
         }));
       }
-
     });
   }
 

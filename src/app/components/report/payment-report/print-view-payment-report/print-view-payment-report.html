@@ -1,0 +1,45 @@
+<div id="printable">
+    <div style="display: flex; justify-content: center">
+        <p>Payments <strong>{{ trip.origin }}</strong> to <strong>{{ trip.destination }}</strong>, load number <strong>{{ trip.loadNumber }}</strong> on {{ trip.departureDate | date: 'MMM dd, yyyy' }}</p>
+    </div>
+
+    <table mat-table [dataSource]="data" class="mat-elevation-z8">
+        <ng-container matColumnDef="truck">
+            <th mat-header-cell *matHeaderCellDef> Truck </th>
+            <td mat-cell *matCellDef="let row"> {{ truck.truckNumber }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="company">
+            <th mat-header-cell *matHeaderCellDef> Company </th>
+            <td mat-cell *matCellDef="let row"> {{ truck.companyName }} </td>
+        </ng-container>
+        <ng-container matColumnDef="recNo">
+            <th mat-header-cell *matHeaderCellDef> Rec No </th>
+            <td mat-cell *matCellDef="let row"> {{ row.recNo }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="lastName">
+            <th mat-header-cell *matHeaderCellDef> Last Name </th>
+            <td mat-cell *matCellDef="let row"> {{ row.lastName }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef> Amount </th>
+            <td mat-cell *matCellDef="let row"> {{ row.amount }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="check">
+            <th mat-header-cell *matHeaderCellDef> Check # </th>
+            <td mat-cell *matCellDef="let row"> {{ row.check }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="bank">
+            <th mat-header-cell *matHeaderCellDef> Bank </th>
+            <td mat-cell *matCellDef="let row"> {{ row.bank }} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['truck', 'company', 'recNo', 'lastName', 'amount', 'check', 'bank']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['truck', 'company', 'recNo', 'lastName', 'amount', 'check', 'bank'];"></tr>
+
+    </table>
+</div>

@@ -1,10 +1,7 @@
 <div *ngIf="!printing">
     <div class="header">
-        <div style="width: 33%"></div>
-        <div style="width: 33%; text-align: center">
-            <h1>Work Order</h1>
-        </div>
-        <div style="display: flex; align-items: center; width: 33%; gap: 10px;">
+        <h1>Work Order</h1>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
             <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>Date range</mat-label>
                 <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
@@ -13,21 +10,25 @@
                 </mat-date-range-input>
                 <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-date-range-picker #picker></mat-date-range-picker>
-                <mat-error *ngIf="dateRange.hasError('required')">Please select a range</mat-error>
+                @if(dateRange.hasError('required')){
+                    <mat-error>Please select a range</mat-error>
+                }
             </mat-form-field>
-            <button *ngIf="!(loading$ | async)" mat-raised-button type="submit" (click)="searchResult()"
-                style="background-color: #ED2D89; color: white">
-                Search
-            </button>
-            <button *ngIf="loading$ | async" mat-raised-button disabled
-                style="background-color: gray; color: white">
-                <mat-icon>
-                    <mat-spinner diameter="18"></mat-spinner>
-                </mat-icon>
-                Searching...
-            </button>
+            @if(!(loading$ | async)){
+                 <button mat-raised-button type="submit" (click)="searchResult()"
+                    style="background-color: #ED2D89; color: white">
+                    Search
+                </button>
+            } @else {
+                <button mat-raised-button disabled
+                    style="background-color: gray; color: white">
+                    <mat-icon>
+                        <mat-spinner diameter="18"></mat-spinner>
+                    </mat-icon>
+                    Searching...
+                </button>
+            }
         </div>
-
     </div>
     <mat-progress-bar *ngIf="loading$ | async" class="indeterminate"></mat-progress-bar>
 
@@ -82,7 +83,6 @@
 
         <!-- Report Summary (hidden on print) -->
 
-
         <!-- Trucks and Trips -->
         <div *ngFor="let truckReport of report.trucks" class="truck-section">
             <!-- Truck Header -->
@@ -121,9 +121,7 @@
                         </button>
                     </div>
                 </div>
-
                 <!-- Print Trip Button -->
-
 
                 <!-- Bookings Table for this Trip -->
                 <div class="bookings-table">
@@ -201,5 +199,10 @@
 
 
 <!-- Print View Component -->
-<app-print-view-work-order *ngIf="printing" [bookReport]="printingData.bookReport"
-    [truckTrips]="printingData.truckTrips" [bookingGroup]="printingData.bookingGroup"></app-print-view-work-order>
+@if(printing){
+    <app-print-view-work-order 
+        [bookReport]="printingData.bookReport"
+        [truckTrips]="printingData.truckTrips" 
+        [bookingGroup]="printingData.bookingGroup">
+    </app-print-view-work-order>
+}

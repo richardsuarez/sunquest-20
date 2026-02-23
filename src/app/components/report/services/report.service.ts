@@ -60,7 +60,7 @@ export class ReportService {
         });
     }
 
-    getTruckTrips(season: Season) {
+    getTruckTripsBySeason(season: Season) {
         return runInInjectionContext(this.injector, () => {
             return from((async () => {
 
@@ -95,6 +95,83 @@ export class ReportService {
                             const q = query(
                                 tripsCollection,
                                 where('season', '==', `${season.seasonName}-${season.year}`),
+                                orderBy('departureDate', 'asc')
+                            );
+                            let snapshot;
+                            try {
+                                snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+                            } catch (error) {
+                                console.error('Error getting truck trips from server, trying cache...', error);
+                                snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
+                            }
+                            let trips: any[] = [];
+                            snapshot.forEach(doc => {
+                                const data = doc.data() as any;
+                                const arrivalDate = data.arrivalDate ? (typeof data.arrivalDate.toDate === 'function' ? data.arrivalDate.toDate() : new Date(data.arrivalDate)) : null;
+                                const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+                                const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
+                                const delayDate = data.delayDate ? (typeof data.delayDate.toDate === 'function' ? data.delayDate.toDate() : new Date(data.delayDate)) : null;
+
+                                trips.push({
+                                    ...data,
+                                    id: doc.id,
+                                    arrivalDate,
+                                    departureDate,
+                                    createdAt,
+                                    delayDate,
+                                });
+                            });
+                            return {
+                                ...truck,
+                                trips,
+                            };
+                        }
+                        catch (error) {
+                            throw error;
+                        }
+                    })
+                );
+                return trucksWithTrips;
+            })());
+        });
+    }
+
+    getTruckTripsByDateRange(start: Date, end: Date) {
+        return runInInjectionContext(this.injector, () => {
+            return from((async () => {
+
+                // loading trucks
+                let trucks: Truck[] = [];
+                try {
+                    const trucksCollection = collection(this.firestore, 'trucks');
+                    const q = query(trucksCollection);
+                    let snapshot;
+                    try {
+                        snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+                    } catch (error) {
+                        console.error('Error getting trucks from server, trying cache...', error);
+                        snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
+                    }
+                    snapshot.forEach(doc => {
+                        trucks.push({
+                            ...(doc.data() as any),
+                            id: doc.id,
+                        });
+                    });
+                }
+                catch (error) {
+                    throw error;
+                }
+
+                //loading trips
+                const trucksWithTrips = await Promise.all(
+                    trucks.map(async (truck) => {
+                        try {
+                            const tripsCollection = collection(this.firestore, `trucks/${truck.id}/trips`);
+                            const q = query(
+                                tripsCollection,
+                                where('departureDate', '>=', start),
+                                where('departureDate', '<=', end),
                                 orderBy('departureDate', 'asc')
                             );
                             let snapshot;
@@ -352,7 +429,7 @@ export class ReportService {
     /**
      * Get bookings for a specific trip
      */
-    getBookingsForTrip(tripId: string, bookings: Booking[]): Booking[] {
+    private getBookingsForTrip(tripId: string, bookings: Booking[]): Booking[] {
         return bookings
             .filter(b => b.tripId === tripId)
             .sort((a, b) => {
@@ -371,6 +448,36 @@ export class ReportService {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
+        });
+    }
+
+    fetchBookingsForTrip(tripId: string, season: Season): Observable<Booking[]> {
+        return runInInjectionContext(this.injector, () => {
+            return from((async () => {
+                try {
+                    const bookingsCollection = collection(this.firestore, 'bookings');
+                    const q = query(
+                        bookingsCollection,
+                        where('season', '==', `${season.seasonName}-${season.year}`),
+                        where('tripId', '==', tripId)
+                    );
+                    let snapshot;
+                    try {
+                        snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+                    } catch (error) {
+                        console.error('Error getting bookings for trip from server, trying cache...', error);
+                        snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
+                    }
+                    let bookings: Booking[] = [];
+                    snapshot.forEach(doc => {
+                        bookings.push(doc.data() as Booking);
+                    });
+                    return bookings;
+                } catch (error) {
+                    console.error('Error fetching bookings for trip:', error);
+                    throw error;
+                }
+            })());
         });
     }
 }
