@@ -23,7 +23,7 @@ export class CustomerEffects {
     readonly updateVehicleStart$;
     readonly getVehicles$;
     readonly deleteVehicleStart$;
-    readonly deleteCustomerStart$;
+    readonly deleteRecordStart$;
     readonly deleteCustomerEnd$;
     readonly updateCustomerStart$;
     readonly updateCustomerEnd$;
@@ -119,7 +119,7 @@ export class CustomerEffects {
                                 // If the action included vehicles, dispatch addVehicleStart for each one
                                 if (action.vehicles && action.vehicles.length && customer?.DocumentID) {
                                     const vehicleActions = action.vehicles.map((v: any) =>
-                                        CustomerActions.addVehicleStart({ customer, vehicle: {...v, recNo: customer.recNo }})
+                                        CustomerActions.addVehicleStart({ customer, vehicle: { ...v, recNo: customer.recNo } })
                                     );
                                     baseActions.push(...vehicleActions);
                                     return baseActions;
@@ -149,40 +149,28 @@ export class CustomerEffects {
             { dispatch: false }
         );
 
-        this.deleteCustomerStart$ = createEffect(() =>
+        this.deleteRecordStart$ = createEffect(() =>
             this.actions$.pipe(
-                ofType(CustomerActions.deleteCustomerStart),
-                switchMap((action) =>
-                    runInInjectionContext(this.injector, () =>
-                        this.customerService.deleteCustomer(action.id).pipe(
-                            switchMap(() => 
-                                from(this.customerService.getNextBookingsForCustomer(action.id)).pipe(
-                                    switchMap((bookings$: Observable<Booking[]>) => 
-                                        bookings$.pipe(
-                                            switchMap((bookings: Booking[]) => {
-                                                // If there are bookings, dispatch deleteBookingStart for each one
-                                                if (bookings && bookings.length > 0) {
-                                                    // Emit a deleteBookingStart action for each booking, then emit deleteCustomerEnd
-                                                    return concat(
-                                                        from(bookings).pipe(
-                                                            concatMap((booking) => 
-                                                                of(MainActions.deleteBookingStart({ booking }))
-                                                            )
-                                                        ),
-                                                        of(CustomerActions.deleteCustomerEnd({customerId: action.id}))
-                                                    );
-                                                }
-                                                // If no bookings, just dispatch deleteCustomerEnd
-                                                return of(CustomerActions.deleteCustomerEnd({customerId: action.id}));
-                                            })
-                                        )
-                                    )
+                ofType(CustomerActions.deleteRecordStart),
+                switchMap((action) => {
+                    // If there are bookings, dispatch deleteBookingStart for each one
+                    if (action.record.bookings && action.record.bookings.length > 0) {
+                        // Emit a deleteBookingStart action for each booking, then emit deleteCustomerEnd
+                        return concat(
+                            // delete all next bookings for this record and update trips
+                            from(action.record.bookings).pipe(
+                                filter((b) => b.departureDate! > new Date()),
+                                concatMap((booking) =>
+                                    of(MainActions.deleteBookingStart({ booking }))
                                 )
                             ),
-                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
-                        )
-                    )
-                )
+                            // delete vehicle from customer
+                            of(CustomerActions.deleteVehicleStart({ customerId: action.record.customer.DocumentID, vehicleId: action.record.vehicle!.id! }))
+                        );
+                    }
+                    // If no bookings, just dispatch deleteCustomerEnd
+                    return of(CustomerActions.deleteVehicleStart({ customerId: action.record.customer.DocumentID, vehicleId: action.record.vehicle!.id! }));
+                })
             )
         );
 
@@ -235,8 +223,7 @@ export class CustomerEffects {
                     runInInjectionContext(this.injector, () =>
                         this.customerService.deleteVehicle(action.customerId, action.vehicleId).pipe(
                             switchMap(() => [
-                                CustomerActions.deleteVehicleEnd(),
-                                CustomerActions.getVehiclesStart({ customerId: action.customerId }),
+                                CustomerActions.deleteVehicleEnd({customerId: action.customerId, vehicleId: action.vehicleId}),
                             ]),
                             catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )
@@ -269,20 +256,26 @@ export class CustomerEffects {
                             concatMap(() => {
                                 // if vehicles are provided, dispatch addVehicleStart for each
                                 if (action.vehicles && action.vehicles.length && action.customer?.DocumentID) {
-                                    const vehicleActions = action.vehicles.map((v: any) =>
-                                        CustomerActions.updateVehicleStart({ customer: action.customer, vehicle: v })
-                                    );
+                                    let vehicleActions: any[] = [];
+                                    action.vehicles.forEach((v: any) => {
+                                        if(v.id){
+                                            vehicleActions.push(CustomerActions.updateVehicleStart({ customer: action.customer, vehicle: v }))
+                                        } else {
+                                            vehicleActions.push(CustomerActions.addVehicleStart({ customer: action.customer, vehicle: v }))
+                                        }
+                                        
+                                    });
                                     return [
                                         CustomerActions.resetCustomerViewModel(),
-                                        ...vehicleActions, 
+                                        ...vehicleActions,
                                         CustomerActions.updateCustomerEnd({ customer: action.customer }),
                                     ];
                                 }
 
                                 return [
-                                        CustomerActions.resetCustomerViewModel(), 
-                                        CustomerActions.updateCustomerEnd({ customer: action.customer }),
-                                    ];
+                                    CustomerActions.resetCustomerViewModel(),
+                                    CustomerActions.updateCustomerEnd({ customer: action.customer }),
+                                ];
                             }),
                             catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )

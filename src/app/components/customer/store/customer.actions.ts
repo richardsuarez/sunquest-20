@@ -1,5 +1,5 @@
 import { createAction, props } from "@ngrx/store";
-import { Customer, SearchCriteria, Vehicle } from "../model/customer.model";
+import { Customer, CustomerRecord, SearchCriteria, Vehicle } from "../model/customer.model";
 import { Booking } from "../../book/model/booking.model";
 
 
@@ -84,7 +84,7 @@ export const resetSearchCriteria = createAction(
 
 export const addVehicleStart = createAction(
     '[Customer] Start adding vehicle',
-    props<{ customer: Customer, vehicle: Partial<Vehicle>}>()
+    props<{ customer: Partial<Customer>, vehicle: Partial<Vehicle>}>()
 );
 
 export const addVehicleEnd = createAction(
@@ -116,7 +116,8 @@ export const deleteVehicleStart = createAction(
 );
 
 export const deleteVehicleEnd = createAction(
-    '[Customer] End deleting vehicle'
+    '[Customer] End deleting vehicle',
+    props<{customerId: string, vehicleId: string}>()
 );
 
 export const getBookingsStart = createAction(
@@ -128,3 +129,8 @@ export const getBookingsEnd = createAction(
     '[Customer] End retrieving booking for a customer',
     props<{ bookings: Booking[] }>()
 );
+
+export const deleteRecordStart = createAction(
+    '[Customer] Delete record',
+    props<{record: CustomerRecord}>()
+)

@@ -205,15 +205,17 @@ export class CustomerComponent implements OnInit, OnDestroy {
     }
   }
 
-  deleteCustomer(customer: Customer | undefined) {
-    if (customer && customer.DocumentID) {
+  deleteRecord(record: CustomerRecord) {
+    if (record && record.recNo) {
       const dialogRef = this.matDialog.open(
         PopupComponent,
         {
           data: {
-            title: 'Delete Customer',
-            message: `Are you sure you want to delete ${customer.primaryTitle} ${customer.primaryFirstName} ${customer.primaryLastName}?.\n
-            All next bookings of this customer will also be deleted. This action cannot be undone.`,
+            title: 'Delete Record',
+            message: `Are you sure you want to delete record ${record.recNo}?
+            All next bookings for this record will also be deleted.
+            Only will remain the previous bookings for reference.
+            This action cannot be undone.`,
             cancelButton: 'No',
             successButton: 'Yes',
           }
@@ -223,7 +225,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         map(result => {
           if (result === 'Success') {
-            this.store.dispatch(CustomerActions.deleteCustomerStart({ id: customer.DocumentID }));
+            this.store.dispatch(CustomerActions.deleteRecordStart({ record }));
           }  // allow navigation if the user click discard button or click outside modal
         })
       ).subscribe();

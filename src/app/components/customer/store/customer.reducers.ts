@@ -167,4 +167,24 @@ export const customerReducer = createReducer(
         loading: false,
         bookingList: action.bookings,
     })),
+
+    on(CustomerActions.deleteVehicleEnd, (state, action) => ({
+        ...state,
+        customerViewModel: state.customerViewModel
+            ? { 
+                ...state.customerViewModel, 
+                vehicles: state.customerViewModel.vehicles ? state.customerViewModel.vehicles.filter(v => v.id !== action.vehicleId) : state.customerViewModel.vehicles
+              }
+            : state.customerViewModel,
+        customerList: state.customerList
+            ? state.customerList.map(c => 
+                c.DocumentID === action.customerId
+                  ? {
+                      ...c,
+                      vehicles: c.vehicles ? c.vehicles.filter(v => v.id !== action.vehicleId) : c.vehicles
+                    }
+                  : c
+              )
+            : state.customerList,
+    }))
 )
