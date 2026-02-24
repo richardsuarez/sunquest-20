@@ -1,16 +1,19 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, switchMap, catchError, tap, mergeMap } from 'rxjs/operators';
+import { map, switchMap, catchError, tap, mergeMap, withLatestFrom, concatMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import * as MainActions from './main.actions';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MainService } from '../services/main.service';
+import { selectSeasons } from './main.selectors';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class MainEffects {
   private actions$ = inject(Actions);
   private mainService = inject(MainService);
   private snackBar = inject(MatSnackBar);
+  private readonly store = inject(Store)
 
   loadSeasons$ = createEffect(() =>
     this.actions$.pipe(
@@ -95,11 +98,16 @@ export class MainEffects {
   deleteBookingSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MainActions.deleteBookingSuccess),
-      tap(() => {
+      withLatestFrom(this.store.select(selectSeasons)),
+      concatMap(([_, seasons]) => {
         this.snackBar.open('Booking deleted successfully', 'Close', { duration: 3000 });
+        const activeSeason = seasons && seasons.length > 0 ? seasons.find(s => s.isActive === true) : null;
+        if (activeSeason) {
+          return of(MainActions.getPaidBookings({ season: activeSeason }));
+        }
+        return of();
       })
-    ),
-    { dispatch: false }
+    )
   );
 
   updateTripAfterDeleteBooking$ = createEffect(() =>

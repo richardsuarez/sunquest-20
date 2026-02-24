@@ -20,7 +20,7 @@ export const loadTrucksAndTripsFail = createAction('[Calendar] Load Trucks And T
 export const loadSelectedTrip = createAction('[Calendar] Load selected trip', props<{ trip: Trip | null }>());
 
 export const deleteBookingStart = createAction('[Calendar] Delete Booking Start', props<{ booking: Booking, trip: Trip }>());
-export const deleteBookingEnd = createAction('[Calendar] Delete Booking End', props<{ bookingId: string, trip: Trip }>());
+export const deleteBookingEnd = createAction('[Calendar] Delete Booking End', props<{ booking: Booking, trip: Trip }>());
 
 export const addTripStart = createAction('[Calendar] Add trip start', props<{ truckId: string, trip: Trip }>());
 export const addTripSuccess = createAction('[Calendar] Add trip success', props<{ truckId: string, trip: Trip }>());

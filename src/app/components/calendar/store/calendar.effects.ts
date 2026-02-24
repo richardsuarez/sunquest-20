@@ -1,10 +1,13 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, switchMap, catchError, mergeMap, tap, concatMap } from 'rxjs/operators';
+import { map, switchMap, catchError, mergeMap, tap, concatMap, withLatestFrom } from 'rxjs/operators';
 import { of, combineLatest, from } from 'rxjs';
 import * as CalendarActions from './calendar.actions';
+import * as MainActions from '../../main/store/main.actions'
 import { CalendarService } from '../service/calendar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Store } from '@ngrx/store';
+import { selectSeasons } from '../../main/store/main.selectors';
 
 @Injectable()
 export class CalendarEffects {
@@ -19,8 +22,12 @@ export class CalendarEffects {
   readonly updateTrip$;
   readonly deleteTrip$;
   readonly deleteBookingsByTrip$;
+  readonly deleteBookingsEnd$;
 
-  constructor(private actions$: Actions) {
+  constructor(
+    private readonly actions$: Actions,
+    private readonly store: Store
+  ) {
     this.loadBookingsForMonth$ = createEffect(() =>
       this.actions$.pipe(
         ofType(CalendarActions.loadBookingsForMonth),
@@ -57,11 +64,11 @@ export class CalendarEffects {
                       map(trips => ({
                         truckId: truck.id,
                         trips: (action.monthStart && action.monthEnd)
-                        ? trips.filter((trip: any) => {
-                          const depDate = new Date(trip.departureDate);
-                          return depDate >= action.monthStart! && depDate <= action.monthEnd!;
-                        })
-                        :trips
+                          ? trips.filter((trip: any) => {
+                            const depDate = new Date(trip.departureDate);
+                            return depDate >= action.monthStart! && depDate <= action.monthEnd!;
+                          })
+                          : trips
                       }))
                     );
                   });
@@ -134,14 +141,14 @@ export class CalendarEffects {
                     booking.truckId,
                     updatedTrip
                   ).pipe(
-                    map(() => CalendarActions.deleteBookingEnd({ bookingId: action.booking.id!, trip: updatedTrip })),
+                    map(() => CalendarActions.deleteBookingEnd({ booking: action.booking!, trip: updatedTrip })),
                     catchError((err: Error) => {
                       console.error('[CalendarEffects] Failed to update trip after booking deletion:', err);
                       return of(CalendarActions.loadBookingsForMonthFail({ error: err }));
                     })
                   );
                 } else {
-                  return of(CalendarActions.deleteBookingEnd({ bookingId: action.booking.id!, trip: updatedTrip }));
+                  return of(CalendarActions.deleteBookingEnd({ booking: action.booking!, trip: updatedTrip }));
                 }
               }),
               catchError((err: Error) => {
@@ -153,6 +160,22 @@ export class CalendarEffects {
         )
       )
     );
+
+    this.deleteBookingsEnd$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(CalendarActions.deleteBookingEnd),
+        withLatestFrom(this.store.select(selectSeasons)),
+        concatMap(([action, seasons]) => {
+          const activeSeason = seasons && seasons.length > 0 ? seasons.find(s => s.isActive === true) : null;
+
+          if (activeSeason && action.booking.season === `${activeSeason.seasonName}-${activeSeason.year}`) {
+            // if the deleted booking belongs to the current season
+            return of(MainActions.getPaidBookings({ season: activeSeason }));
+          }
+          return of();
+        })
+      )
+    )
 
     this.addTrip$ = createEffect(() =>
       this.actions$.pipe(
@@ -198,10 +221,10 @@ export class CalendarEffects {
         switchMap(action =>
           runInInjectionContext(this.injector, () =>
             this.calendarService.deleteTrip(action.truckId, action.trip.id!).pipe(
-              concatMap(() => 
+              concatMap(() =>
                 // After trip is deleted successfully, dispatch action to delete its bookings
                 [
-                  CalendarActions.deleteTripSuccess({truckId: action.truckId, tripId: action.trip.id!}),
+                  CalendarActions.deleteTripSuccess({ truckId: action.truckId, tripId: action.trip.id! }),
                   CalendarActions.deleteBookingsByTripStart({ tripId: action.trip.id! }),
                 ]
               ),
