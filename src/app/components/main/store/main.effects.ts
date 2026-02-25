@@ -132,7 +132,9 @@ export class MainEffects {
             const updatedTrip = {
               ...trip,
               remCarCap: remCarCapDelta,
-              remLoadCap: remLoadCapDelta
+              remLoadCap: remLoadCapDelta,
+              paidBookings: booking.paycheck.amount >= 1200 ? trip.paidBookings - 1 : trip.paidBookings,
+
             };
 
             return this.mainService.updateTrip(truckId, updatedTrip).pipe(
