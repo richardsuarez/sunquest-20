@@ -328,6 +328,7 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         remCarCap: truck?.carCapacity || 0,
         delayDate: null,
         season: `${this.activeSeason.seasonName}-${this.activeSeason.year}`,
+        paidBookings: 0
       }
     }));
 
@@ -466,7 +467,7 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
       from: this.form.controls.origin.value,
       to: this.form.controls.destination.value,
       departureDate: this.currentSelectedTrip ? this.currentSelectedTrip.departureDate : null,
-      tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id : null,
+      tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id! : null,
       truckId: this.currentSelectedTruckId,
       notes: this.form.controls.notes.value,
       createdAt: new Date(),
@@ -481,7 +482,9 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         if (this.originalTrip.id !== this.currentSelectedTrip.id) {
           // if user changes trip, then we need to update the original trip and then update new trip
           this.updateOriginalTrip();
-          this.updateCurrentTrip(booking); 
+          this.updateCurrentTrip(booking);
+        } else {
+          this.updatePaidBookingsOfAtripIfNeedIt(booking)
         }
       } else {
         // if user unselects the original trip and does not select any, then we need to update the original trip capacity by adding back the booked load and cars
@@ -514,12 +517,13 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         ...this.originalTrip,
         remLoadCap: this.originalTrip.remLoadCap + originalBookingVehicleLoad,
         remCarCap: this.originalTrip.remCarCap + 1,
+        paidBookings: this.isBookingFullPaid(this.originalBooking) ? this.originalTrip.paidBookings - 1 : this.originalTrip.paidBookings,
       }
       this.store.dispatch(BookActions.updateTripStart({ truckId: this.originalTruckId!, trip: originalTripForUpdate }));
     }
   }
 
-  private updateCurrentTrip(booking: Partial<Booking>) {
+  private updateCurrentTrip(booking: Booking) {
     if (this.currentSelectedTrip) {
       let currentBookingVehicleLoad = 0;
       if (booking && booking?.customer?.vehicles) {
@@ -528,10 +532,38 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
       const currentTripForUpdate = {
         ...this.currentSelectedTrip,
         remLoadCap: this.currentSelectedTrip.remLoadCap - currentBookingVehicleLoad,
-        remCarCap: this.currentSelectedTrip.remCarCap - 1
+        remCarCap: this.currentSelectedTrip.remCarCap - 1,
+        paidBookings: this.isBookingFullPaid(booking) ? this.currentSelectedTrip.paidBookings + 1 : this.currentSelectedTrip.paidBookings
       }
       this.store.dispatch(BookActions.updateTripStart({ truckId: this.currentSelectedTruckId!, trip: currentTripForUpdate }));
     }
+  }
+
+  updatePaidBookingsOfAtripIfNeedIt(booking: Booking){
+    if(this.currentSelectedTrip){
+      if(!this.isBookingFullPaid(this.originalBooking) && this.isBookingFullPaid(booking)){
+        const currentTripForUpdate = {
+          ...this.currentSelectedTrip,
+          paidBookings: this.currentSelectedTrip.paidBookings + 1,
+        }
+        this.store.dispatch(BookActions.updateTripStart({ truckId: this.currentSelectedTruckId!, trip: currentTripForUpdate }));
+      } else {
+        if(this.isBookingFullPaid(this.originalBooking) && !this.isBookingFullPaid(booking)){
+          const currentTripForUpdate = {
+            ...this.currentSelectedTrip,
+            paidBookings: this.currentSelectedTrip.paidBookings - 1,
+          }
+          this.store.dispatch(BookActions.updateTripStart({ truckId: this.currentSelectedTruckId!, trip: currentTripForUpdate }));
+        }
+      }
+    }
+  }
+
+  private isBookingFullPaid(booking: Booking | null): boolean {
+    if(booking){
+      return booking.paycheck && booking.paycheck.amount >= 1200;
+    }
+    return false;
   }
 
   onSelectTruck(truckId: string | null) {

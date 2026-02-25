@@ -188,7 +188,7 @@ export class MainService {
           });
 
           const totalBookings = bookings.length;
-          const paidBookings = bookings.filter(b => b.paycheck && b.paycheck.amount > 0).length;
+          const paidBookings = bookings.filter(b => b.paycheck && b.paycheck.amount >= 1200).length;
 
           return `${paidBookings} of ${totalBookings}`;
         } catch (error) {

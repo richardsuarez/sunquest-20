@@ -4,10 +4,17 @@
             <h1>Payment Report</h1>
             <div style="display: flex; justify-content: flex-end; gap: 10px; align-items: center">
                 <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                    <mat-label>Search Criteria</mat-label>
+                    <mat-select matInput [formControl]="searchCriteriaSelector">
+                        <mat-option value="byDateRange">By Date Range</mat-option>
+                        <mat-option value="All Season">All season</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                     <mat-label>Date range</mat-label>
                     <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
-                        <input matStartDate required placeholder="Start date" formControlName="start">
-                        <input matEndDate required placeholder="End date" formControlName="end">
+                        <input matStartDate required placeholder="Start date" formControlName="start" [disabled]="disableDateRange()">
+                        <input matEndDate required placeholder="End date" formControlName="end" [disabled]="disableDateRange()">
                     </mat-date-range-input>
                     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-date-range-picker #picker></mat-date-range-picker>
@@ -43,6 +50,15 @@
                         </div>
                         <div style="text-align: center"><span>{{ allTrips() }}</span></div>
                     </div>
+                    <div style="display: flex; gap: 20px; align-items: center">
+                        Legend:
+                        <div class="legend-trip" [style.background-color]="'#14aa1c'">
+                            All bookings paid
+                        </div>
+                        <div class="legend-trip" [style.background-color]="'#3498db'">
+                            Not all bookings paid
+                        </div>
+                    </div>
                 </div>
                 <!-- Report Summary (hidden on print) -->
 
@@ -59,7 +75,7 @@
                             <!-- Trip Header -->
                             <div class="trip-header">
                                 @for(trip of truck.trips; track trip){
-                                    <div class="event-badge" [style.background-color]="'#3498db'"
+                                    <div class="event-badge" [style.background-color]="isFullPaid(truck, trip) ? '#14aa1c' : '#3498db'"
                                         (click)="selectTrip(trip, truck)">
                                         <span class="event-title">Trip {{ trip.loadNumber }}</span>
                                         <span style="margin-left: 10px; margin-right: 10px;">|</span>

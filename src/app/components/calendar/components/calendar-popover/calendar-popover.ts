@@ -68,7 +68,12 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.selectedTrip$.pipe(takeUntil(this.destroy$)).subscribe(trip => {
-      this.trip = trip;
+      if(trip){
+        this.trip = trip;
+      } else {
+        this.close();
+      }
+      
     });
 
     this.bookings$.pipe(takeUntil(this.destroy$)).subscribe(bookings => {

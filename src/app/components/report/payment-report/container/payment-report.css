@@ -23,6 +23,7 @@
     justify-content: flex-start;
     align-items: center;
     padding: 15px;
+    gap: 30px;
 
     h3{
         margin: 0;
@@ -138,6 +139,24 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     transform: scale(1.05);
   }
+
+  .event-title {
+    display: inline-block;
+    max-width: 100%;
+  }
+}
+
+.legend-trip {
+    text-align: center;
+    width: 200px;
+  padding: 10px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: #14aa1c;
 
   .event-title {
     display: inline-block;

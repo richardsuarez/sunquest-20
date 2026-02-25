@@ -138,6 +138,7 @@ export class TripPopoverComponent implements OnInit, OnDestroy {
                     remCarCap: truck?.carCapacity || 0,
                     delayDate: null,
                     season: this.trip?.season || null,
+                    paidBookings: 0,
                 }
             }));
         }

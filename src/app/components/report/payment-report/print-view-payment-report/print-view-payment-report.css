@@ -50,3 +50,7 @@
         display: none !important;
     }
 }
+
+tr {
+    height: 25px !important;
+}

@@ -71,6 +71,7 @@ export class PaymentReport implements OnInit, OnDestroy {
   bookings$!: Observable<Booking[] | null>;
   activeSeason: Season | null = null;
   tableData: TableData[] = [];
+  searchCriteriaSelector = new FormControl('byDateRange');
 
   constructor(
     private readonly store: Store,
@@ -118,6 +119,10 @@ export class PaymentReport implements OnInit, OnDestroy {
     return tripCount;
   }
 
+  disableDateRange(): boolean {
+    return this.searchCriteriaSelector.value === 'All Season'
+  }
+
   editBooking(booking: Booking) {
     this.router.navigate(['main/book/edit']);
     this.store.dispatch(MainAction.loadCustomer({ customer: booking.customer as Customer }));
@@ -125,7 +130,7 @@ export class PaymentReport implements OnInit, OnDestroy {
   }
 
   paidBookings(bookings: Booking[] | null) {
-    return bookings?.filter(booking => booking.paycheck && booking.paycheck.amount > 0).length || 0;
+    return bookings?.filter(booking => booking.paycheck && booking.paycheck.amount >= 1200).length || 0;
   }
 
   searchRecNo(booking: Booking): string {
@@ -143,12 +148,17 @@ export class PaymentReport implements OnInit, OnDestroy {
       console.log('No active season selected');
       return;
     }
-    if (!this.dateRange.value.start || !this.dateRange.value.end) {
-      this.dateRange.setErrors({ 'required': true });
-      return;
+    if (this.disableDateRange()) {
+      this.store.dispatch(ReportActions.loadTruckTripsBySeason({ season: this.activeSeason }));
+    } else {
+      if (!this.dateRange.value.start || !this.dateRange.value.end) {
+        this.dateRange.setErrors({ 'required': true });
+        return;
+      }
+      this.dateRange.setErrors(null);
+      this.store.dispatch(ReportActions.loadTruckTripsByDateRange({ start: this.dateRange.value.start, end: this.dateRange.value.end }));
     }
-    this.dateRange.setErrors(null);
-    this.store.dispatch(ReportActions.loadTruckTripsByDateRange({ start: this.dateRange.value.start, end: this.dateRange.value.end }));
+
   }
 
   selectTrip(trip: Trip, truck: Truck) {
@@ -176,5 +186,12 @@ export class PaymentReport implements OnInit, OnDestroy {
         data: [] as TableData[],
       }
     }, 1000)
+  }
+
+  isFullPaid(truck: Truck, trip: Trip): boolean{
+    if(truck.carCapacity){
+      return truck.carCapacity - trip.remCarCap === trip.paidBookings
+    }
+    return false;
   }
 }

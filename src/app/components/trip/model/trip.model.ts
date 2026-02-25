@@ -9,4 +9,5 @@ export interface Trip {
   remCarCap: number;   // remaining car capacity
   delayDate: Date | null;
   season: string | null;
+  paidBookings: number;
 }
