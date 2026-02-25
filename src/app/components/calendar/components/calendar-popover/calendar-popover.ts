@@ -16,6 +16,7 @@ import { Trip } from '../../../trip/model/trip.model';
 import { MatTableModule } from "@angular/material/table";
 import { TripPopoverComponent } from '../trip-popover/trip-popover.component';
 import * as CalendarActions from '../../store/calendar.actions';
+import { Vehicle } from '../../../customer/model/customer.model';
 
 @Component({
   selector: 'app-calendar-popover',
@@ -116,29 +117,12 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
     }
   }
 
-  getVehicleInfo(booking: Booking): string[] {
-    const vehicleIds = booking.vehicleIds || [];
-    const vehicles = booking.customer?.vehicles;
-    const returnedVehicles: string[] = [];
-
-    if (vehicles && vehicles.length > 0) {
-      for (let v of vehicles) {
-        // Check if this vehicle's ID is in the booking's vehicleIds array
-        if (v.id && vehicleIds.includes(v.id)) {
-          returnedVehicles.push(`${v.year} ${v.make} ${v.model} (${v.plate})`);
-        }
-      }
+  getBookingVehicles(booking: Booking): Vehicle[] {
+    const list = [];
+    if(booking.customer?.vehicles){
+      list.push(booking.customer?.vehicles[0] as Vehicle);
     }
-
-    return returnedVehicles.length > 0 ? returnedVehicles : ['No vehicles'];
-  }
-
-  getBookingVehicles(booking: Booking): any[] {
-    const vehicleIds = booking.vehicleIds || [];
-    const vehicles = booking.customer?.vehicles || [];
-
-    // Filter vehicles to only include those in this booking
-    return vehicles.filter(v => v.id && vehicleIds.includes(v.id));
+    return list ;
   }
 
   getPrimaryCustomer(booking: Booking): string {

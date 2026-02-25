@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Address, Customer } from '../../customer/model/customer.model';
 import { getTruckListStart } from '../store/book.actions';
@@ -68,7 +68,7 @@ import { selectIsMobile } from '../../main/store/main.selectors';
   styleUrls: ['./book.css'],
   providers: [provideNativeDateAdapter()],
 })
-export class Book implements OnInit, OnDestroy {
+export class Book implements OnInit, OnDestroy, AfterViewInit {
   private store = inject(Store);
   public router = inject(Router);
   private snackBar = inject(MatSnackBar);
@@ -93,6 +93,7 @@ export class Book implements OnInit, OnDestroy {
   pickupAt!: Date;
   crud = '';
   isMadeChange = false;
+  adjustedCardHeight = 0;
 
   bookingVM$!: Observable<Booking | null>;
 
@@ -253,7 +254,7 @@ export class Book implements OnInit, OnDestroy {
         this.form.controls.notes.setValue(booking.notes || null);
 
         this.arrivalAt = booking.arrivalAt || new Date();
-        this.pickupAt = booking.pickupAt || new Date();
+        this.pickupAt = booking.pickupAt!;
         this.currentSelectedTruckId = booking.truckId || null;
         this.arrivalAddress = booking.arrivalAddress || null;
         this.pickupAddress = booking.pickupAddress || null;
@@ -262,11 +263,6 @@ export class Book implements OnInit, OnDestroy {
         }
         if (this.pickupAddress) {
           this.pickupAddressForm.patchValue(this.pickupAddress);
-        }
-        if (booking.vehicleIds) {
-          booking.vehicleIds.forEach(id => {
-            this.vehicleSelection[id] = true;
-          });
         }
 
         if (booking.truckId && this.trips[booking.truckId]) {
@@ -287,6 +283,22 @@ export class Book implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  ngAfterViewInit() {
+    this.isMobile$.pipe(takeUntil(this.destroy$)).subscribe(mobile => {
+      if(mobile === true){
+        const element = document.getElementById('bookForm');
+        element!.scrollIntoView({
+          behavior: "smooth",   // "auto" (default) or "smooth"
+        });
+      }
+    })
+    
+    const cardHeader = document.getElementById('cardHeader');
+    const cardContent = document.getElementById('cardContent');
+    const card = document.getElementById('card');
+    card?.setAttribute('height', String((cardHeader?.offsetHeight ?? 0) + (cardContent?.offsetHeight ?? 0)).concat(' !important'))
   }
 
   addTrip() {
@@ -429,10 +441,8 @@ export class Book implements OnInit, OnDestroy {
       return;
     }
 
-    const selectedVehicleIds = Object.keys(this.vehicleSelection).filter(k => this.vehicleSelection[k]);
-
-    if (selectedVehicleIds.length === 0) {
-      this.snackBar.open('Please select at least one vehicle to book', 'Close', { duration: 5000 });
+    if (!this.currentCustomer?.vehicles || this.currentCustomer.vehicles.length === 0) {
+      this.snackBar.open(`Can't create booking. No vehicle provided`, 'Close', { duration: 5000 });
       return;
     }
 
@@ -441,7 +451,7 @@ export class Book implements OnInit, OnDestroy {
     const booking = {
       id: this.originalBooking? this.originalBooking.id : undefined,
       customer: this.currentCustomer,
-      vehicleIds: selectedVehicleIds,
+      vehicleId: this.currentCustomer.vehicles[0].id!,
       paycheck: {
         checkNumber: this.form.controls.checkNumber.value,
         bankName: this.form.controls.bankName.value,
@@ -497,16 +507,13 @@ export class Book implements OnInit, OnDestroy {
   private updateOriginalTrip() {
     if (this.originalTrip) {
       let originalBookingVehicleLoad = 0;
-      if (this.originalBooking && this.originalBooking.vehicleIds) {
-        originalBookingVehicleLoad = this.originalBooking.vehicleIds.reduce((totalLoad, vehicleId) => {
-          const vehicle = this.originalBooking?.customer?.vehicles?.find(v => v.id === vehicleId);
-          return totalLoad + (vehicle?.weight || 0);
-        }, 0);
+      if (this.originalBooking && this.originalBooking?.customer?.vehicles) {
+        originalBookingVehicleLoad = this.originalBooking?.customer?.vehicles[0].weight ?? 0;
       }
       const originalTripForUpdate = {
         ...this.originalTrip,
         remLoadCap: this.originalTrip.remLoadCap + originalBookingVehicleLoad,
-        remCarCap: this.originalTrip.remCarCap + (this.originalBooking?.vehicleIds?.length || 0)
+        remCarCap: this.originalTrip.remCarCap + 1,
       }
       this.store.dispatch(BookActions.updateTripStart({ truckId: this.originalTruckId!, trip: originalTripForUpdate }));
     }
@@ -515,16 +522,13 @@ export class Book implements OnInit, OnDestroy {
   private updateCurrentTrip(booking: Partial<Booking>) {
     if (this.currentSelectedTrip) {
       let currentBookingVehicleLoad = 0;
-      if (booking && booking.vehicleIds) {
-        currentBookingVehicleLoad = booking.vehicleIds.reduce((totalLoad, vehicleId) => {
-          const vehicle = booking?.customer?.vehicles?.find(v => v.id === vehicleId);
-          return totalLoad + (vehicle?.weight || 0);
-        }, 0);
+      if (booking && booking?.customer?.vehicles) {
+        currentBookingVehicleLoad = booking?.customer?.vehicles[0].weight ?? 0;
       }
       const currentTripForUpdate = {
         ...this.currentSelectedTrip,
         remLoadCap: this.currentSelectedTrip.remLoadCap - currentBookingVehicleLoad,
-        remCarCap: this.currentSelectedTrip.remCarCap - (booking.vehicleIds?.length || 0)
+        remCarCap: this.currentSelectedTrip.remCarCap - 1
       }
       this.store.dispatch(BookActions.updateTripStart({ truckId: this.currentSelectedTruckId!, trip: currentTripForUpdate }));
     }

@@ -124,17 +124,13 @@ export class PaymentReport implements OnInit, OnDestroy {
     this.store.dispatch(MainAction.loadBooking({ booking }));
   }
 
-  paidBookings(bookings: Booking[] | null){
+  paidBookings(bookings: Booking[] | null) {
     return bookings?.filter(booking => booking.paycheck && booking.paycheck.amount > 0).length || 0;
   }
 
   searchRecNo(booking: Booking): string {
-    if (booking.vehicleIds && booking.vehicleIds.length > 0) {
-      const vehicleId = booking.vehicleIds[0];
-      if (booking.customer && booking.customer.vehicles && booking.customer.vehicles.length > 0) {
-        const recNo = booking.customer.vehicles.find(v => v.id === vehicleId)?.recNo;
-        return recNo || '';
-      }
+    if (booking.customer && booking.customer.vehicles && booking.customer.vehicles.length > 0) {
+      return booking.customer.vehicles[0].recNo || '';
     }
     return 'No provided';
   }

@@ -9,7 +9,7 @@ export interface Paycheck {
 export interface Booking {
   id?: string;
   customer: Customer | null;
-  vehicleIds: string[];
+  vehicleId: string;
   paycheck: Paycheck;
   arrivalAddress: Address | null;
   arrivalAt: Date | null; // ISO datetime

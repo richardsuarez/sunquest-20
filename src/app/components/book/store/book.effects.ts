@@ -44,15 +44,11 @@ export class BookEffects {
                                 if (!action.trip) {
                                     return of(BookActions.addBookingEnd());
                                 }
-                                const carsBooked = action.booking.vehicleIds || [];
                                 let totalWeight = 0
-                                for (let carId of carsBooked) {
-                                    const vehicle = action.booking.customer?.vehicles?.find(v => v.id === carId);
-                                    if (vehicle && vehicle.weight) {
-                                        totalWeight = totalWeight + vehicle.weight;
-                                    }
+                                if (action.booking.customer?.vehicles) {
+                                    totalWeight = action.booking.customer?.vehicles[0].weight ?? 0
                                 }
-                                const remCarCapDelta = action.trip?.remCarCap ? action.trip.remCarCap - carsBooked.length : 0;
+                                const remCarCapDelta = action.trip?.remCarCap ? action.trip.remCarCap - 1 : 0;
                                 const remWeightCapDelta = action.trip?.remLoadCap ? action.trip.remLoadCap - totalWeight : 0;
                                 const updatedTrip = {
                                     ...action.trip,

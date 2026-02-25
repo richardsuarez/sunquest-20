@@ -114,21 +114,10 @@ export class CalendarEffects {
                 // After booking is deleted, update the trip with restored capacity
                 const booking = action.booking;
                 const trip = action.trip;
-                const vehicleIds = booking.vehicleIds || [];
-
-                // Calculate the capacity to restore
-                let totalWeight = trip.remLoadCap;
-                let totalCars = trip.remCarCap;
-                const vehicles = booking.customer?.vehicles || [];
-                for (let vehicleId of vehicleIds) {
-                  const vehicle = vehicles.find(v => v.id === vehicleId);
-                  if (vehicle && vehicle.weight) {
-                    totalWeight += vehicle.weight;
-                  }
-                }
-
-                const remCarCapDelta = totalCars + vehicleIds.length; // Add back the cars
-                const remLoadCapDelta = totalWeight; // Add back the weight
+                const vehicle = booking.customer?.vehicles && booking.customer?.vehicles[0];
+                
+                const remCarCapDelta = trip.remCarCap + 1; // Add back the car
+                const remLoadCapDelta = trip.remLoadCap + (vehicle?.weight ?? 0); // Add back the weight
                 const updatedTrip = {
                   ...trip,
                   remCarCap: remCarCapDelta,

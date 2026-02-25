@@ -68,6 +68,18 @@ h1{
   width: 45% !important;
 }
 
+mat-card {
+  background: white;
+  border-radius: 12px;
+  width: 25%;
+}
+
+mat-card-header {
+  background-color: #2664b4;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
 mat-card-title {
   font-size: 1.3rem;
   font-weight: bold;
@@ -84,6 +96,13 @@ mat-card-actions {
   padding: 20px;
 }
 
+.customer-info {
+  border-radius: 5px;
+  border: 3px solid darkgray;
+  padding: 5px;
+  margin-top: 10px;
+}
+
 .info-section {
   margin: 1rem 0;
 }
@@ -92,6 +111,16 @@ mat-card-actions {
   vertical-align: middle;
   margin-right: 8px;
   color: #555;
+}
+
+.info-section p {
+  margin: 0px 0px 3px 0px;
+  ;
+}
+
+.info-section h4 {
+  margin-bottom: 10px;
+  color: #203d72;
 }
 
 table{

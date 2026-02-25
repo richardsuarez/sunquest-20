@@ -147,13 +147,8 @@ export class CustomerComponent implements OnInit, OnDestroy {
           for (let vehicle of customer.vehicles) {
             const vehicleBookings: Booking[] = [];
             for (let booking of customerBookings) {
-              if (booking.vehicleIds) {
-                for (let v of booking.vehicleIds) {
-                  if (v === vehicle.id) {
-                    vehicleBookings.push(booking);
-                    break;
-                  }
-                }
+              if (booking.vehicleId && booking.vehicleId === vehicle.id) {
+                vehicleBookings.push(booking);
               }
             }
             let record: CustomerRecord = {
@@ -179,7 +174,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   deleteBookingTooltip(booking: Booking): string {
-    if (!this.editableBooking(booking)) {
+    if (this.pastBooking(booking)) {
       return 'Cannot delete past bookings';
     }
     return '';
@@ -233,12 +228,27 @@ export class CustomerComponent implements OnInit, OnDestroy {
     }
   }
 
-  createBooking(customer: Customer | undefined) {
+  createBooking(customer: Customer | undefined, vehicle: Vehicle | null) {
     if (this.currentSeason) {
-      if (customer) {
+      if (customer && vehicle) {
+        const auxCustomer: Customer = {
+          ...customer,
+          vehicles: customer.vehicles?.filter(v => v.id === vehicle.id)
+        }
         this.router.navigate(['main/book/new']);
-        this.store.dispatch(MainAction.loadCustomer({ customer }));
-        this.store.dispatch(MainAction.createEmptyBooking()); ``
+        this.store.dispatch(MainAction.loadCustomer({ customer:  auxCustomer}));
+        this.store.dispatch(MainAction.createEmptyBooking()); 
+      } else {
+        this.matDialog.open(
+        PopupComponent,
+        {
+          data: {
+            title: 'No vehicle provided',
+            message: `Cannot create booking because there is no vehicle provided. Please add one and try later.`,
+            cancelButton: 'OK',
+          }
+        }
+      );
       }
     } else {
       this.matDialog.open(
@@ -287,12 +297,12 @@ export class CustomerComponent implements OnInit, OnDestroy {
     }
   }
 
-  editableBooking(booking: Booking): boolean {
+  pastBooking(booking: Booking): boolean {
     const today = new Date();
     if (!booking.departureDate) {
-      return true;
+      return false;
     }
-    return new Date(booking.departureDate) >= today;
+    return new Date(booking.departureDate) < today;
   }
 
   onPageChange(event: any) {
