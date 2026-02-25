@@ -1,22 +1,27 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, switchMap, catchError, take } from 'rxjs/operators';
+import { map, switchMap, catchError, take, withLatestFrom, concatMap } from 'rxjs/operators';
 import { mergeMap, tap } from 'rxjs/operators';
 import { of, from, combineLatest } from 'rxjs';
 import * as BookActions from './book.actions';
+import * as MainActions from '../../main/store/main.actions';
 import { BookingService } from '../service/booking.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TruckService } from '../../truck/services/truck.service';
 import { Truck } from '../../truck/model/truck.model';
+import { Location } from '@angular/common';
+import { Store } from '@ngrx/store';
+import { selectSeasons } from '../../main/store/main.selectors';
 
 @Injectable()
 export class BookEffects {
     private injector = inject(EnvironmentInjector);
     private bookingService = inject(BookingService);
     private snackBar = inject(MatSnackBar);
-    private router = inject(Router);
+    private location = inject(Location);
     private truckService = inject(TruckService);
+    private store = inject(Store);
 
     readonly addBookingStart$;
     readonly addBookingEnd$;
@@ -39,15 +44,11 @@ export class BookEffects {
                                 if (!action.trip) {
                                     return of(BookActions.addBookingEnd());
                                 }
-                                const carsBooked = action.booking.vehicleIds || [];
                                 let totalWeight = 0
-                                for (let carId of carsBooked) {
-                                    const vehicle = action.booking.customer?.vehicles?.find(v => v.id === carId);
-                                    if (vehicle && vehicle.weight) {
-                                        totalWeight = totalWeight + vehicle.weight;
-                                    }
+                                if (action.booking.customer?.vehicles) {
+                                    totalWeight = action.booking.customer?.vehicles[0].weight ?? 0
                                 }
-                                const remCarCapDelta = action.trip?.remCarCap ? action.trip.remCarCap - carsBooked.length : 0;
+                                const remCarCapDelta = action.trip?.remCarCap ? action.trip.remCarCap - 1 : 0;
                                 const remWeightCapDelta = action.trip?.remLoadCap ? action.trip.remLoadCap - totalWeight : 0;
                                 const updatedTrip = {
                                     ...action.trip,
@@ -119,12 +120,20 @@ export class BookEffects {
         this.addBookingEnd$ = createEffect(() =>
             this.actions$.pipe(
                 ofType(BookActions.addBookingEnd),
-                tap(() => {
+                withLatestFrom(this.store.select(selectSeasons)),
+                concatMap(([_, seasons]) => {
                     this.snackBar.open('Booking saved', 'Close', { duration: 3000 });
-                    this.router.navigate(['/main/customer']);
+                    this.location.back();
+                    
+                    // Get the active season (the last one in the seasons list, which should be the most recent)
+                    const activeSeason = seasons && seasons.length > 0 ? seasons.find(s => s.isActive === true) : null;
+                    
+                    if (activeSeason) {
+                        return of(MainActions.getPaidBookings({ season: activeSeason }));
+                    }
+                    return of();
                 })
-            ),
-            { dispatch: false }
+            )
         );
 
         // Add Trip effect

@@ -4,7 +4,7 @@ import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Booking } from '../../../book/model/booking.model';
-import { Address } from '../../../customer/model/customer.model';
+import { Address, Vehicle } from '../../../customer/model/customer.model';
 
 @Component({
   selector: 'app-booking-details-popup',
@@ -35,10 +35,11 @@ export class BookingDetailsPopupComponent {
     };
   }
 
-  getVehicles(): any[] {
-    const vehicleIds = this.booking.vehicleIds || [];
-    const vehicles = this.booking.customer?.vehicles || [];
-    return vehicles.filter(v => v.id && vehicleIds.includes(v.id));
+  getVehicle(): Vehicle | undefined {
+    if(this.booking?.customer?.vehicles){
+      return this.booking?.customer?.vehicles[0];
+    }
+    return undefined;
   }
 
   formatAddress(address: Address | null): string {

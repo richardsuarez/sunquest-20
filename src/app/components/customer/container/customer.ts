@@ -147,13 +147,8 @@ export class CustomerComponent implements OnInit, OnDestroy {
           for (let vehicle of customer.vehicles) {
             const vehicleBookings: Booking[] = [];
             for (let booking of customerBookings) {
-              if (booking.vehicleIds) {
-                for (let v of booking.vehicleIds) {
-                  if (v === vehicle.id) {
-                    vehicleBookings.push(booking);
-                    break;
-                  }
-                }
+              if (booking.vehicleId && booking.vehicleId === vehicle.id) {
+                vehicleBookings.push(booking);
               }
             }
             let record: CustomerRecord = {
@@ -179,7 +174,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   deleteBookingTooltip(booking: Booking): string {
-    if (!this.editableBooking(booking)) {
+    if (this.pastBooking(booking)) {
       return 'Cannot delete past bookings';
     }
     return '';
@@ -205,15 +200,17 @@ export class CustomerComponent implements OnInit, OnDestroy {
     }
   }
 
-  deleteCustomer(customer: Customer | undefined) {
-    if (customer && customer.DocumentID) {
+  deleteRecord(record: CustomerRecord) {
+    if (record && record.recNo) {
       const dialogRef = this.matDialog.open(
         PopupComponent,
         {
           data: {
-            title: 'Delete Customer',
-            message: `Are you sure you want to delete ${customer.primaryTitle} ${customer.primaryFirstName} ${customer.primaryLastName}?.\n
-            All next bookings of this customer will also be deleted. This action cannot be undone.`,
+            title: 'Delete Record',
+            message: `Are you sure you want to delete record ${record.recNo}?
+            All next bookings for this record will also be deleted.
+            Only will remain the previous bookings for reference.
+            This action cannot be undone.`,
             cancelButton: 'No',
             successButton: 'Yes',
           }
@@ -223,7 +220,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         map(result => {
           if (result === 'Success') {
-            this.store.dispatch(CustomerActions.deleteCustomerStart({ id: customer.DocumentID }));
+            this.store.dispatch(CustomerActions.deleteRecordStart({ record }));
           }  // allow navigation if the user click discard button or click outside modal
         })
       ).subscribe();
@@ -231,12 +228,27 @@ export class CustomerComponent implements OnInit, OnDestroy {
     }
   }
 
-  createBooking(customer: Customer | undefined) {
+  createBooking(customer: Customer | undefined, vehicle: Vehicle | null) {
     if (this.currentSeason) {
-      if (customer) {
+      if (customer && vehicle) {
+        const auxCustomer: Customer = {
+          ...customer,
+          vehicles: customer.vehicles?.filter(v => v.id === vehicle.id)
+        }
         this.router.navigate(['main/book/new']);
-        this.store.dispatch(MainAction.loadCustomer({ customer }));
-        this.store.dispatch(MainAction.createEmptyBooking()); ``
+        this.store.dispatch(MainAction.loadCustomer({ customer:  auxCustomer}));
+        this.store.dispatch(MainAction.createEmptyBooking()); 
+      } else {
+        this.matDialog.open(
+        PopupComponent,
+        {
+          data: {
+            title: 'No vehicle provided',
+            message: `Cannot create booking because there is no vehicle provided. Please add one and try later.`,
+            cancelButton: 'OK',
+          }
+        }
+      );
       }
     } else {
       this.matDialog.open(
@@ -285,12 +297,12 @@ export class CustomerComponent implements OnInit, OnDestroy {
     }
   }
 
-  editableBooking(booking: Booking): boolean {
+  pastBooking(booking: Booking): boolean {
     const today = new Date();
     if (!booking.departureDate) {
-      return true;
+      return false;
     }
-    return new Date(booking.departureDate) >= today;
+    return new Date(booking.departureDate) < today;
   }
 
   onPageChange(event: any) {

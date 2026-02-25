@@ -1,15 +1,15 @@
 @media print {
-    body * {
+    /* body * {
         margin: 0;
         padding: 0;
         display: none !important;
-    }
+    } */
 
     app-header {
         display: none !important;
     }
 
-    .no-printable{
+    /* .no-printable{
         display: none !important;
         margin: 0px !important;
         padding: 0px !important;
@@ -19,6 +19,6 @@
         margin: 0px;
         padding: 0px;
         display: none !important;
-    }
+    } */
 
 }

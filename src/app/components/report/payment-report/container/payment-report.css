@@ -1,0 +1,177 @@
+.header {
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h3 {
+    margin: 0;
+    flex: 1;
+    min-width: 200px;
+}
+
+.body {
+    padding: 20px;
+    background-color: #fff;
+}
+
+.print-controls {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 15px;
+    gap: 30px;
+
+    h3{
+        margin: 0;
+    }
+}
+
+.info{
+    padding: 10px;
+    border: 1px solid gray;
+    border-radius: 4px;
+    width: 15%;
+}
+
+.print-controls button {
+    margin-right: 10px;
+}
+
+.truck-section {
+    margin-bottom: 30px;
+    page-break-inside: avoid;
+}
+
+.truck-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 20px;
+    border-radius: 4px 4px 0 0;
+    border: 2px solid gray;
+    margin-bottom: 0;
+}
+
+.truck-header h2 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+}
+
+/* Trip Section Styles */
+.trip-section {
+    margin-bottom: 20px;
+    border-left: 3px solid #FF9800;
+    padding-left: 15px;
+    background-color: #fff8f0;
+    padding: 15px;
+    border-radius: 0 4px 4px 0;
+    page-break-inside: avoid;
+}
+
+.trip-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 20px;
+}
+
+.trip-header h3 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+    color: #1a237e;
+}
+
+.trip-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #1a237e;
+
+    mat-icon{
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+    }
+}
+
+.trip-details {
+    margin: 5px 0 0 0;
+    font-size: 16px;
+    color: #666;
+}
+
+.trip-details span {
+    margin-right: 15px;
+}
+
+/* Print Trip Button */
+.trip-print-button {
+    text-align: right;
+    margin-bottom: 12px;
+}
+
+.trip-print-button button {
+    font-size: 12px;
+}
+
+.event-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+  }
+
+  .event-title {
+    display: inline-block;
+    max-width: 100%;
+  }
+}
+
+.legend-trip {
+    text-align: center;
+    width: 200px;
+  padding: 10px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: #14aa1c;
+
+  .event-title {
+    display: inline-block;
+    max-width: 100%;
+  }
+}
+
+.route {
+  display: flex;
+  align-items: center;
+
+  mat-icon{
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
+    margin: 0 2px;
+  }
+}

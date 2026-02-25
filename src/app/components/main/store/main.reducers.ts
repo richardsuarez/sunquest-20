@@ -105,4 +105,13 @@ export const mainReducer = createReducer(
       deletingBooking: null,
       error: error.message,
   })),
+  on(MainActions.getPaidBookings, (state) => ({
+    ...state,
+    gettingPaidBookings: true,
+  })),
+  on(MainActions.getPaidBookingsSuccess, (state, action) => ({
+    ...state,
+    gettingPaidBookings: false,
+    paidBookings: action.paidBookings
+  }))
 )

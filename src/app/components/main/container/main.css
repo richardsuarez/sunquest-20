@@ -6,6 +6,18 @@
     /*top: 90px;*/
 }
 
+.booking-summary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e3f2fd; 
+    border-radius: 2px;
+    color: rgb(58, 137, 240);
+    gap: 20px;
+    padding-top: 10px;;
+    padding-bottom: 10px;;
+}
+
 .container{
     max-width: 1500px;
     flex:1;

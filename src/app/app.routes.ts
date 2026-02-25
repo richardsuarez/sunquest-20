@@ -117,6 +117,12 @@ export const routes: Routes = [
                         loadComponent() {
                             return import('./components/report/customer-report/customer-report').then((m => m.CustomerReport))
                         },
+                    },
+                    {
+                        path: 'payment',
+                        loadComponent() {
+                            return import('./components/report/payment-report/container/payment-report').then((m => m.PaymentReport))
+                        },
                     }
                 ],
                 providers: [

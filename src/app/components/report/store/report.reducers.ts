@@ -21,7 +21,13 @@ export const reportReducer = createReducer(
         appError: action.error.message
     })),
 
-    on(ReportActions.loadTruckTrips, (state) => ({
+    on(ReportActions.loadTruckTripsBySeason, (state) => ({
+        ...state,
+        loading: true,
+        appError: null,
+    })),
+
+    on(ReportActions.loadTruckTripsByDateRange, (state) => ({
         ...state,
         loading: true,
         appError: null,
@@ -66,5 +72,9 @@ export const reportReducer = createReducer(
         ...state,
         loading: false,
         customerList: action.customerList,
+    })),
+    on(ReportActions.cleanTruckList, (state) => ({
+        ...state,
+        trucks: null,
     }))
 );

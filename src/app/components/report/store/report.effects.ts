@@ -11,7 +11,7 @@ export class ReportEffects {
     private actions$ = inject(Actions);
     private reportService = inject(ReportService);
 
-    bookings$ = createEffect(() =>
+    bookingsGeneral$ = createEffect(() =>
         this.actions$.pipe(
             ofType(ReportActions.loadBookingsStart),
             switchMap((action) =>
@@ -25,11 +25,39 @@ export class ReportEffects {
         )
     );
 
-    trips$ = createEffect(() =>
+    bookingsForTrip$ = createEffect(() =>
         this.actions$.pipe(
-            ofType(ReportActions.loadTruckTrips),
+            ofType(ReportActions.loadBookingsForTripStart),
             switchMap((action) =>
-                this.reportService.getTruckTrips(action.season).pipe(
+                this.reportService.fetchBookingsForTrip(action.tripId, action.season).pipe(
+                    map((bookings) => ReportActions.loadBookingsSuccess({ bookings })),
+                    catchError((error) =>
+                        of(ReportActions.fail({ error }))
+                    )
+                )
+            )
+        )
+    );
+
+    tripsBySeason$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(ReportActions.loadTruckTripsBySeason),
+            switchMap((action) =>
+                this.reportService.getTruckTripsBySeason(action.season).pipe(
+                    map((truckWithTrips) => ReportActions.loadTruckTripsSuccess({ trucks: truckWithTrips })),
+                    catchError((error) =>
+                        of(ReportActions.fail({ error }))
+                    )
+                )
+            )
+        )
+    );
+
+    tripsByDateRange$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(ReportActions.loadTruckTripsByDateRange),
+            switchMap((action) =>
+                this.reportService.getTruckTripsByDateRange(action.start, action.end).pipe(
                     map((truckWithTrips) => ReportActions.loadTruckTripsSuccess({ trucks: truckWithTrips })),
                     catchError((error) =>
                         of(ReportActions.fail({ error }))

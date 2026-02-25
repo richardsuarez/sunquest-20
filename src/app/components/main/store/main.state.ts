@@ -11,6 +11,8 @@ export interface MainState {
   customerViewModel: Customer | null;
   bookingViewModel: Booking | null;
   deletingBooking: string | null;
+  gettingPaidBookings: boolean;
+  paidBookings: string;
 }
 
 export const initialMainState: MainState = {
@@ -22,4 +24,6 @@ export const initialMainState: MainState = {
   customerViewModel: null,
   bookingViewModel: null,
   deletingBooking: null,
+  gettingPaidBookings: false,
+  paidBookings: '',
 };

@@ -1,16 +1,19 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, switchMap, catchError, tap, mergeMap } from 'rxjs/operators';
+import { map, switchMap, catchError, tap, mergeMap, withLatestFrom, concatMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import * as MainActions from './main.actions';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MainService } from '../services/main.service';
+import { selectSeasons } from './main.selectors';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class MainEffects {
   private actions$ = inject(Actions);
   private mainService = inject(MainService);
   private snackBar = inject(MatSnackBar);
+  private readonly store = inject(Store)
 
   loadSeasons$ = createEffect(() =>
     this.actions$.pipe(
@@ -95,11 +98,16 @@ export class MainEffects {
   deleteBookingSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MainActions.deleteBookingSuccess),
-      tap(() => {
+      withLatestFrom(this.store.select(selectSeasons)),
+      concatMap(([_, seasons]) => {
         this.snackBar.open('Booking deleted successfully', 'Close', { duration: 3000 });
+        const activeSeason = seasons && seasons.length > 0 ? seasons.find(s => s.isActive === true) : null;
+        if (activeSeason) {
+          return of(MainActions.getPaidBookings({ season: activeSeason }));
+        }
+        return of();
       })
-    ),
-    { dispatch: false }
+    )
   );
 
   updateTripAfterDeleteBooking$ = createEffect(() =>
@@ -117,24 +125,16 @@ export class MainEffects {
               console.warn(`[MainEffects] Trip with id ${tripId} not found for truck ${truckId}, cannot update after booking deletion`);
               return of(MainActions.deleteBookingSuccess());
             }
-            const vehicleIds = booking.vehicleIds || [];
+            const vehicle = booking.customer?.vehicles && booking.customer?.vehicles[0];
 
-            // Calculate the capacity to restore
-            let totalWeight = trip.remLoadCap;
-            let totalCars = trip.remCarCap;
-            const vehicles = booking.customer?.vehicles || [];
-            for (let vehicleId of vehicleIds) {
-              const vehicle = vehicles.find(v => v.id === vehicleId);
-              if (vehicle && vehicle.weight) {
-                totalWeight += vehicle.weight;
-              }
-            }
-            const remCarCapDelta = totalCars + vehicleIds.length; // Add back the cars
-            const remLoadCapDelta = totalWeight; // Add back the weight
+            const remCarCapDelta = trip.remCarCap + 1; // Add back the car
+            const remLoadCapDelta = trip.remLoadCap + (vehicle?.weight ?? 0); // Add back the weight
             const updatedTrip = {
               ...trip,
               remCarCap: remCarCapDelta,
-              remLoadCap: remLoadCapDelta
+              remLoadCap: remLoadCapDelta,
+              paidBookings: booking.paycheck.amount >= 1200 ? trip.paidBookings - 1 : trip.paidBookings,
+
             };
 
             return this.mainService.updateTrip(truckId, updatedTrip).pipe(
@@ -151,6 +151,21 @@ export class MainEffects {
           })
         );
       })
+    )
+  );
+
+  getPaidBookings$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(MainActions.getPaidBookings),
+      switchMap((action) =>
+        this.mainService.getPaidBookings(action.season).pipe(
+          map(paidBookings => MainActions.getPaidBookingsSuccess({ paidBookings })),
+          catchError(error => {
+            console.error('Error loading seasons:', error);
+            return of(MainActions.loadSeasonsFail({ error: error.message }));
+          })
+        )
+      )
     )
   );
 }

@@ -1,0 +1,186 @@
+@if(!printing){
+    @if(!selectedTrip){
+        <div class="header">
+            <h1>Payment Report</h1>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; align-items: center">
+                <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                    <mat-label>Search Criteria</mat-label>
+                    <mat-select matInput [formControl]="searchCriteriaSelector">
+                        <mat-option value="byDateRange">By Date Range</mat-option>
+                        <mat-option value="All Season">All season</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                    <mat-label>Date range</mat-label>
+                    <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
+                        <input matStartDate required placeholder="Start date" formControlName="start" [disabled]="disableDateRange()">
+                        <input matEndDate required placeholder="End date" formControlName="end" [disabled]="disableDateRange()">
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-date-range-picker #picker></mat-date-range-picker>
+                    @if(dateRange.hasError('required')){
+                        <mat-error>Please select a range</mat-error>
+                    }
+                </mat-form-field>
+                @if(!(loading$ | async)){
+                    <button mat-raised-button type="submit" (click)="searchResult()"
+                        style="background-color: #ED2D89; color: white">
+                        Search
+                    </button>
+                } @else {
+                    <button mat-raised-button disabled style="background-color: gray; color: white">
+                        <mat-icon>
+                            <mat-spinner diameter="18"></mat-spinner>
+                        </mat-icon>
+                        Searching...
+                    </button>
+                }
+            </div>
+        </div>
+        @if(loading$ | async){
+            <mat-progress-bar class="indeterminate"></mat-progress-bar>
+        }
+        @if(trucks$ | async; as trucks){
+            <div class="body">
+                <!-- Print Buttons (hidden on print) -->
+                <div class="print-controls">
+                    <div class="info">
+                        <div style="text-align: center">
+                            <h3>Trips</h3>
+                        </div>
+                        <div style="text-align: center"><span>{{ allTrips() }}</span></div>
+                    </div>
+                    <div style="display: flex; gap: 20px; align-items: center">
+                        Legend:
+                        <div class="legend-trip" [style.background-color]="'#14aa1c'">
+                            All bookings paid
+                        </div>
+                        <div class="legend-trip" [style.background-color]="'#3498db'">
+                            Not all bookings paid
+                        </div>
+                    </div>
+                </div>
+                <!-- Report Summary (hidden on print) -->
+
+                <!-- Trucks and Trips -->
+                @for(truck of trucks; track truck){
+                    <div class="truck-section">
+                        <!-- Truck Header -->
+                        <div class="truck-header">
+                            <h2>{{ truck.truckNumber }} | {{ truck.companyName }}</h2>
+                        </div>
+                        <!-- Trips for this Truck -->
+                            
+                        <div class="trip-section">
+                            <!-- Trip Header -->
+                            <div class="trip-header">
+                                @for(trip of truck.trips; track trip){
+                                    <div class="event-badge" [style.background-color]="isFullPaid(truck, trip) ? '#14aa1c' : '#3498db'"
+                                        (click)="selectTrip(trip, truck)">
+                                        <span class="event-title">Trip {{ trip.loadNumber }}</span>
+                                        <span style="margin-left: 10px; margin-right: 10px;">|</span>
+                                        @if(trip.origin === 'Florida'){
+                                            <div class="route">
+                                                <span>F</span> 
+                                                <mat-icon>arrow_forward</mat-icon>
+                                                <span>N</span>
+                                            </div>
+                                        } @else {
+                                            <div class="route">
+                                                <span>N</span>
+                                                <mat-icon>arrow_forward</mat-icon>
+                                                <span>F</span>
+                                            </div>
+                                        }
+                                        <span style="margin-left: 10px; margin-right: 10px;">|</span>
+                                        <span>{{ trip.departureDate | date: 'MMM dd, yyyy' }}</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }    
+    } @else {
+        <div class="header">
+            <div style="display: flex; align-items: center; cursor: pointer; color: #005CBB; width: 33%" (click)="selectedTrip = null; selectedTruck = null;">
+                <mat-icon color="primary">arrow_back_ios</mat-icon>
+                <h2>Payment Report</h2>
+            </div>
+            <div style="width: 33%; text-align: center;">
+                <h3>{{ selectedTruck?.truckNumber }} | {{ selectedTruck?.companyName }}</h3>
+            </div>
+            <div style="width: 33%; text-align: center">
+                <h3>Trip {{ selectedTrip.loadNumber }} | {{ selectedTrip.origin }} to {{ selectedTrip.destination }} | {{ selectedTrip.departureDate | date: 'MMM dd, yyyy' }}</h3>
+            </div>
+        </div>
+
+        <div class="body">
+            @if(bookings$ | async; as bookings){
+                <div style="display: flex; justify-content: flex-end; padding: 10px;">
+                    <button mat-raised-button (click)="printReport()" style="background-color: #ED2D89; color: white">
+                        <mat-icon>print</mat-icon>
+                        Print Report
+                    </button>
+                </div>
+                <table mat-table [dataSource]="bookings" class="mat-elevation-z8">
+
+                    <ng-container matColumnDef="truck">
+                        <th mat-header-cell *matHeaderCellDef> Truck </th>
+                        <td mat-cell *matCellDef="let booking"> {{ selectedTruck?.truckNumber }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="company">
+                        <th mat-header-cell *matHeaderCellDef> Company </th>
+                        <td mat-cell *matCellDef="let booking"> {{ selectedTruck?.companyName }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="recNo">
+                        <th mat-header-cell *matHeaderCellDef> Rec No </th>
+                        <td mat-cell *matCellDef="let booking"> {{ searchRecNo(booking) }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="lastName">
+                        <th mat-header-cell *matHeaderCellDef> Last Name </th>
+                        <td mat-cell *matCellDef="let booking"> {{ booking.customer?.primaryLastName || '' }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="amount">
+                        <th mat-header-cell *matHeaderCellDef> Amount </th>
+                        <td mat-cell *matCellDef="let booking"> {{ booking.paycheck.amount || 0 }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="check">
+                        <th mat-header-cell *matHeaderCellDef> Check # </th>
+                        <td mat-cell *matCellDef="let booking"> {{ booking.paycheck.checkNumber }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="bank">
+                        <th mat-header-cell *matHeaderCellDef> Bank </th>
+                        <td mat-cell *matCellDef="let booking"> {{ booking.paycheck.bankName }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="action">
+                        <th mat-header-cell *matHeaderCellDef>  </th>
+                        <td mat-cell *matCellDef="let booking"> 
+                            <button mat-button color="primary" (click)="editBooking(booking)"> <mat-icon>edit</mat-icon></button>    
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['truck', 'company','recNo', 'lastName', 'amount', 'check', 'bank', 'action']"></tr>
+                    <tr mat-row *matRowDef="let booking; columns: ['truck', 'company', 'recNo', 'lastName', 'amount', 'check', 'bank', 'action'];"></tr>
+
+                </table>
+            } @else {
+                <p>No bookings found for this trip.</p>
+            }
+        </div>
+    }
+} @else {
+    <app-print-view-payment-report
+    [truck]="printData.truck" 
+    [trip]="printData.trip" 
+    [data]="printData.data"
+    ></app-print-view-payment-report>
+}

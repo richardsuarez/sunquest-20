@@ -174,9 +174,9 @@ export const calendarReducer = createReducer(
     appError: error
   })),
 
-  on(CalendarActions.deleteBookingEnd, (state, { bookingId, trip }) => {
+  on(CalendarActions.deleteBookingEnd, (state, { booking, trip }) => {
     // Remove the deleted booking from currentMonthBookings
-    const updatedBookings = state.currentMonthBookings.filter(b => b.id !== bookingId);
+    const updatedBookings = state.currentMonthBookings.filter(b => b.id !== booking.id);
 
     // Update calendar events - rebuild with updated bookings
     const updatedEvents: { [key: string]: CalendarEvent[] } = { ...state.calendarEvents };
@@ -187,7 +187,7 @@ export const calendarReducer = createReducer(
         if (event.bookings && event.id?.startsWith('trip-')) {
           return {
             ...event,
-            bookings: event.bookings.filter(b => b.id !== bookingId)
+            bookings: event.bookings.filter(b => b.id !== booking.id)
           };
         }
         return event;

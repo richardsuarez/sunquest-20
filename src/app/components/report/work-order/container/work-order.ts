@@ -109,11 +109,10 @@ export class WorkOrder implements OnInit, OnDestroy {
     this.seasons$.pipe(takeUntil(this.destroy$)).subscribe((seasons) => {
       this.activeSeason = seasons.find(season => season.isActive) || null;
       if (this.activeSeason) {
-        this.store.dispatch(ReportActions.loadTruckTrips({
+        this.store.dispatch(ReportActions.loadTruckTripsBySeason({
           season: this.activeSeason,
         }));
       }
-
     });
   }
 
@@ -206,19 +205,18 @@ export class WorkOrder implements OnInit, OnDestroy {
     return bookings.reduce(
       (acc, booking) => ({
         weight: acc.weight + (booking.paycheck?.amount || 0),
-        volume: acc.volume + (booking.vehicleIds?.length || 0)
+        volume: acc.volume + 1
       }),
       { weight: 0, volume: 0 }
     );
   }
 
-  vehicleInfo(booking: Booking, id: string) {
-    let formattedVehicle: string = '';
-    if (booking.customer && booking.customer.vehicles && booking.customer.vehicles.length > 0) {
-      const vehicle = booking.customer.vehicles.find(v => v.id === id);
-      formattedVehicle = `${vehicle?.color || ''} ${vehicle?.year || ''} ${vehicle?.make || ''} ${vehicle?.model || ''} (${vehicle?.plate || ''})`.trim();
+  vehicleInfo(booking: Booking) {
+    if(booking.customer && booking.customer.vehicles && booking.customer.vehicles[0]) {
+      const vehicle = booking.customer.vehicles[0];
+      return `${vehicle?.color || ''} ${vehicle?.year || ''} ${vehicle?.make || ''} ${vehicle?.model || ''} (${vehicle?.plate || ''})`.trim();
     }
-    return formattedVehicle;
+    return 'No provided'
   }
 
   getPreviewDataAsBookingGroup(): BookingGroup | null {

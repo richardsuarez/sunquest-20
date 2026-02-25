@@ -9,650 +9,607 @@
         <h1>{{ crudTitle() }} Booking</h1>
     </div>
     @if(customer$ | async; as customer){
-        <div class="body">
-            <mat-card [class.customer-card-desktop]="!(isMobile$ | async)" [class.customer-card-mobile]="isMobile$ | async">
-                <mat-card-header>
-                    <div mat-card-avatar [class.male-customer-avatar]="customer.primaryTitle === 'Mr.'"
-                        [class.female-customer-avatar]="customer.primaryTitle === 'Mrs.'">
-                        <mat-icon>person</mat-icon>
-                    </div>
-                    <mat-card-title>{{ customer.primaryTitle }} {{ customer.primaryLastName }}, {{ customer.primaryFirstName
+    <div class="body">
+        <mat-card id="card">
+            <mat-card-header id="cardHeader">
+                <div mat-card-avatar style="text-align: center; margin: 0px">
+                    @if(customer.vehicles){
+                        <h2 style="margin: 0px; color: white">{{ customer.vehicles[0]!.recNo }}</h2>
+                    } @else {
+                        <h2 style="margin: 0px; color: white">{{ customer.recNo }}</h2>
+                    }
+                    
+                </div>
+            </mat-card-header>
+            <mat-card-content id="cardContent">
+                <div class="customer-info">
+                    <mat-card-title>{{ customer.primaryTitle }} {{ customer.primaryLastName }}, {{
+                        customer.primaryFirstName
                         }}
                         {{ customer.primaryMiddleName }}</mat-card-title>
-                    @if(customer.secondaryLastName) {
-                        <mat-card-subtitle >
-                            {{ customer.secondaryTitle }} {{ customer.secondaryLastName }}, {{ customer.secondaryFirstName }} {{
-                            customer.secondaryMiddleName }}
-                        </mat-card-subtitle>
+                    @if(customer.secondaryFirstName){
+                    <mat-card-subtitle>
+                        {{ customer.secondaryTitle }} {{ customer.secondaryLastName }}, {{
+                        customer.secondaryFirstName }} {{
+                        customer.secondaryMiddleName }}
+                    </mat-card-subtitle>
                     }
-                </mat-card-header>
-
-                <mat-card-content>
-                    <section class="info-section">
-                        <h4>Contact Information</h4>
-                        <p>
-                            <mat-icon>email</mat-icon>
-                            @if(customer.email){
-                                <a [href]="'mailto:' + customer.email">{{ customer.email }}</a>
-                            } @else {
-                                <span style="color: darkgray;">No provided</span>
-                            }
-                        </p>
-                        <div style="display: flex; gap: 25px">
-                            <p style="margin: 0px !important">
-                                <mat-icon>phone</mat-icon>
-                                @if(customer.primaryPhone){
-                                    <a  [href]="'tel:' + customer.primaryPhone">{{
-                                    customer.primaryPhone }}</a>
-                                } @else {
+                    <div style="display: block">
+                        <section class="info-section">
+                            <h4>Contact Information</h4>
+                            <div style="margin-left: 20px">
+                                <p>
+                                    <mat-icon>email</mat-icon>
+                                    @if(customer.email){
+                                    <a [href]="'mailto:' + customer.email">{{
+                                        customer.email }}</a>
+                                    } @else {
                                     <span style="color: darkgray;">No provided</span>
-                                }
-                            </p>
-                            @if(customer.secondaryPhone){
-                                <p style="margin: 0px !important">
+                                    }
+                                </p>
+                                <p>
+                                    <mat-icon>phone</mat-icon>
+                                    @if(customer.primaryPhone){
+                                    <a [href]="'tel:' + customer.primaryPhone">{{
+                                        customer.primaryPhone }}</a>
+                                    } @else {
+                                    <span style="color: darkgray;">No provided</span>
+                                    }
+                                </p>
+                                @if(customer.secondaryPhone){
+                                <p>
                                     <mat-icon>phone</mat-icon>
                                     <a [href]="'tel:' + customer.secondaryPhone">{{
-                                        customer.secondaryPhone
-                                        }}</a>
+                                        customer.secondaryPhone }}</a>
                                 </p>
-                            }
-                        </div>
-                    </section>
-
-                    <mat-divider></mat-divider>
-                    <section class="info-section">
-                        <h4>Addresses</h4>
-                        @if(customer.floridaAddress){
-                            <div style="display: flex; gap: 5px">
-                                <mat-icon>location_on</mat-icon>
-                                <div style="display: block">
-                                    <div>{{ customer.floridaAddress.address1 }} {{ customer.floridaAddress.address2 }} {{
-                                        customer.floridaAddress.city }}, {{ customer.floridaAddress.state }} {{
-                                        customer.floridaAddress.zipCode }}</div>
-                                </div>
-                            </div>
-                        }
-                        @if(customer.newYorkAddress){
-                            <div style="display: flex; gap: 5px">
-                                <mat-icon>location_on</mat-icon>
-                                <div style="display: block">
-                                    <div>{{ customer.newYorkAddress.address1 }} {{ customer.newYorkAddress.address2 }} {{
-                                        customer.newYorkAddress.city }}, {{ customer.newYorkAddress.state }} {{
-                                        customer.newYorkAddress.zipCode }}</div>
-                                </div>
-                            </div>
-                        }
-                    </section>
-                </mat-card-content>
-            </mat-card>
-            <div style="display: block" [class.booking-desktop]="!(isMobile$ | async)">
-                <section>
-                    <h3>Select vehicle(s) to book</h3>
-                    @if(customer.vehicles && customer.vehicles.length > 0){
-                        <div>
-                            @if(isMobile$ | async){
-                                <div class="vehicles-list">
-                                    @for (vehicle of customer?.vehicles || []; track $index) {
-                                        <div class="vehicle-item">
-                                            <mat-checkbox [checked]="vehicleSelection[vehicle?.id || '']"
-                                                (change)="vehicleSelection[vehicle?.id || ''] = $event.checked"></mat-checkbox>
-                                            <div style="flex: 1">
-                                                <p class="detail-value">{{ vehicle.color }} {{ vehicle.year }} {{ vehicle.make }} {{
-                                                vehicle.model }} ({{ vehicle.plate }})</p>
-                                                <p class="detail-value">VIN: {{ vehicle.vin }}</p>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            } @else {
-                                <table mat-table [dataSource]="customer.vehicles" class="mat-elevation-z8"
-                                    style="border: 1px solid gray; margin-bottom: 20px">
-
-                                    <ng-container matColumnDef="checkbox">
-                                        <th mat-header-cell *matHeaderCellDef></th>
-                                        <td mat-cell *matCellDef="let element">
-                                            <mat-checkbox [checked]="vehicleSelection[element.id]" (click)="isMadeChange = true"
-                                                (change)="vehicleSelection[element.id] = $event.checked"></mat-checkbox>
-                                        </td>
-                                    </ng-container>
-
-                                    <ng-container matColumnDef="year">
-                                        <th mat-header-cell *matHeaderCellDef> Year </th>
-                                        <td mat-cell *matCellDef="let element"> {{element.year}} </td>
-                                    </ng-container>
-                                    <ng-container matColumnDef="make">
-                                        <th mat-header-cell *matHeaderCellDef> Make </th>
-                                        <td mat-cell *matCellDef="let element"> {{element.make}} </td>
-                                    </ng-container>
-                                    <ng-container matColumnDef="model">
-                                        <th mat-header-cell *matHeaderCellDef> Model </th>
-                                        <td mat-cell *matCellDef="let element"> {{element.model}} </td>
-                                    </ng-container>
-                                    <ng-container matColumnDef="vin">
-                                        <th mat-header-cell *matHeaderCellDef> VIN </th>
-                                        <td mat-cell *matCellDef="let element"> {{element.vin}} </td>
-                                    </ng-container>
-                                    <ng-container matColumnDef="plate">
-                                        <th mat-header-cell *matHeaderCellDef> Plate </th>
-                                        <td mat-cell *matCellDef="let element"> {{element.plate}} </td>
-                                    </ng-container>
-                                    <ng-container matColumnDef="state">
-                                        <th mat-header-cell *matHeaderCellDef> State </th>
-                                        <td mat-cell *matCellDef="let element"> {{element.state}} </td>
-                                    </ng-container>
-                                    <ng-container matColumnDef="weight">
-                                        <th mat-header-cell *matHeaderCellDef> Weight (lbs) </th>
-                                        <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
-                                    </ng-container>
-
-                                    <tr mat-header-row *matHeaderRowDef="vehiclesProperties"></tr>
-                                    <tr mat-row *matRowDef="let row; columns: vehiclesProperties;"></tr>
-                                </table>
-                                @if(!areSelectedVehicles()) {
-                                    <span style="color: red">* Select 1 vehicle at least</span>
                                 }
+                            </div>
+                        </section>
+                        <section class="info-section">
+                            <h4>Vehicle</h4>
+                            <div style="margin-left: 20px;">
+                                @if(customer.vehicles && customer.vehicles.length > 0){
+                                <p><strong>Year:</strong> {{ customer.vehicles[0].year ?? 'No provided' }}</p>
+                                <p><strong>Make:</strong> {{ customer.vehicles[0].make ?? 'No provided' }}</p>
+                                <p><strong>Model:</strong> {{ customer.vehicles[0].model ?? 'No provided' }}</p>
+                                <p><strong>Color:</strong> {{ customer.vehicles[0].color ?? 'No provided' }}</p>
+                                <p><strong>Plate:</strong> {{ customer.vehicles[0].plate ?? 'No provided' }}</p>
+                                <p><strong>State:</strong> {{ customer.vehicles[0].state ?? 'No provided' }}</p>
+                                <p><strong>VIN:</strong> {{ customer.vehicles[0].vin ?? 'No provided' }}</p>
+                                <p><strong>Weight:</strong> {{ customer.vehicles[0].weight ?? 'No provided' }}</p>
+                                } @else {
+                                <p style="color: darkgray;">No provided</p>
+                                }
+                            </div>
+                        </section>
+                        <section class="info-section">
+                            <h4>Florida Address</h4>
+                            @if(customer.floridaAddress){
+                            <div style="margin-left: 20px;">
+                                <p>{{ customer.floridaAddress.address1 }} {{
+                                    customer.floridaAddress.address2 }}</p>
+                                <p> {{customer.floridaAddress.city }}, {{ customer.floridaAddress.state }}
+                                    {{ customer.floridaAddress.zipCode }}</p>
+                            </div>
+                            } @else {
+                            <p style="color: darkgray; margin-left: 20px;">No provided</p>
                             }
+
+                        </section>
+                        <section class="info-section">
+                            <h4>New York Address</h4>
+                            @if(customer.newYorkAddress){
+                            <div style="margin-left: 20px;">
+                                <p>{{ customer.newYorkAddress.address1 }} {{
+                                    customer.newYorkAddress.address2 }}</p>
+                                <p> {{customer.newYorkAddress.city }}, {{ customer.newYorkAddress.state }}
+                                    {{ customer.newYorkAddress.zipCode }}</p>
+                            </div>
+                            } @else {
+                            <p style="color: darkgray; margin-left: 20px;">No provided</p>
+                            }
+                        </section>
+
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+        
+        <div id="bookForm" style="display: block" [class.booking-desktop]="!(isMobile$ | async)">
+            <section>
+                <h3>Route</h3>
+                <div class="info">
+                    <mat-form-field appearance="outline" floatLabel="always"
+                        [class.form-field-mobile]="isMobile$ | async" style="width: 49%">
+                        <mat-label>Origin</mat-label>
+                        <mat-select required [formControl]="form.controls.origin"
+                            (selectionChange)="updateRouteDestination($event)">
+                            <mat-option value="Florida">Florida</mat-option>
+                            <mat-option value="New York">New York</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" floatLabel="always" style="width: 49%"
+                        [class.form-field-mobile]="isMobile$ | async">
+                        <mat-label>Destination</mat-label>
+                        <mat-select required [formControl]="form.controls.destination"
+                            (selectionChange)="updateRouteOrigin($event)">
+                            <mat-option value="Florida">Florida</mat-option>
+                            <mat-option value="New York">New York</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </section>
+
+            <section>
+                <h3>Customer Arrival</h3>
+                <div class="info">
+                    <mat-form-field appearance="outline" floatLabel="always"
+                        [class.form-field-mobile]="isMobile$ | async" style="width: 49%">
+                        <mat-label>Date</mat-label>
+                        <input required matInput [matDatepicker]="picker" [(ngModel)]="arrivalAt" [min]="today"
+                            appAllowOnlyNumbers>
+                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" floatLabel="always" style="width: 49%"
+                        [class.form-field-mobile]="isMobile$ | async">
+                        <mat-label>Time</mat-label>
+                        <mat-timepicker #timePicker />
+                        <input required matInput [matTimepicker]="timePicker" [(ngModel)]="arrivalAt">
+                        <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+                    </mat-form-field>
+                </div>
+                <div>
+                    <h3>Delivery Address <span style="font-weight: lighter; color: red;">(Suggested address: Customer's
+                            {{form.controls.destination.value}} address)</span></h3>
+                    @if(!(isMobile$ | async)){
+                        <div style="display: flex; justify-content: space-between; width: 100%; gap: 2%">
+                            <mat-form-field floatLabel="always" appearance="outline" style="width: 49%;">
+                                <mat-label>Address 1</mat-label>
+                                <input type="text" matInput required [formControl]="deliveryAddressForm.controls.address1"
+                                    appAllowAlphanumeric>
+                            </mat-form-field>
+
+                            <mat-form-field floatLabel="always" appearance="outline" style="width: 49%;">
+                                <mat-label>Address 2</mat-label>
+                                <input type="text" matInput [formControl]="deliveryAddressForm.controls.address2">
+                            </mat-form-field>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; width: 100%; gap: 10px">
+                            <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                                <mat-label>Building</mat-label>
+                                <input type="text" matInput [formControl]="deliveryAddressForm.controls.bldg"
+                                    appAllowAlphanumeric>
+                            </mat-form-field>
+                            <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                                <mat-label>Apartment</mat-label>
+                                <input type="text" matInput [formControl]="deliveryAddressForm.controls.apt"
+                                    appAllowAlphanumeric>
+                            </mat-form-field>
+                            <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                                <mat-label>City</mat-label>
+                                <input type="text" matInput required [formControl]="deliveryAddressForm.controls.city"
+                                    appAllowAlphaAndSpecificChar>
+                            </mat-form-field>
+                            <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                                <mat-label>State</mat-label>
+                                <input type="text" matInput required [formControl]="deliveryAddressForm.controls.state"
+                                    appAllowAlphaAndSpecificChar>
+                            </mat-form-field>
+                            <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                                <mat-label>Zip Code</mat-label>
+                                <input type="text" matInput required [formControl]="deliveryAddressForm.controls.zipCode"
+                                    appAllowOnlyNumbers>
+                            </mat-form-field>
                         </div>
                     } @else {
-                        <div>No vehicles found for this customer</div>
+                        <div>
+                            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
+                                <mat-label>Address 1</mat-label>
+                                <input type="text" matInput required [formControl]="deliveryAddressForm.controls.address1"
+                                    appAllowAlphanumeric>
+                            </mat-form-field>
+
+                            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                                <mat-label>Address 2</mat-label>
+                                <input type="text" matInput [formControl]="deliveryAddressForm.controls.address2">
+                            </mat-form-field>
+                            <mat-form-field floatLabel="always" appearance="outline"
+                                style="max-width: 45%; margin-right: 10%">
+                                <mat-label>Building</mat-label>
+                                <input type="text" matInput [formControl]="deliveryAddressForm.controls.bldg"
+                                    appAllowAlphanumeric>
+                            </mat-form-field>
+                            <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%;">
+                                <mat-label>Apartment</mat-label>
+                                <input type="text" matInput [formControl]="deliveryAddressForm.controls.apt"
+                                    appAllowAlphanumeric>
+                            </mat-form-field>
+
+                            <mat-form-field floatLabel="always" appearance="outline"
+                                style="max-width: 45%; margin-right: 10%;">
+                                <mat-label>City</mat-label>
+                                <input type="text" matInput requiered [formControl]="deliveryAddressForm.controls.city"
+                                    appAllowAlphaAndSpecificChar>
+                            </mat-form-field>
+                            <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%">
+                                <mat-label>State</mat-label>
+                                <input type="text" matInput required [formControl]="deliveryAddressForm.controls.state"
+                                    appAllowAlphaAndSpecificChar>
+                            </mat-form-field>
+                            <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%">
+                                <mat-label>Zip Code</mat-label>
+                                <input type="text" matInput required [formControl]="deliveryAddressForm.controls.zipCode"
+                                    appAllowOnlyNumbers>
+                            </mat-form-field>
+                        </div>
                     }
-                </section>
+                </div>
+            </section>
 
-                <section>
-                    <h3>Paycheck</h3>
-                    <div class="paycheck">
-                        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
-                            <mat-label>Check number</mat-label>
-                            <input matInput [formControl]="form.controls.checkNumber" appAllowOnlyNumbers>
+            <section>
+                <h3>Pick up Date</h3>
+                <div class="info">
+                    <mat-form-field appearance="outline" floatLabel="always"
+                        [class.form-field-mobile]="isMobile$ | async" style="width: 49%">
+                        <mat-label>Date</mat-label>
+                        <input required matInput [matDatepicker]="pickupPicker" [(ngModel)]="pickupAt" [min]="today"
+                            [max]="arrivalAt" appAllowOnlyNumbers>
+                        <mat-datepicker-toggle matIconSuffix [for]="pickupPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #pickupPicker></mat-datepicker>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" floatLabel="always" style="width: 49%"
+                        [class.form-field-mobile]="isMobile$ | async">
+                        <mat-label>Time</mat-label>
+                        <input required matInput [matTimepicker]="pickupTimePicker" [(ngModel)]="pickupAt">
+                        <mat-timepicker-toggle matIconSuffix [for]="pickupTimePicker" />
+                        <mat-timepicker #pickupTimePicker />
+                    </mat-form-field>
+                </div>
+                <div>
+                    <h3>Pickup Address <span style="font-weight: lighter; color: red;">(Suggested address: Customer's
+                            {{form.controls.origin.value}} address)</span></h3>
+                    @if(!(isMobile$ | async)){
+                    <div style="display: flex; justify-content: space-between; width: 100%; gap: 2%">
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 49%;">
+                            <mat-label>Address 1</mat-label>
+                            <input type="text" matInput required [formControl]="pickupAddressForm.controls.address1"
+                                appAllowAlphanumeric>
                         </mat-form-field>
-                        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
-                            <mat-label>Bank name</mat-label>
-                            <input matInput [formControl]="form.controls.bankName" appAllowAlphanumeric>
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
-                            <mat-label>Amount</mat-label>
-                            <input type="number" matInput [formControl]="form.controls.amount" appAllowOnlyNumbers>
+
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 49%;">
+                            <mat-label>Address 2</mat-label>
+                            <input type="text" matInput [formControl]="pickupAddressForm.controls.address2">
                         </mat-form-field>
                     </div>
 
-                </section>
-
-                <section>
-                    <h3>Route</h3>
-                    <div class="info">
-                        <mat-form-field appearance="outline" floatLabel="always" [class.form-field-mobile]="isMobile$ | async"
-                            style="margin-right: 4%">
-                            <mat-label>Origin</mat-label>
-                            <mat-select required [formControl]="form.controls.origin"
-                                (selectionChange)="updateRouteDestination($event)">
-                                <mat-option value="Florida">Florida</mat-option>
-                                <mat-option value="New York">New York</mat-option>
-                            </mat-select>
+                    <div style="display: flex; justify-content: space-between; width: 100%; gap: 10px">
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>Building</mat-label>
+                            <input type="text" matInput [formControl]="pickupAddressForm.controls.bldg"
+                                appAllowAlphanumeric>
                         </mat-form-field>
-                        <mat-form-field appearance="outline" floatLabel="always" [class.form-field-mobile]="isMobile$ | async">
-                            <mat-label>Destination</mat-label>
-                            <mat-select required [formControl]="form.controls.destination"
-                                (selectionChange)="updateRouteOrigin($event)">
-                                <mat-option value="Florida">Florida</mat-option>
-                                <mat-option value="New York">New York</mat-option>
-                            </mat-select>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>Apartment</mat-label>
+                            <input type="text" matInput [formControl]="pickupAddressForm.controls.apt"
+                                appAllowAlphanumeric>
                         </mat-form-field>
-                    </div>
-                </section>
-
-                <section>
-                    <h3>Customer Arrival</h3>
-                    <div class="info">
-                        <mat-form-field appearance="outline" floatLabel="always" [class.form-field-mobile]="isMobile$ | async"
-                            style="margin-right: 4%">
-                            <mat-label>Date</mat-label>
-                            <input required matInput [matDatepicker]="picker" [(ngModel)]="arrivalAt" [min]="today"
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>City</mat-label>
+                            <input type="text" matInput requiered [formControl]="pickupAddressForm.controls.city"
+                                appAllowAlphaAndSpecificChar>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>State</mat-label>
+                            <input type="text" matInput required [formControl]="pickupAddressForm.controls.state"
+                                appAllowAlphaAndSpecificChar>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
+                            <mat-label>Zip Code</mat-label>
+                            <input type="text" matInput required [formControl]="pickupAddressForm.controls.zipCode"
                                 appAllowOnlyNumbers>
-                            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                            <mat-datepicker #picker></mat-datepicker>
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" floatLabel="always" [class.form-field-mobile]="isMobile$ | async">
-                            <mat-label>Time</mat-label>
-                            <mat-timepicker #timePicker />
-                            <input required matInput [matTimepicker]="timePicker" [(ngModel)]="arrivalAt">
-                            <mat-timepicker-toggle matIconSuffix [for]="timePicker"/>
                         </mat-form-field>
                     </div>
+                    } @else {
                     <div>
-                        <h3>Delivery Address <span style="font-weight: lighter; color: red;">(Suggested address: Customer's
-                                {{form.controls.destination.value}} address)</span></h3>
-                        @if(!(isMobile$ | async)){
-                            <div style="display: flex; justify-content: space-between; width: 100%; gap: 10px">
-                                <mat-form-field floatLabel="always" appearance="outline" style="width: 50%;">
-                                    <mat-label>Address 1</mat-label>
-                                    <input type="text" matInput required [formControl]="deliveryAddressForm.controls.address1"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
-
-                                <mat-form-field floatLabel="always" appearance="outline" style="width: 50%;">
-                                    <mat-label>Address 2</mat-label>
-                                    <input type="text" matInput [formControl]="deliveryAddressForm.controls.address2">
-                                </mat-form-field>
-                            </div>
-                        } @else {
-                            <div>
-                                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
-                                    <mat-label>Address 1</mat-label>
-                                    <input type="text" matInput required [formControl]="deliveryAddressForm.controls.address1"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
-
-                                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                                    <mat-label>Address 2</mat-label>
-                                    <input type="text" matInput [formControl]="deliveryAddressForm.controls.address2">
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline"
-                                    style="max-width: 45%; margin-right: 10%">
-                                    <mat-label>Building</mat-label>
-                                    <input type="text" matInput [formControl]="deliveryAddressForm.controls.bldg"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%;">
-                                    <mat-label>Apartment</mat-label>
-                                    <input type="text" matInput [formControl]="deliveryAddressForm.controls.apt"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
-
-                                <mat-form-field floatLabel="always" appearance="outline"
-                                    style="max-width: 45%; margin-right: 10%;">
-                                    <mat-label>City</mat-label>
-                                    <input type="text" matInput requiered [formControl]="deliveryAddressForm.controls.city"
-                                        appAllowAlphaAndSpecificChar>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%">
-                                    <mat-label>State</mat-label>
-                                    <input type="text" matInput required [formControl]="deliveryAddressForm.controls.state"
-                                        appAllowAlphaAndSpecificChar>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%">
-                                    <mat-label>Zip Code</mat-label>
-                                    <input type="text" matInput required [formControl]="deliveryAddressForm.controls.zipCode"
-                                        appAllowOnlyNumbers>
-                                </mat-form-field>
-
-                            </div>
-                            <div style="display: flex; justify-content: space-between; width: 100%; gap: 10px">
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
-                                    <mat-label>Building</mat-label>
-                                    <input type="text" matInput [formControl]="deliveryAddressForm.controls.bldg"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
-                                    <mat-label>Apartment</mat-label>
-                                    <input type="text" matInput [formControl]="deliveryAddressForm.controls.apt"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
-                                    <mat-label>City</mat-label>
-                                    <input type="text" matInput required [formControl]="deliveryAddressForm.controls.city"
-                                        appAllowAlphaAndSpecificChar>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
-                                    <mat-label>State</mat-label>
-                                    <input type="text" matInput required [formControl]="deliveryAddressForm.controls.state"
-                                        appAllowAlphaAndSpecificChar>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
-                                    <mat-label>Zip Code</mat-label>
-                                    <input type="text" matInput required [formControl]="deliveryAddressForm.controls.zipCode"
-                                        appAllowOnlyNumbers>
-                                </mat-form-field>
-                            </div>
-                        }
-                    </div>
-                </section>
-
-                <section>
-                    <h3>Pick up Date</h3>
-                    <div class="info">
-                        <mat-form-field appearance="outline" floatLabel="always" [class.form-field-mobile]="isMobile$ | async"
-                            style="margin-right: 4%;">
-                            <mat-label>Date</mat-label>
-                            <input required matInput [matDatepicker]="pickupPicker" [(ngModel)]="pickupAt" [min]="today"
-                                [max]="arrivalAt" appAllowOnlyNumbers>
-                            <mat-datepicker-toggle matIconSuffix [for]="pickupPicker"></mat-datepicker-toggle>
-                            <mat-datepicker #pickupPicker></mat-datepicker>
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
+                            <mat-label>Address 1</mat-label>
+                            <input type="text" matInput required [formControl]="pickupAddressForm.controls.address1"
+                                appAllowAlphanumeric>
                         </mat-form-field>
-                        <mat-form-field appearance="outline" floatLabel="always" [class.form-field-mobile]="isMobile$ | async">
-                            <mat-label>Time</mat-label>
-                            <input required matInput [matTimepicker]="pickupTimePicker" [(ngModel)]="pickupAt">
-                            <mat-timepicker-toggle matIconSuffix [for]="pickupTimePicker" />
-                            <mat-timepicker #pickupTimePicker />
+
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                            <mat-label>Address 2</mat-label>
+                            <input type="text" matInput [formControl]="pickupAddressForm.controls.address2">
                         </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline"
+                            style="max-width: 45%; margin-right: 10%">
+                            <mat-label>Building</mat-label>
+                            <input type="text" matInput [formControl]="pickupAddressForm.controls.bldg"
+                                appAllowAlphanumeric>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%;">
+                            <mat-label>Apartment</mat-label>
+                            <input type="text" matInput [formControl]="pickupAddressForm.controls.apt"
+                                appAllowAlphanumeric>
+                        </mat-form-field>
+
+                        <mat-form-field floatLabel="always" appearance="outline"
+                            style="max-width: 45%; margin-right: 10%;">
+                            <mat-label>City</mat-label>
+                            <input type="text" matInput requiered [formControl]="pickupAddressForm.controls.city"
+                                appAllowAlphaAndSpecificChar>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%">
+                            <mat-label>State</mat-label>
+                            <input type="text" matInput required [formControl]="pickupAddressForm.controls.state"
+                                appAllowAlphaAndSpecificChar>
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%">
+                            <mat-label>Zip Code</mat-label>
+                            <input type="text" matInput required [formControl]="pickupAddressForm.controls.zipCode"
+                                appAllowOnlyNumbers>
+                        </mat-form-field>
+
                     </div>
-                    <div>
-                        <h3>Pickup Address <span style="font-weight: lighter; color: red;">(Suggested address: Customer's
-                                {{form.controls.origin.value}} address)</span></h3>
-                        @if(!(isMobile$ | async)){
-                            <div style="display: flex; justify-content: space-between; width: 100%; gap: 10px">
-                                <mat-form-field floatLabel="always" appearance="outline" style="width: 50%;">
-                                    <mat-label>Address 1</mat-label>
-                                    <input type="text" matInput required [formControl]="pickupAddressForm.controls.address1"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
+                    }
+                </div>
+            </section>
 
-                                <mat-form-field floatLabel="always" appearance="outline" style="width: 50%;">
-                                    <mat-label>Address 2</mat-label>
-                                    <input type="text" matInput [formControl]="pickupAddressForm.controls.address2">
-                                </mat-form-field>
-                            </div>
+            <section>
+                <h3>Next Trips</h3>
+                @if(truckList$ | async; as trucks){
+                @if(!(isMobile$ | async)){
+                <table mat-table [dataSource]="trucks" class="mat-elevation-z8" style="margin-bottom: 20px">
+                    <ng-container matColumnDef="truckNumber">
+                        <th mat-header-cell *matHeaderCellDef>Truck #</th>
+                        <td mat-cell *matCellDef="let truck">{{truck.truckNumber}}</td>
+                    </ng-container>
 
-                            <div style="display: flex; justify-content: space-between; width: 100%; gap: 10px">
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
-                                    <mat-label>Building</mat-label>
-                                    <input type="text" matInput [formControl]="pickupAddressForm.controls.bldg"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
-                                    <mat-label>Apartment</mat-label>
-                                    <input type="text" matInput [formControl]="pickupAddressForm.controls.apt"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
-                                    <mat-label>City</mat-label>
-                                    <input type="text" matInput requiered [formControl]="pickupAddressForm.controls.city"
-                                        appAllowAlphaAndSpecificChar>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
-                                    <mat-label>State</mat-label>
-                                    <input type="text" matInput required [formControl]="pickupAddressForm.controls.state"
-                                        appAllowAlphaAndSpecificChar>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 20%">
-                                    <mat-label>Zip Code</mat-label>
-                                    <input type="text" matInput required [formControl]="pickupAddressForm.controls.zipCode"
-                                        appAllowOnlyNumbers>
-                                </mat-form-field>
-                            </div>
-                        } @else {
-                            <div>
-                                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
-                                    <mat-label>Address 1</mat-label>
-                                    <input type="text" matInput required [formControl]="pickupAddressForm.controls.address1"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
+                    <ng-container matColumnDef="trips">
+                        <th mat-header-cell *matHeaderCellDef>Trips</th>
+                        <td mat-cell *matCellDef="let truck">
+                            @if(tripsMap$ | async; as tripsMap){
+                            @if((tripsMap[truck.id] || []).length > 0 && !allTripsAreUpcoming(tripsMap[truck.id])){
+                            <table mat-table [dataSource]="nextTrips(tripsMap[truck.id])" class="nested-table">
+                                <ng-container matColumnDef="checkbox">
+                                    <th mat-header-cell *matHeaderCellDef> </th>
+                                    <td mat-cell *matCellDef="let trip" (click)="clickOnCheckbox(trip, truck.id)">
+                                        <mat-checkbox [checked]="currentSelectedTrip?.id === trip.id"
+                                            [disabled]="!selectableTrip(trip)">
+                                        </mat-checkbox>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="loadNumber">
+                                    <th mat-header-cell *matHeaderCellDef>Load #</th>
+                                    <td mat-cell *matCellDef="let trip">{{trip.loadNumber}}</td>
+                                </ng-container>
 
-                                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                                    <mat-label>Address 2</mat-label>
-                                    <input type="text" matInput [formControl]="pickupAddressForm.controls.address2">
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline"
-                                    style="max-width: 45%; margin-right: 10%">
-                                    <mat-label>Building</mat-label>
-                                    <input type="text" matInput [formControl]="pickupAddressForm.controls.bldg"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%;">
-                                    <mat-label>Apartment</mat-label>
-                                    <input type="text" matInput [formControl]="pickupAddressForm.controls.apt"
-                                        appAllowAlphanumeric>
-                                </mat-form-field>
+                                <ng-container matColumnDef="departureDate">
+                                    <th mat-header-cell *matHeaderCellDef>Departure</th>
+                                    <td mat-cell *matCellDef="let trip">{{trip.departureDate |
+                                        date:'short'}}</td>
+                                </ng-container>
 
-                                <mat-form-field floatLabel="always" appearance="outline"
-                                    style="max-width: 45%; margin-right: 10%;">
-                                    <mat-label>City</mat-label>
-                                    <input type="text" matInput requiered [formControl]="pickupAddressForm.controls.city"
-                                        appAllowAlphaAndSpecificChar>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%">
-                                    <mat-label>State</mat-label>
-                                    <input type="text" matInput required [formControl]="pickupAddressForm.controls.state"
-                                        appAllowAlphaAndSpecificChar>
-                                </mat-form-field>
-                                <mat-form-field floatLabel="always" appearance="outline" style="max-width: 45%">
-                                    <mat-label>Zip Code</mat-label>
-                                    <input type="text" matInput required [formControl]="pickupAddressForm.controls.zipCode"
-                                        appAllowOnlyNumbers>
-                                </mat-form-field>
+                                <ng-container matColumnDef="origin">
+                                    <th mat-header-cell *matHeaderCellDef>From</th>
+                                    <td mat-cell *matCellDef="let trip">{{trip.origin}}</td>
+                                </ng-container>
 
-                            </div>
-                        }
-                    </div>
-                </section>
+                                <ng-container matColumnDef="destination">
+                                    <th mat-header-cell *matHeaderCellDef>To</th>
+                                    <td mat-cell *matCellDef="let trip">{{trip.destination}}</td>
+                                </ng-container>
 
-                <section>
-                    <h3>Next Trips</h3>
-                    @if(truckList$ | async; as trucks){
-                        @if(!(isMobile$ | async)){
-                            <table mat-table [dataSource]="trucks" class="mat-elevation-z8"
-                            style="margin-bottom: 20px">
-                            <ng-container matColumnDef="truckNumber">
-                                <th mat-header-cell *matHeaderCellDef>Truck #</th>
-                                <td mat-cell *matCellDef="let truck">{{truck.truckNumber}}</td>
-                            </ng-container>
+                                <ng-container matColumnDef="remLoadCap">
+                                    <th mat-header-cell *matHeaderCellDef>Rem. Load</th>
+                                    <td mat-cell *matCellDef="let trip">{{trip.remLoadCap}}</td>
+                                </ng-container>
 
-                            <ng-container matColumnDef="trips">
-                                <th mat-header-cell *matHeaderCellDef>Trips</th>
-                                <td mat-cell *matCellDef="let truck">
-                                    @if(tripsMap$ | async; as tripsMap){
-                                        @if((tripsMap[truck.id] || []).length > 0 && !allTripsAreUpcoming(tripsMap[truck.id])){
-                                            <table mat-table [dataSource]="nextTrips(tripsMap[truck.id])"
-                                                class="nested-table">
-                                                <ng-container matColumnDef="checkbox">
-                                                    <th mat-header-cell *matHeaderCellDef> </th>
-                                                    <td mat-cell *matCellDef="let trip"
-                                                        (click)="clickOnCheckbox(trip, truck.id)">
-                                                        <mat-checkbox [checked]="currentSelectedTrip?.id === trip.id"
-                                                            [disabled]="!selectableTrip(trip)">
-                                                        </mat-checkbox>
-                                                    </td>
-                                                </ng-container>
-                                                <ng-container matColumnDef="loadNumber">
-                                                    <th mat-header-cell *matHeaderCellDef>Load #</th>
-                                                    <td mat-cell *matCellDef="let trip">{{trip.loadNumber}}</td>
-                                                </ng-container>
+                                <ng-container matColumnDef="remCarCap">
+                                    <th mat-header-cell *matHeaderCellDef>Rem. Cars</th>
+                                    <td mat-cell *matCellDef="let trip">{{trip.remCarCap}}</td>
+                                </ng-container>
 
-                                                <ng-container matColumnDef="departureDate">
-                                                    <th mat-header-cell *matHeaderCellDef>Departure</th>
-                                                    <td mat-cell *matCellDef="let trip">{{trip.departureDate |
-                                                        date:'short'}}</td>
-                                                </ng-container>
+                                <tr mat-header-row *matHeaderRowDef="tripColumns"></tr>
+                                <tr mat-row *matRowDef="let trip; columns: tripColumns;"></tr>
+                            </table>
+                            } @else {
+                            <div class="no-trips">No next trips available</div>
+                            }
+                            }
+                        </td>
+                    </ng-container>
 
-                                                <ng-container matColumnDef="origin">
-                                                    <th mat-header-cell *matHeaderCellDef>From</th>
-                                                    <td mat-cell *matCellDef="let trip">{{trip.origin}}</td>
-                                                </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="truckColumns"></tr>
+                    <tr mat-row *matRowDef="let truck; columns: truckColumns;"></tr>
+                </table>
+                }
 
-                                                <ng-container matColumnDef="destination">
-                                                    <th mat-header-cell *matHeaderCellDef>To</th>
-                                                    <td mat-cell *matCellDef="let trip">{{trip.destination}}</td>
-                                                </ng-container>
+                @if(isMobile$ | async){
+                <div class="trucks-mobile-container">
+                    <mat-card class="truck-card" *ngFor="let truck of trucks">
 
-                                                <ng-container matColumnDef="remLoadCap">
-                                                    <th mat-header-cell *matHeaderCellDef>Rem. Load</th>
-                                                    <td mat-cell *matCellDef="let trip">{{trip.remLoadCap}}</td>
-                                                </ng-container>
+                        <div class="truck-header">
+                            <span style="font-weight: bold;">{{ truck.truckNumber }} - {{ truck.companyName
+                                }}</span>
+                        </div>
+                        @if(tripsMap$ | async; as tripsMap){
+                        @if(truck.id && (tripsMap[truck.id] || []).length > 0 &&
+                        !allTripsAreUpcoming(tripsMap[truck.id])){
+                        <div class="trips-section">
+                            <div class="section-title">Available Trips</div>
+                            <div class="trip-item" *ngFor="let trip of nextTrips(tripsMap[truck.id])">
 
-                                                <ng-container matColumnDef="remCarCap">
-                                                    <th mat-header-cell *matHeaderCellDef>Rem. Cars</th>
-                                                    <td mat-cell *matCellDef="let trip">{{trip.remCarCap}}</td>
-                                                </ng-container>
+                                <div class="trip-checkbox">
+                                    <mat-checkbox [checked]="currentSelectedTrip?.id === trip.id"
+                                        (change)="currentSelectedTrip = trip; currentSelectedTruckId = truck.id || null"
+                                        [disabled]="!selectableTrip(trip)">
+                                    </mat-checkbox>
+                                </div>
 
-                                                <tr mat-header-row *matHeaderRowDef="tripColumns"></tr>
-                                                <tr mat-row *matRowDef="let trip; columns: tripColumns;"></tr>
-                                            </table>
-                                        } @else {
-                                            <div class="no-trips">No next trips available</div>
-                                        }
-                                    }
-                                </td>
-                            </ng-container>
 
-                            <tr mat-header-row *matHeaderRowDef="truckColumns"></tr>
-                            <tr mat-row *matRowDef="let truck; columns: truckColumns;"></tr>
-                        </table>
-                        }
-                        
-                        @if(isMobile$ | async){
-                            <div class="trucks-mobile-container">
-                                <mat-card class="truck-card" *ngFor="let truck of trucks">
-
-                                    <div class="truck-header">
-                                        <span style="font-weight: bold;">{{ truck.truckNumber }} - {{ truck.companyName
+                                <div class="trip-details">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Load #</span>
+                                        <span class="detail-value">{{ trip.loadNumber }}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Departure</span>
+                                        <span class="detail-value">{{ trip.departureDate | date: 'short'
                                             }}</span>
                                     </div>
-                                    @if(tripsMap$ | async; as tripsMap){
-                                        @if(truck.id && (tripsMap[truck.id] || []).length > 0 && !allTripsAreUpcoming(tripsMap[truck.id])){
-                                            <div class="trips-section">
-                                                <div class="section-title">Available Trips</div>
-                                                <div class="trip-item" *ngFor="let trip of nextTrips(tripsMap[truck.id])">
-
-                                                    <div class="trip-checkbox">
-                                                        <mat-checkbox [checked]="currentSelectedTrip?.id === trip.id"
-                                                            (change)="currentSelectedTrip = trip; currentSelectedTruckId = truck.id || null"
-                                                            [disabled]="!selectableTrip(trip)">
-                                                        </mat-checkbox>
-                                                    </div>
-
-
-                                                    <div class="trip-details">
-                                                        <div class="detail-row">
-                                                            <span class="detail-label">Load #</span>
-                                                            <span class="detail-value">{{ trip.loadNumber }}</span>
-                                                        </div>
-                                                        <div class="detail-row">
-                                                            <span class="detail-label">Departure</span>
-                                                            <span class="detail-value">{{ trip.departureDate | date: 'short'
-                                                                }}</span>
-                                                        </div>
-                                                        <div class="detail-row">
-                                                            <span class="detail-label">From</span>
-                                                            <span class="detail-value">{{ trip.origin }}</span>
-                                                        </div>
-                                                        <div class="detail-row">
-                                                            <span class="detail-label">To</span>
-                                                            <span class="detail-value">{{ trip.destination }}</span>
-                                                        </div>
-                                                        <div class="detail-row">
-                                                            <span class="detail-label">Rem. Load</span>
-                                                            <span class="detail-value">{{ trip.remLoadCap }}</span>
-                                                        </div>
-                                                        <div class="detail-row">
-                                                            <span class="detail-label">Rem. Cars</span>
-                                                            <span class="detail-value">{{ trip.remCarCap }}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        } @else {
-                                            <div class="no-trips-mobile">No next trips available</div>
-                                        }   
-                                    }
-                                </mat-card>
-                            </div>  
+                                    <div class="detail-row">
+                                        <span class="detail-label">From</span>
+                                        <span class="detail-value">{{ trip.origin }}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">To</span>
+                                        <span class="detail-value">{{ trip.destination }}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Rem. Load</span>
+                                        <span class="detail-value">{{ trip.remLoadCap }}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Rem. Cars</span>
+                                        <span class="detail-value">{{ trip.remCarCap }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        } @else {
+                        <div class="no-trips-mobile">No next trips available</div>
                         }
-                        <mat-accordion>
-                            <mat-expansion-panel>
-                                <mat-expansion-panel-header>
-                                    <mat-panel-title>
-                                        <h3>Add a new trip</h3>
-                                    </mat-panel-title>
-                                </mat-expansion-panel-header>
-                                <form [formGroup]="tripForm">
-                                    <div class="info">
-                                        <mat-form-field appearance="outline" floatLabel="always"
-                                            [class.form-field-mobile]="isMobile$ | async">
-                                            <mat-label>Truck</mat-label>
-                                            <mat-select formControlName="truckId">
-                                                <mat-option *ngFor="let truck of trucks" [value]="truck.id">
-                                                    Truck #{{truck.truckNumber}}
-                                                </mat-option>
-                                            </mat-select>
-                                        </mat-form-field>
+                        }
+                    </mat-card>
+                </div>
+                }
+                <mat-accordion>
+                    <mat-expansion-panel>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                <h3>Add a new trip</h3>
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <form [formGroup]="tripForm">
+                            <div class="info">
+                                <mat-form-field appearance="outline" floatLabel="always"
+                                    [class.form-field-mobile]="isMobile$ | async">
+                                    <mat-label>Truck</mat-label>
+                                    <mat-select formControlName="truckId">
+                                        <mat-option *ngFor="let truck of trucks" [value]="truck.id">
+                                            Truck #{{truck.truckNumber}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
 
-                                        <mat-form-field appearance="outline" floatLabel="always"
-                                            [class.form-field-mobile]="isMobile$ | async">
-                                            <mat-label>Load Number</mat-label>
-                                            <input matInput formControlName="loadNumber" type="text">
-                                        </mat-form-field>
+                                <mat-form-field appearance="outline" floatLabel="always"
+                                    [class.form-field-mobile]="isMobile$ | async">
+                                    <mat-label>Load Number</mat-label>
+                                    <input matInput formControlName="loadNumber" type="text">
+                                </mat-form-field>
 
-                                        <mat-form-field appearance="outline" floatLabel="always"
-                                            [class.form-field-mobile]="isMobile$ | async">
-                                            <mat-label>Departure Date</mat-label>
-                                            <input matInput [matDatepicker]="depPicker" formControlName="departureDate"
-                                                [min]="today">
-                                            <mat-datepicker-toggle matSuffix [for]="depPicker"></mat-datepicker-toggle>
-                                            <mat-datepicker #depPicker></mat-datepicker>
-                                            <mat-hint>Week: {{weekNumber(tripForm.controls.departureDate.value)}}</mat-hint>
-                                            @if (tripForm.controls.departureDate.hasError('wrongDate')) {
-                                                <mat-error>Departure
-                                                date
-                                                must be
-                                                less than or equal arrival date</mat-error>
-                                            }
-                                        </mat-form-field>
-                                        <mat-form-field appearance="outline" floatLabel="always"
-                                            [class.form-field-mobile]="isMobile$ | async">
-                                            <mat-label>Arrival Date</mat-label>
-                                            <input matInput [matDatepicker]="arrPicker" formControlName="arrivalDate">
-                                            <mat-datepicker-toggle matSuffix [for]="arrPicker"></mat-datepicker-toggle>
-                                            <mat-datepicker #arrPicker></mat-datepicker>
-                                            <mat-hint>Week: {{weekNumber(tripForm.controls.arrivalDate.value)}}</mat-hint>
-                                            @if (tripForm.controls.arrivalDate.hasError('wrongDate')) {
-                                                <mat-error>Arrival
-                                                    date must be grater
-                                                    than or equal departure date</mat-error>
-                                            }
-                                        </mat-form-field>
+                                <mat-form-field appearance="outline" floatLabel="always"
+                                    [class.form-field-mobile]="isMobile$ | async">
+                                    <mat-label>Departure Date</mat-label>
+                                    <input matInput [matDatepicker]="depPicker" formControlName="departureDate"
+                                        [min]="today">
+                                    <mat-datepicker-toggle matSuffix [for]="depPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #depPicker></mat-datepicker>
+                                    <mat-hint>Week: {{weekNumber(tripForm.controls.departureDate.value)}}</mat-hint>
+                                    @if (tripForm.controls.departureDate.hasError('wrongDate')) {
+                                    <mat-error>Departure
+                                        date
+                                        must be
+                                        less than or equal arrival date</mat-error>
+                                    }
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" floatLabel="always"
+                                    [class.form-field-mobile]="isMobile$ | async">
+                                    <mat-label>Arrival Date</mat-label>
+                                    <input matInput [matDatepicker]="arrPicker" formControlName="arrivalDate">
+                                    <mat-datepicker-toggle matSuffix [for]="arrPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #arrPicker></mat-datepicker>
+                                    <mat-hint>Week: {{weekNumber(tripForm.controls.arrivalDate.value)}}</mat-hint>
+                                    @if (tripForm.controls.arrivalDate.hasError('wrongDate')) {
+                                    <mat-error>Arrival
+                                        date must be grater
+                                        than or equal departure date</mat-error>
+                                    }
+                                </mat-form-field>
 
-                                    </div>
-                                    <div class="info">
-                                        <mat-form-field appearance="outline" floatLabel="always"
-                                            [class.form-field-mobile]="isMobile$ | async">
-                                            <mat-label>Origin</mat-label>
-                                            <mat-select formControlName="origin"
-                                                (selectionChange)="updateTripDestination($event)">
-                                                <mat-option value="Florida">Florida</mat-option>
-                                                <mat-option value="New York">New York</mat-option>
-                                            </mat-select>
-                                        </mat-form-field>
+                            </div>
+                            <div class="info">
+                                <mat-form-field appearance="outline" floatLabel="always"
+                                    [class.form-field-mobile]="isMobile$ | async">
+                                    <mat-label>Origin</mat-label>
+                                    <mat-select formControlName="origin"
+                                        (selectionChange)="updateTripDestination($event)">
+                                        <mat-option value="Florida">Florida</mat-option>
+                                        <mat-option value="New York">New York</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
 
-                                        <mat-form-field appearance="outline" floatLabel="always"
-                                            [class.form-field-mobile]="isMobile$ | async">
-                                            <mat-label>Destination</mat-label>
-                                            <mat-select formControlName="destination"
-                                                (selectionChange)="updateTripOrigin($event)">
-                                                <mat-option value="Florida">Florida</mat-option>
-                                                <mat-option value="New York">New York</mat-option>
-                                            </mat-select>
-                                        </mat-form-field>
-                                    </div>
-                                    <div style="display: flex; justify-content: end">
-                                        <button mat-raised-button color="primary" (click)="addTrip()">Add Trip</button>
-                                    </div>
-                                </form>
-                            </mat-expansion-panel>
-                        </mat-accordion>
-                    }
-                </section>
+                                <mat-form-field appearance="outline" floatLabel="always"
+                                    [class.form-field-mobile]="isMobile$ | async">
+                                    <mat-label>Destination</mat-label>
+                                    <mat-select formControlName="destination"
+                                        (selectionChange)="updateTripOrigin($event)">
+                                        <mat-option value="Florida">Florida</mat-option>
+                                        <mat-option value="New York">New York</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <div style="display: flex; justify-content: end">
+                                <button mat-raised-button color="primary" (click)="addTrip()">Add Trip</button>
+                            </div>
+                        </form>
+                    </mat-expansion-panel>
+                </mat-accordion>
+                }
+            </section>
 
-                <section>
-                    <h3>Notes</h3>
-                    <mat-form-field appearance="outline" floatLabel="always" style="width: 100%">
-                        <mat-label>Trip notes</mat-label>
-                        <textarea matInput [formControl]="form.controls.notes"></textarea>
+            <section>
+                <h3>Paycheck</h3>
+                <div class="paycheck">
+                    <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-label>Check number</mat-label>
+                        <input matInput [formControl]="form.controls.checkNumber" appAllowOnlyNumbers>
                     </mat-form-field>
-                </section>
-            </div>
+                    <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-label>Bank name</mat-label>
+                        <input matInput [formControl]="form.controls.bankName" appAllowAlphanumeric>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-label>Amount</mat-label>
+                        <input type="number" matInput [formControl]="form.controls.amount" appAllowOnlyNumbers>
+                    </mat-form-field>
+                </div>
+
+            </section>
+
+            <section>
+                <h3>Notes</h3>
+                <mat-form-field appearance="outline" floatLabel="always" style="width: 100%">
+                    <mat-label>Trip notes</mat-label>
+                    <textarea matInput [formControl]="form.controls.notes"></textarea>
+                </mat-form-field>
+            </section>
         </div>
+    </div>
     }
 
     <div style="display: flex; width: 100%; justify-content: end; margin-top:16px; gap: 20px">
-        <button mat-button (click)="router.navigate(['/main/customer'])">Cancel</button>
+        <button mat-button (click)="location.back()">Cancel</button>
         @if(!(savingBooking$ | async)){
-            <button mat-raised-button class="primary-button" (click)="save()">Save
-                Booking</button>
+        <button mat-raised-button class="primary-button" (click)="save()">Save
+            Booking</button>
         } @else {
-            <button style="display: flex; align-items: center" mat-button mat-raised-button
-                disabled>
-                <mat-icon><mat-spinner diameter="18"></mat-spinner></mat-icon>
-                <span>Saving...</span>
-            </button>
+        <button style="display: flex; align-items: center" mat-button mat-raised-button disabled>
+            <mat-icon><mat-spinner diameter="18"></mat-spinner></mat-icon>
+            <span>Saving...</span>
+        </button>
         }
     </div>
 </div>

@@ -1,0 +1,56 @@
+@media print {
+    body {
+        margin: 0;
+        padding: 20px;
+    }
+
+    body * {
+        visibility: hidden;
+        margin: 0;
+        padding: 0;
+    }
+
+    #printable {
+        visibility: visible;
+        position: absolute;
+        left: 20px;
+        top: 20px;
+        width: calc(100% - 40px);
+        height: auto;
+        page-break-inside: avoid;
+        margin: 0;
+        padding: 0;
+    }
+
+    #printable * {
+        visibility: visible !important;
+    }
+
+    #printable table {
+        visibility: visible !important;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #printable table thead {
+        display: table-header-group;
+    }
+
+    #printable table tbody {
+        display: table-row-group;
+    }
+
+    #printable table tr,
+    #printable table th,
+    #printable table td {
+        visibility: visible !important;
+    }
+
+    #no-printable {
+        display: none !important;
+    }
+}
+
+tr {
+    height: 25px !important;
+}
