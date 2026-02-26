@@ -162,9 +162,13 @@
                     </ng-container>
 
                     <ng-container matColumnDef="action">
-                        <th mat-header-cell *matHeaderCellDef>  </th>
-                        <td mat-cell *matCellDef="let booking"> 
-                            <button mat-button color="primary" (click)="editBooking(booking)"> <mat-icon>edit</mat-icon></button>    
+                        <th style="width: 30px !important; padding: 0px" mat-header-cell *matHeaderCellDef>  </th>
+                        <td style="width: 30px !important; padding: 0px" mat-cell *matCellDef="let booking"> 
+                            <button 
+                                style="padding: 0px !important; width: 30px !important" 
+                                mat-button color="primary" (click)="editBooking(booking)"> 
+                                <mat-icon style="margin-right: 0px">edit</mat-icon>
+                            </button>    
                         </td>
                     </ng-container>
 

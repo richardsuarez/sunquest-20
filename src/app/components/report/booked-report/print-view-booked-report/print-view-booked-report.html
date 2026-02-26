@@ -1,0 +1,61 @@
+<div id="printable">
+    <div style="display: flex; justify-content: center">
+        <p>Booked Report as started from <strong>{{ startDate | date : 'EEE, MM/dd/yy' }}</strong> to <strong>{{ endDate | date : 'EEE, MM/dd/yy' }}</strong></p>
+    </div>
+
+    <table mat-table [dataSource]="bookings" class="mat-elevation-z8">
+
+        <ng-container matColumnDef="week">
+            <th mat-header-cell *matHeaderCellDef> Week # </th>
+            <td mat-cell *matCellDef="let booking"> {{ weekNumber(booking.departureDate) }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="pickupDate">
+            <th mat-header-cell *matHeaderCellDef> PU Date </th>
+            <td mat-cell *matCellDef="let booking"> {{ booking.pickupAt | date : 'EEE, MM/dd/yy' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="lastName">
+            <th mat-header-cell *matHeaderCellDef> Last Name </th>
+            <td mat-cell *matCellDef="let booking"> {{ booking.customer?.primaryLastName || '' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="recNo">
+            <th mat-header-cell *matHeaderCellDef> Rec No </th>
+            <td mat-cell *matCellDef="let booking"> {{ searchRecNo(booking) }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="car">
+            <th mat-header-cell *matHeaderCellDef> Car </th>
+            <td mat-cell *matCellDef="let booking"> {{ vehicleMake(booking.customer) }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="model">
+            <th mat-header-cell *matHeaderCellDef> Nodel </th>
+            <td mat-cell *matCellDef="let booking"> {{ vehicleModel(booking.customer) }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="origin">
+            <th mat-header-cell *matHeaderCellDef> Origin </th>
+            <td mat-cell *matCellDef="let booking"> {{ booking.pickupAddress.city }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="destination">
+            <th mat-header-cell *matHeaderCellDef> Destination </th>
+            <td mat-cell *matCellDef="let booking"> {{ booking.arrivalAddress.city }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef> Arrival Date </th>
+            <td mat-cell *matCellDef="let booking"> {{ booking.arrivalAt | date : 'EEE, MM/dd/yy' }} </td>
+        </ng-container>
+
+        <tr mat-header-row
+            *matHeaderRowDef="['week', 'pickupDate','lastName', 'recNo', 'car', 'model', 'origin', 'destination', 'date']">
+        </tr>
+        <tr mat-row
+            *matRowDef="let booking; columns: ['week', 'pickupDate', 'lastName', 'recNo', 'car', 'model', 'origin', 'destination', 'date'];">
+        </tr>
+
+    </table>
+</div>

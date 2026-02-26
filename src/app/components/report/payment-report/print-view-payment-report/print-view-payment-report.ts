@@ -21,7 +21,6 @@ export class PrintViewPaymentReport implements AfterViewInit {
   @Input() truck!: Truck;
   @Input() trip!: Trip;
   @Input() data!: TableData[];
-  @ViewChild('printable') printable!: ElementRef;
 
   ngAfterViewInit(){
     window.print();
