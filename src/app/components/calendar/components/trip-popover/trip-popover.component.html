@@ -9,28 +9,24 @@
     <div class="dialog-content">
         <form [formGroup]="tripForm" class="trip-form">
             <!-- Truck Selection -->
-            <div *ngIf="!trip?.id" style="display: flex; justify-content: space-evenly;">
-                <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
-                    <mat-label>Truck</mat-label>
-                    <mat-select formControlName="truckId">
-                        <mat-option *ngFor="let truck of truckList" [value]="truck.id">
-                            {{ truck.truckNumber }} ({{ truck.companyName }})
-                        </mat-option>
-                    </mat-select>
-                    <mat-error *ngIf="tripForm.get('truckId')?.hasError('required')">
-                        Truck is required
-                    </mat-error>
-                </mat-form-field>
-                <!-- Load Number -->
-                 <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
-                    <mat-label>Load</mat-label>
-                    <input type="text" matInput required formControlName="loadNumber" appAllowOnlyNumbers>
-                 </mat-form-field>
-            </div>
-
-            <div *ngIf="trip?.id" style="text-align: center; margin-bottom: 10px;">
-                {{ getTruckInfo() }}
-            </div>
+                <div style="display: flex; justify-content: space-evenly;">
+                    <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+                        <mat-label>Truck</mat-label>
+                        <mat-select formControlName="truckId">
+                            <mat-option *ngFor="let truck of truckList" [value]="truck.id">
+                                {{ truck.truckNumber }} ({{ truck.companyName }})
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="tripForm.get('truckId')?.hasError('required')">
+                            Truck is required
+                        </mat-error>
+                    </mat-form-field>
+                    <!-- Load Number -->
+                    <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+                        <mat-label>Load</mat-label>
+                        <input type="text" matInput required formControlName="loadNumber" appAllowOnlyNumbers >
+                    </mat-form-field>
+                </div>
 
             <div style="display: flex; justify-content: space-evenly;">
                 <!-- Departure Date -->

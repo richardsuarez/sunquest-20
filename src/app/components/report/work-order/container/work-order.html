@@ -1,7 +1,7 @@
-<div *ngIf="!printing">
+@if(!printing){
     <div class="header">
         <h1>Work Order</h1>
-        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
             <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>Date range</mat-label>
                 <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
@@ -30,176 +30,192 @@
             }
         </div>
     </div>
-    <mat-progress-bar *ngIf="loading$ | async" class="indeterminate"></mat-progress-bar>
+    @if(loading$ |async){
+        <mat-progress-bar class="indeterminate"></mat-progress-bar>
+    }
 
-    <div *ngIf="(bookings$ | async) && (bookings$ | async)?.length === 0" class="no-results">
-        <p>No bookings found for the selected date range.</p>
-    </div>
-
-    <!-- Report Body -->
-    <div class="body" *ngIf="bookReport$ | async as report">
-        <!-- Print Buttons (hidden on print) -->
-        <div class="print-controls" *ngIf="report.totalBookings > 0">
-            <ng-container *ngIf="!isMobile else reportGlobalInfo">
-                <div class="info">
-                    <div style="text-align: center">
-                        <h3>Trucks</h3>
-                    </div>
-                    <div style="text-align: center"><span>{{ report.trucks.length }}</span></div>
-                </div>
-                <div class="info">
-                    <div style="text-align: center">
-                        <h3>Trips</h3>
-                    </div>
-                    <div style="text-align: center"><span>{{ allTrips() }}</span></div>
-                </div>
-                <div class="info">
-                    <div style="text-align: center">
-                        <h3>Bookings</h3>
-                    </div>
-                    <div style="text-align: center"><span>{{ report.totalBookings}}</span></div>
-                </div>
-            </ng-container>
-
-            <ng-template #reportGlobalInfo>
-                <div>
-                    <p><strong>Trucks:</strong> {{ report.trucks.length }}</p>
-                    <p><strong>Trips:</strong> {{ allTrips() }}</p>
-                    <p><strong>Bookings:</strong> {{ report.totalBookings }}</p>
-                </div>
-
-            </ng-template>
-
-            <button mat-raised-button (click)="printFullReport(report)" style="background-color: #ED2D89; color: white">
-                <mat-icon>print</mat-icon>
-                Print Full Report
-            </button>
-        </div>
-
-        <!-- No Results -->
-        <div *ngIf="report.totalBookings === 0" class="no-results">
+    @if((bookings$ | async) && (bookings$ | async)?.length === 0){
+        <div class="no-results">
             <p>No bookings found for the selected date range.</p>
         </div>
+    }
 
-        <!-- Report Summary (hidden on print) -->
+    <!-- Report Body -->
+     @if(bookReport$ | async; as report){
+        <div class="body">
+            <!-- Print Buttons (hidden on print) -->
+             @if(report.totalBookings > 0){
+                <div class="print-controls">
+                    @if(!isMobile){
+                        <div class="info">
+                            <div style="text-align: center">
+                                <h3>Trucks</h3>
+                            </div>
+                            <div style="text-align: center"><span>{{ report.trucks.length }}</span></div>
+                        </div>
+                        <div class="info">
+                            <div style="text-align: center">
+                                <h3>Trips</h3>
+                            </div>
+                            <div style="text-align: center"><span>{{ allTrips() }}</span></div>
+                        </div>
+                        <div class="info">
+                            <div style="text-align: center">
+                                <h3>Bookings</h3>
+                            </div>
+                            <div style="text-align: center"><span>{{ report.totalBookings}}</span></div>
+                        </div>
+                    } @else {
+                        <div>
+                            <p><strong>Trucks:</strong> {{ report.trucks.length }}</p>
+                            <p><strong>Trips:</strong> {{ allTrips() }}</p>
+                            <p><strong>Bookings:</strong> {{ report.totalBookings }}</p>
+                        </div>
+                    }
 
-        <!-- Trucks and Trips -->
-        <div *ngFor="let truckReport of report.trucks" class="truck-section">
-            <!-- Truck Header -->
-            <div class="truck-header">
-                <h2>{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
-                <div class="all-trips-print-button">
-                    <button mat-stroked-button (click)="printAllTripsForTruck(truckReport)">
+                    <button mat-raised-button (click)="printFullReport(report)" style="background-color: #ED2D89; color: white">
                         <mat-icon>print</mat-icon>
-                        Print All Trips
+                        Print Full Report
                     </button>
                 </div>
-            </div>
+             }
+            
 
-            <!-- Trips for this Truck -->
-            <div *ngFor="let bookingGroup of truckReport.trips" class="trip-section">
-                <!-- Trip Header -->
-                <div class="trip-header">
-                    <div>
-                        <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
-                        <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
-                            bookingGroup.trip.destination }}</h2>
-                        <p *ngIf="!isMobile" class="trip-details">
-                            <span>Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy' }}</span>
-                            <span>Arrival: {{ bookingGroup.trip.arrivalDate |
-                                date:
-                                'MMM dd, yyyy' }}</span>
-                        </p>
-                        <p class="trip-details" *ngIf="isMobile">Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy' }}</p>
-                        <p class="trip-details" *ngIf="isMobile">Arrival: {{ bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</p>
+            <!-- No Results -->
+            @if(report.totalBookings === 0){
+                <div class="no-results">
+                    <p>No bookings found for the selected date range.</p>
+                </div>
+            }
+            
+            <!-- Report Summary (hidden on print) -->
+
+            <!-- Trucks and Trips -->
+             @for(truckReport of report.trucks; track truckReport){
+                <div class="truck-section">
+                    <!-- Truck Header -->
+                    <div class="truck-header">
+                        <h2>{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                        <div class="all-trips-print-button">
+                            <button mat-stroked-button (click)="printAllTripsForTruck(truckReport)">
+                                <mat-icon>print</mat-icon>
+                                Print All Trips
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="trip-print-button">
-                        <button mat-stroked-button (click)="printTrip(bookingGroup)">
-                            <mat-icon>print</mat-icon>
-                            Print Trip
-                        </button>
-                    </div>
-                </div>
-                <!-- Print Trip Button -->
+                    <!-- Trips for this Truck -->
+                     @for(bookingGroup of truckReport.trips; track bookingGroup){
+                        <div class="trip-section">
+                            <!-- Trip Header -->
+                            <div class="trip-header">
+                                <div>
+                                    <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
+                                    <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
+                                        bookingGroup.trip.destination }}</h2>
+                                    @if(!isMobile){
+                                        <p class="trip-details">
+                                            <span>Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy' }}</span>
+                                            <span>Arrival: {{ bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</span>
+                                        </p>
+                                    } @else {
+                                        <p class="trip-details">Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy' }}</p>
+                                        <p class="trip-details">Arrival: {{ bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</p>
+                                    }
+                                </div>
 
-                <!-- Bookings Table for this Trip -->
-                <div class="bookings-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Customer</th>
-                                <th>Vehicle</th>
-                                <th>Pickup</th>
-                                <th>Arrival</th>
-                                <th>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let booking of bookingGroup.bookings" class="booking-row">
-                                <td>
-                                    <div>
-                                        <p>{{ booking.customer?.primaryFirstName }} {{ booking.customer?.primaryLastName
-                                            }}
-                                        </p>
-                                        <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon *ngIf="!isMobile">phone</mat-icon>{{
-                                            booking.customer?.primaryPhone }}
-                                        </p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <p>{{ vehicleInfo(booking) }}
-                                        </p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon *ngIf="!isMobile">location_on</mat-icon>{{
-                                            formatAddress(booking.pickupAddress) }}
-                                        </p>
-                                        <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon *ngIf="!isMobile">calendar_month</mat-icon>{{ booking.pickupAt |
-                                            date: 'MM/dd/yyyy'
-                                            }}
-                                        </p>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon *ngIf="!isMobile">location_on</mat-icon>{{
-                                            formatAddress(booking.arrivalAddress) }}
-                                        </p>
-                                        <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon *ngIf="!isMobile">calendar_month</mat-icon>{{ booking.arrivalAt |
-                                            date: 'MM/dd/yyyy'
-                                            }}
-                                        </p>
-                                    </div>
-                                </td>
-                                <td>{{ booking.notes }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                                <div class="trip-print-button">
+                                    <button mat-stroked-button (click)="printTrip(bookingGroup)">
+                                        <mat-icon>print</mat-icon>
+                                        Print Trip
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Print Trip Button -->
 
-                <!-- Trip Totals -->
-                <div class="trip-totals">
-                    <p><strong>Bookings:</strong> {{ bookingGroup.bookings.length }}</p>
-                    <p><strong>Amount:</strong> ${{ getTripTotals(bookingGroup.bookings).weight || 0 }}</p>
-                    <p><strong>Vehicles:</strong> {{ getTripTotals(bookingGroup.bookings).volume || 0 }}</p>
+                            <!-- Bookings Table for this Trip -->
+                            <div class="bookings-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Vehicle</th>
+                                            <th>Pickup</th>
+                                            <th>Arrival</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for(booking of bookingGroup.bookings; track booking){
+                                            <tr class="booking-row">
+                                                <td>
+                                                    <div>
+                                                        <p>{{ booking.customer?.primaryFirstName }} {{ booking.customer?.primaryLastName
+                                                            }}
+                                                        </p>
+                                                        <p style="display: flex; align-items: center; gap: 4px">
+                                                            @if(!isMobile){
+                                                                <mat-icon>phone</mat-icon>
+                                                            }
+                                                            {{ booking.customer?.primaryPhone }}
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <p>{{ vehicleInfo(booking) }}
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <p style="display: flex; align-items: center; gap: 4px">
+                                                            @if(!isMobile){
+                                                                <mat-icon>location_on</mat-icon>
+                                                            }
+                                                            {{ formatAddress(booking.pickupAddress) }}
+                                                        </p>
+                                                        <p style="display: flex; align-items: center; gap: 4px">
+                                                            @if(!isMobile){
+                                                                <mat-icon>calendar_month</mat-icon>
+                                                            }
+                                                            {{ booking.pickupAt | date: 'MM/dd/yyyy' }}
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <p style="display: flex; align-items: center; gap: 4px">
+                                                            @if(!isMobile){
+                                                                <mat-icon>location_on</mat-icon>
+                                                            }
+                                                            {{ formatAddress(booking.arrivalAddress) }}
+                                                        </p>
+                                                        <p style="display: flex; align-items: center; gap: 4px">
+                                                            @if(!isMobile){
+                                                                <mat-icon>calendar_month</mat-icon>
+                                                            }
+                                                            {{ booking.arrivalAt | date: 'MM/dd/yyyy'}}
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td>{{ booking.notes }}</td>
+                                            </tr>
+                                        }
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                     }
+                    
                 </div>
-            </div>
+             }
+            
         </div>
-    </div>
-</div>
-
-
-<!-- Print View Component -->
-@if(printing){
+     }
+    
+} @else {
     <app-print-view-work-order 
         [bookReport]="printingData.bookReport"
         [truckTrips]="printingData.truckTrips" 

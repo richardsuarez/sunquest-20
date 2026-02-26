@@ -48,10 +48,11 @@ export class TripPopoverComponent implements OnInit, OnDestroy {
     originalTruckId: string | null = null;
     truckTripsObserver$!: Observable<{ [truckId: string]: Trip[]; }>;
     truckTrips: { [truckId: string]: Trip[]; } = {};
+    disableTruckInfo$ = new Subject<boolean>();
 
     tripForm = new FormGroup({
-        truckId: new FormControl<string>('', [Validators.required]),
-        loadNumber: new FormControl<string>('', [Validators.required]),
+        truckId: new FormControl<string>({value: '', disabled: (this.trip?.id !== "" && this.trip?.id !== undefined) ? true :  false}),
+        loadNumber: new FormControl<string>({value: '', disabled: (this.trip?.id !== "" && this.trip?.id !== undefined) ? true :  false }),
         departureDate: new FormControl<Date | null>(this.tomorrow, [Validators.required]),
         arrivalDate: new FormControl<Date | null>(this.dayAfterTomorrow, [Validators.required]),
         origin: new FormControl<string>('', [Validators.required]),
@@ -67,6 +68,11 @@ export class TripPopoverComponent implements OnInit, OnDestroy {
         this.truckList = data?.trucks || [];
         if (data.trip) {
             this.trip = data.trip;
+            if(data.trip.id){
+                this.disableTruckInfo$.next(true);
+            } else {
+                this.disableTruckInfo$.next(false);
+            }
             this.originalTruckId = data.truckTrip || null;
             this.tripForm.patchValue({
                 truckId: data.truckTrip,

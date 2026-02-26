@@ -118,7 +118,8 @@
 
         <div class="body">
             @if(bookings$ | async; as bookings){
-                <div style="display: flex; justify-content: flex-end; padding: 10px;">
+                <div style="display: flex; justify-content: space-between; padding: 10px;">
+                    <h3>Total paid: <span style="color: #14aa1c">$ {{ totalPaid(bookings) }}</span></h3>
                     <button mat-raised-button (click)="printReport()" style="background-color: #ED2D89; color: white">
                         <mat-icon>print</mat-icon>
                         Print Report

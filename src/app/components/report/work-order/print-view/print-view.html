@@ -45,7 +45,7 @@
                                                     booking.customer?.primaryLastName }}
                                                 </p>
                                                 <p style="display: flex; align-items: center; gap: 4px">
-                                                    <mat-icon>phone</mat-icon>{{ booking.customer?.primaryPhone }}, {{ booking.customer?.secondaryPhone }} 
+                                                    {{ booking.customer?.primaryPhone }}, {{ booking.customer?.secondaryPhone }} 
                                                 </p>
                                             </div>
                                         </td>
@@ -57,11 +57,9 @@
                                         <td>
                                             <div>
                                                 <div style="display: flex; align-items: center; gap: 5px">
-                                                    <mat-icon>location_on</mat-icon>
                                                     <p>{{formatAddress(booking.pickupAddress) }}</p>
                                                 </div>
                                                 <div style="display: flex; align-items: center; gap: 5px">
-                                                    <mat-icon>calendar_month</mat-icon>
                                                     <p>{{ booking.pickupAt | date:
                                                         'MM/dd/yyyy' }}</p>
                                                 </div>
@@ -70,12 +68,10 @@
                                         <td>
                                             <div>
                                                 <p style="display: flex; align-items: center; gap: 5px">
-                                                    <mat-icon>location_on</mat-icon>{{
-                                                    formatAddress(booking.arrivalAddress) }}
+                                                    {{ formatAddress(booking.arrivalAddress) }}
                                                 </p>
                                                 <p style="display: flex; align-items: center; gap: 5px">
-                                                    <mat-icon>calendar_month</mat-icon>{{ booking.arrivalAt | date:
-                                                    'MM/dd/yyyy' }}
+                                                    {{ booking.arrivalAt | date: 'MM/dd/yyyy' }}
                                                 </p>
                                             </div>
                                         </td>
@@ -140,7 +136,7 @@
                                                     booking.customer?.primaryLastName }}
                                                 </p>
                                                 <p style="display: flex; align-items: center; gap: 4px">
-                                                    <mat-icon>phone</mat-icon>{{ booking.customer?.primaryPhone }}, {{ booking.customer?.secondaryPhone }}
+                                                    {{ booking.customer?.primaryPhone }}, {{ booking.customer?.secondaryPhone }}
                                                 </p>
                                             </div>
                                         </td>
@@ -152,11 +148,9 @@
                                         <td>
                                             <div>
                                                 <div style="display: flex; align-items: center; gap: 5px">
-                                                    <mat-icon>location_on</mat-icon>
                                                     <p>{{formatAddress(booking.pickupAddress) }}</p>
                                                 </div>
                                                 <div style="display: flex; align-items: center; gap: 5px">
-                                                    <mat-icon>calendar_month</mat-icon>
                                                     <p>{{ booking.pickupAt | date:
                                                         'MM/dd/yyyy' }}</p>
                                                 </div>
@@ -165,12 +159,10 @@
                                         <td>
                                             <div>
                                                 <p style="display: flex; align-items: center; gap: 5px">
-                                                    <mat-icon>location_on</mat-icon>{{
-                                                    formatAddress(booking.arrivalAddress) }}
+                                                    {{ formatAddress(booking.arrivalAddress) }}
                                                 </p>
                                                 <p style="display: flex; align-items: center; gap: 5px">
-                                                    <mat-icon>calendar_month</mat-icon>{{ booking.arrivalAt | date:
-                                                    'MM/dd/yyyy' }}
+                                                    {{ booking.arrivalAt | date: 'MM/dd/yyyy' }}
                                                 </p>
                                             </div>
                                         </td>
@@ -228,7 +220,7 @@
                                             }}
                                         </p>
                                         <p style="display: flex; align-items: center; gap: 4px">
-                                            <mat-icon>phone</mat-icon>{{ booking.customer?.primaryPhone }}, {{ booking.customer?.secondaryPhone }}
+                                            {{ booking.customer?.primaryPhone }}, {{ booking.customer?.secondaryPhone }}
                                         </p>
                                     </div>
                                 </td>
@@ -254,12 +246,6 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
-
-                <div class="trip-totals">
-                    <p><strong>Bookings:</strong> {{ bookingGroup!.bookings.length }}</p>
-                    <p><strong>Amount:</strong> ${{ getTripTotals(bookingGroup!.bookings).weight || 0 }}</p>
-                    <p><strong>Vehicles:</strong> {{ getTripTotals(bookingGroup!.bookings).volume || 0 }}</p>
                 </div>
             </div>
         </ng-container>
