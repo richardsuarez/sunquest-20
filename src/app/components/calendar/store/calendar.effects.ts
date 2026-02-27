@@ -1,6 +1,6 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, switchMap, catchError, mergeMap, tap, concatMap, withLatestFrom } from 'rxjs/operators';
+import { map, switchMap, catchError, mergeMap, tap, concatMap, withLatestFrom, delay } from 'rxjs/operators';
 import { of, combineLatest, from } from 'rxjs';
 import * as CalendarActions from './calendar.actions';
 import * as MainActions from '../../main/store/main.actions'
@@ -16,6 +16,7 @@ export class CalendarEffects {
   private snackBar = inject(MatSnackBar);
 
   readonly loadTrucksAndTrips$;
+  readonly getAllTruckTrips$;
   readonly loadBookingsForMonth$;
   readonly deleteBooking$;
   readonly addTrip$;
@@ -99,6 +100,19 @@ export class CalendarEffects {
               })
             );
           })
+        )
+      )
+    );
+
+    this.getAllTruckTrips$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(CalendarActions.getAllTruckTripsOnThisSeason),
+        switchMap(action =>
+          this.calendarService.getTruckTrips(action.truckId, action.season).pipe(
+            switchMap(trips => {
+              return of(CalendarActions.getAllTruckTripsOnThisSeasonSuccess({trips}))
+            })
+          )
         )
       )
     );

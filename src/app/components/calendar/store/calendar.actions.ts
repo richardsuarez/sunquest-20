@@ -17,6 +17,9 @@ export const loadTrucksAndTrips = createAction('[Calendar] Load Trucks And Trips
 export const loadTrucksAndTripsSuccess = createAction('[Calendar] Load Trucks And Trips Success', props<{ trucks: any[]; trips: { [truckId: string]: any[] } }>());
 export const loadTrucksAndTripsFail = createAction('[Calendar] Load Trucks And Trips Fail', props<{ error: Error }>());
 
+export const getAllTruckTripsOnThisSeason = createAction('[Report] Load all trips on for current season', props<{truckId: string; season: Season}>());
+export const getAllTruckTripsOnThisSeasonSuccess = createAction('[Report] Success loading all trips on for current season', props<{trips: Trip[]}>());
+
 export const loadSelectedTrip = createAction('[Calendar] Load selected trip', props<{ trip: Trip | null }>());
 
 export const deleteBookingStart = createAction('[Calendar] Delete Booking Start', props<{ booking: Booking, trip: Trip }>());
@@ -28,7 +31,7 @@ export const addTripFail = createAction('[Calendar] Add trip fail', props<{ erro
 
 //TODO
 export const updateTripStart = createAction('[Calendar] Update trip start', props<{ truckId: string; trip: Trip }>());
-export const updateTripSuccess = createAction('[Calendar] Update trip success', props<{ truckId: string; trip: Partial<Trip> }>());
+export const updateTripSuccess = createAction('[Calendar] Update trip success', props<{ truckId: string; trip: Trip }>());
 export const updateTripFail = createAction('[Calendar] Update trip fail', props<{ error: Error }>());
 
 export const deleteTripStart = createAction('[Calendar] Delete trip start', props<{ truckId: string; trip: Trip }>());

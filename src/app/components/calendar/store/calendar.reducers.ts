@@ -2,7 +2,6 @@ import { createReducer, on } from '@ngrx/store';
 import * as CalendarActions from './calendar.actions';
 import { initialCalendarState } from './calendar.state';
 import { CalendarEvent } from '../model/calendar-event.model';
-import { Calendar } from '../container/calendar';
 
 export const CALENDAR_FEATURE_KEY = 'calendar';
 
@@ -297,7 +296,8 @@ export const calendarReducer = createReducer(
     return {
       ...state,
       trips: updatedTrips,
-      calendarEvents: cleanCalendarEvents(updatedEvents)
+      calendarEvents: cleanCalendarEvents(updatedEvents),
+      selectedTrip: trip,
     };
   }),
 
@@ -341,4 +341,14 @@ export const calendarReducer = createReducer(
       loading: false
     };
   }),
+
+  on(CalendarActions.getAllTruckTripsOnThisSeason, (state) => ({
+    ...state,
+    loadingTruckTrips: true,
+  })),
+  on(CalendarActions.getAllTruckTripsOnThisSeasonSuccess, (state, action) => ({
+    ...state,
+    loadingTruckTrips: false,
+    tempTruckTrips: action.trips,
+  })),
 );

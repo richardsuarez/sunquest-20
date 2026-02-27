@@ -55,7 +55,7 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
 
   constructor(
     public dialogRef: MatDialogRef<CalendarPopoverComponent>,
-    @Inject(MAT_DIALOG_DATA) data: { isMobile: boolean, truckId: string, startDate: Date, endDate: Date },
+    @Inject(MAT_DIALOG_DATA) data: { isMobile: boolean, truckId: string, startDate: Date, endDate: Date, trip: Trip },
   ) {
     this.isMobile = data.isMobile;
     this.truckId = data.truckId;
@@ -73,7 +73,6 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
       } else {
         this.close();
       }
-      
     });
 
     this.bookings$.pipe(takeUntil(this.destroy$)).subscribe(bookings => {
@@ -174,7 +173,6 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
   }
 
   editTrip() {
-    
     this.matDialog.open(TripPopoverComponent, {
       data: {
         trucks: this.truckList,

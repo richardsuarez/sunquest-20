@@ -5,20 +5,24 @@ import { CalendarEventsByDate } from '../model/calendar-event.model';
 
 export interface CalendarState {
   loading: boolean;
+  loadingTruckTrips: boolean;
   trucks: Truck[];
   trips: { [truckId: string]: any[] };
   selectedTrip: Trip | null;
   appError: Error | null;
   calendarEvents: CalendarEventsByDate;
-  currentMonthBookings: Booking[]
+  currentMonthBookings: Booking[];
+  tempTruckTrips: Trip[] | null;
 }
 
 export const initialCalendarState: CalendarState = {
   loading: false,
+  loadingTruckTrips: false,
   trucks: [],
   trips: {},
   selectedTrip: null,
   appError: null,
   calendarEvents: {},
-  currentMonthBookings: []
+  currentMonthBookings: [],
+  tempTruckTrips: null,
 };
