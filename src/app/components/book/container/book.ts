@@ -427,6 +427,11 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
     return this.crud === 'new' ? 'New' : 'Edit';
   }
 
+  getBookingTruckNumber(){
+    const truck = this.truckList.find(t => t.id === this.originalTruckId)
+    return truck?.truckNumber;
+  }
+
   navigateBack() {
     this.location.back();
   }

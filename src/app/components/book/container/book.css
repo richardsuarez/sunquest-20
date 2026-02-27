@@ -350,3 +350,39 @@ td th{
   border-radius: 6px;
 }
 
+.trip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trip-header h2 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+    color: #1a237e;
+}
+
+.trip-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #1a237e;
+
+    mat-icon{
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+    }
+}
+
+.trip-dates {
+    margin: 5px 0 0 0;
+    font-size: 16px;
+    color: #666;
+}
+
+.trip-dates span {
+    margin-right: 15px;
+}

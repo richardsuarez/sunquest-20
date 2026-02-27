@@ -357,6 +357,24 @@
             </section>
 
             <section>
+                <h3>Currently belongs to:</h3>
+                @if(originalTruckId && originalTrip){
+                    <div class="trip-header">
+                        <h2>Truck: {{ getBookingTruckNumber() }}</h2>
+                        <h2>Load: {{ originalTrip.loadNumber }}</h2>
+                        <h3>{{ originalTrip.origin }} <mat-icon>arrow_forward</mat-icon>{{ originalTrip.destination }}</h3>
+                        <h3 class="trip-dates">
+                            <span>Departure: {{ originalTrip.departureDate | date: 'MMM dd, yyyy' }}</span>
+                        </h3>
+                    </div>
+                } @else {
+                    <p class="trip-dates">
+                        Not assigned
+                    </p>
+                }
+            </section>
+
+            <section>
                 <h3>Next Trips</h3>
                 @if(truckList$ | async; as trucks){
                 @if(!(isMobile$ | async)){
