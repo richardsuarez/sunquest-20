@@ -13,11 +13,6 @@
     min-width: 200px;
 }
 
-.body {
-    padding: 20px;
-    background-color: #fff;
-}
-
 .print-controls {
     display: flex;
     justify-content: flex-start;

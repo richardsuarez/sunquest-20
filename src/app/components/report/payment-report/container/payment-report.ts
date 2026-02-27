@@ -129,8 +129,32 @@ export class PaymentReport implements OnInit, OnDestroy {
     this.store.dispatch(MainAction.loadBooking({ booking }));
   }
 
+  isFullPaid(truck: Truck, trip: Trip): boolean{
+    if(truck.carCapacity){
+      return truck.carCapacity - trip.remCarCap === trip.paidBookings
+    }
+    return false;
+  }
+
   paidBookings(bookings: Booking[] | null) {
     return bookings?.filter(booking => booking.paycheck && booking.paycheck.amount >= 1200).length || 0;
+  }
+
+  printReport() {
+    this.printing = true;
+    this.printData = {
+      truck: this.selectedTruck!,
+      trip: this.selectedTrip!,
+      data: this.tableData,
+    }
+    setTimeout(() => {
+      this.printing = false;
+      this.printData = {
+        truck: {} as Truck,
+        trip: {} as Trip,
+        data: [] as TableData[],
+      }
+    }, 1000)
   }
 
   searchRecNo(booking: Booking): string {
@@ -171,27 +195,13 @@ export class PaymentReport implements OnInit, OnDestroy {
     this.store.dispatch(ReportActions.loadBookingsForTripStart({ tripId: trip.id!, season: this.activeSeason! }));
   }
 
-  printReport() {
-    this.printing = true;
-    this.printData = {
-      truck: this.selectedTruck!,
-      trip: this.selectedTrip!,
-      data: this.tableData,
-    }
-    setTimeout(() => {
-      this.printing = false;
-      this.printData = {
-        truck: {} as Truck,
-        trip: {} as Trip,
-        data: [] as TableData[],
+  totalPaid(bookings: Booking[]): number{
+    let total = 0;
+    for(let booking of bookings){
+      if(booking.paycheck && booking.paycheck.amount){
+        total = total + booking.paycheck.amount;
       }
-    }, 1000)
-  }
-
-  isFullPaid(truck: Truck, trip: Trip): boolean{
-    if(truck.carCapacity){
-      return truck.carCapacity - trip.remCarCap === trip.paidBookings
     }
-    return false;
+    return total;
   }
 }

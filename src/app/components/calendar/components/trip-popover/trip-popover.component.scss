@@ -61,3 +61,34 @@
   border-top: 1px solid #e0e0e0;
   background: #fafafa;
 }
+
+.trip-header h3 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+    color: #1a237e;
+}
+
+.trip-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #1a237e;
+
+    mat-icon{
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+    }
+}
+
+.trip-details {
+    margin: 5px 0 0 0;
+    font-size: 16px;
+    color: #666;
+}
+
+.trip-details span {
+    margin-right: 15px;
+}

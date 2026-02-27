@@ -14,10 +14,6 @@
     min-width: 200px;
 }
 
-.body {
-    padding: 20px;
-    background-color: #fff;
-}
 
 .print-controls {
     display: flex;
@@ -35,10 +31,6 @@
     border: 1px solid gray;
     border-radius: 4px;
     width: 15%;
-}
-
-.print-controls button {
-    margin-right: 10px;
 }
 
 .report-summary {
@@ -186,27 +178,18 @@
 }
 
 .bookings-table td {
-    padding: 10px;
+    padding: 5px 5px;
     border-right: 1px solid #e0e0e0;
-}
 
-.bookings-table td:last-child {
-    border-right: none;
-}
-
-.bookings-table td.numeric {
-    text-align: right;
-}
-
-.bookings-table td.status {
-    font-weight: 500;
-    color: #2196F3;
+    p {
+        margin: 0px;
+    }
 }
 
 /* Trip Totals */
-.trip-totals {
+/* .trip-totals {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     padding: 12px;
     background-color: #f5f5f5;
     border-radius: 4px;
@@ -219,7 +202,7 @@
 
 .trip-totals p {
     margin: 5px 0;
-}
+} */
 
 /* Print Styles */
 @media print {

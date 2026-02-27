@@ -123,6 +123,12 @@ export const routes: Routes = [
                         loadComponent() {
                             return import('./components/report/payment-report/container/payment-report').then((m => m.PaymentReport))
                         },
+                    },
+                    {
+                        path: 'booked',
+                        loadComponent() {
+                            return import('./components/report/booked-report/container/booked-report').then((m => m.BookedReport))
+                        },
                     }
                 ],
                 providers: [

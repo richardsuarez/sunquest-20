@@ -78,7 +78,7 @@ export class Calendar implements OnInit, OnDestroy {
     });
 
     this.seasons$.pipe(takeUntil(this.destroy$)).subscribe(seasons => {
-      this.activeSeason = seasons.find(s => s.isActive) || null;
+      this.activeSeason = seasons.find(s => s.isActive === true) || null;
       if (this.activeSeason) {
         this.store.dispatch(CalendarActions.loadBookingsForMonth({
           startDate: this.currentMonthStart,
