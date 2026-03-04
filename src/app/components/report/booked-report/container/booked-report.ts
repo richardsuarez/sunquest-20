@@ -64,6 +64,7 @@ export class BookedReport implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.store.dispatch(ReportActions.clearBookings());
     this.seasons$.pipe(takeUntil(this.destroy$)).subscribe(seasons => {
       this.activeSeason = seasons.find(s => s.isActive === true) || null;
     });

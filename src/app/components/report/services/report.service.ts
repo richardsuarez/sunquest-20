@@ -22,8 +22,8 @@ export class ReportService {
                     const q = query(
                         bookingsCollection,
                         where('season', '==', `${season.seasonName}-${season.year}`),
-                        where('departureDate', '>=', start),
-                        where('departureDate', '<=', end)
+                        where('pickupAt', '>=', start),
+                        where('pickupAt', '<=', end)
                     );
                     let snapshot;
                     try {

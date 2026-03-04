@@ -80,14 +80,6 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <div class="trip-totals">
-                            <p><strong>Total Bookings in Trip:</strong> {{ bookingGroup.bookings.length }}</p>
-                            <p><strong>Total Amount:</strong> ${{ getTripTotals(bookingGroup.bookings).weight || 0 }}
-                            </p>
-                            <p><strong>Total Vehicles:</strong> {{ getTripTotals(bookingGroup.bookings).volume || 0 }}
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -170,14 +162,6 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-
-                        <div class="trip-totals">
-                            <p><strong>Total Bookings in Trip:</strong> {{ bookingGroup.bookings.length }}</p>
-                            <p><strong>Total Amount:</strong> ${{ getTripTotals(bookingGroup.bookings).weight || 0 }}
-                            </p>
-                            <p><strong>Total Vehicles:</strong> {{ getTripTotals(bookingGroup.bookings).volume || 0 }}
-                            </p>
                         </div>
                     </div>
                 </div>

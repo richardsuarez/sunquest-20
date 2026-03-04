@@ -84,6 +84,7 @@ export class PaymentReport implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.store.dispatch(ReportActions.clearBookings());
     this.seasons$.pipe(takeUntil(this.destroy$)).subscribe((seasons) => {
       this.activeSeason = seasons.find(season => season.isActive) || null;
     });
@@ -102,6 +103,16 @@ export class PaymentReport implements OnInit, OnDestroy {
         });
       }
     });
+
+    this.searchCriteriaSelector.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((value) => {
+      if(value === 'All Season'){
+        this.dateRange.controls.start.disable();
+        this.dateRange.controls.end.disable();
+      } else {
+        this.dateRange.controls.start.enable();
+        this.dateRange.controls.end.enable();
+      }
+    })
 
     this.store.dispatch(ReportActions.cleanTruckList());
   }

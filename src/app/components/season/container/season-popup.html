@@ -21,9 +21,9 @@
     </div>
 
     <!-- New Season Card -->
-    <mat-card class="season-card" *ngIf="!isThereAnActiveSeason()">
+    <mat-card class="season-card" *ngIf="!isThereACurrentSeason()">
       <mat-card-content class="new-season-content">
-        <div class="season-info">
+        <div style="display: flex; align-items: center; justify-content: space-evenly;">
           <mat-form-field appearance="fill" floatLabel="always" subscriptSizing="dynamic">
             <mat-label>Season</mat-label>
             <mat-select [formControl]="seasonNameControl">
@@ -69,24 +69,32 @@
         <div class="season-actions">
           <!-- Status Badge -->
           <span class="status-badge">
-            <span *ngIf="season.isActive === true" 
-              class="badge active-badge"
-            >Active</span>
-            <span 
-              *ngIf="season.isActive === false" 
-              class="badge closed-badge"
-            >Closed</span>
+            @if(season.isActive === true){
+              <span class="badge active-badge">Active</span>
+            } @else {
+              <span class="badge non-active-badge">Active</span>
+            }
+            @if(season.isCurrent === false){
+              <span class="badge archive-badge">Archived</span>
+            } @else {
+              <span class="badge current-badge">Current</span>
+            }
           </span>
-
-          <button
-            *ngIf="season.isActive === true"
-            mat-raised-button
-            color="warn"
-            (click)="closeSeason(season)"
-            class="action-button"
-          >
-            Close
-          </button>
+          @if(season.isActive === false){
+            <button mat-button (click)="activateSeason(season)" class="action-button">
+              Activate
+            </button>
+          }
+          @if(season.isCurrent === true){
+            <button
+              mat-button
+              (click)="closeSeason(season)"
+              class="action-button"
+            >
+              Close
+            </button>
+          } 
+          
         </div>
       </mat-card-content>
     </mat-card>

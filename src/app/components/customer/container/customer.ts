@@ -66,7 +66,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   seasons$!: Observable<Season[]>;
   bookings$!: Observable<Booking[]>;
   customerList: Customer[] = [];
-  currentSeason!: Season | null;
+  activeSeason!: Season | null;
   records: CustomerRecord[] = [];
   bookingColumns: string[] = ['season', 'departureDate', 'from', 'to', 'paymentType', 'bank', 'amount', 'notes', 'actions'];
   currentBookings: Booking[] | null = null;
@@ -92,7 +92,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   ngOnInit() {
     //this.store.dispatch(CustomerActions.resetSearchCriteria());
     this.seasons$.pipe(takeUntil(this.destroy$)).subscribe(seasons => {
-      this.currentSeason = seasons.find(s => s.isActive) ?? null;
+      this.activeSeason = seasons.find(s => s.isActive) ?? null;
     });
 
     this.customerList$.pipe(takeUntil(this.destroy$)).subscribe(customers => {
@@ -189,7 +189,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   isCurrentSeason(season: string): boolean {
-    const aux = this.currentSeason?.seasonName + '-' + this.currentSeason?.year;
+    const aux = this.activeSeason?.seasonName + '-' + this.activeSeason?.year;
     return season === aux;
   }
 
@@ -229,7 +229,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   createBooking(customer: Customer | undefined, vehicle: Vehicle | null) {
-    if (this.currentSeason) {
+    if (this.activeSeason && this.activeSeason.isCurrent) {
       if (customer && vehicle) {
         const auxCustomer: Customer = {
           ...customer,
@@ -255,8 +255,8 @@ export class CustomerComponent implements OnInit, OnDestroy {
         PopupComponent,
         {
           data: {
-            title: 'No active season',
-            message: `Cannot create booking because there is no active season. Please create and activate a season first.`,
+            title: 'Archived season',
+            message: `Cannot create booking because the active season is archived. Please create a new season or switch to the current one.`,
             cancelButton: 'OK',
           }
         }

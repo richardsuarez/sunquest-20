@@ -1,6 +1,7 @@
 export interface Season {
-  id?: string;
+  id: string;
   seasonName: string;
   year: number;
   isActive: boolean;
+  isCurrent: boolean;
 }

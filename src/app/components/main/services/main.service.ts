@@ -1,6 +1,6 @@
 import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Firestore, collection, query, updateDoc, doc, getDocsFromServer, getDocsFromCache, orderBy, addDoc, deleteDoc, getDoc, getDocFromCache, where } from '@angular/fire/firestore';
-import { Observable, from } from 'rxjs';
+import { Observable, from, of } from 'rxjs';
 import { Season } from '../../season/models/season.model';
 import { Trip } from '../../trip/model/trip.model';
 import { Booking } from '../../book/model/booking.model';
@@ -51,6 +51,37 @@ export class MainService {
   }
 
   /**
+   * Open Season
+   */
+
+  openSeason(season: Season){
+    return runInInjectionContext(this.injector, () => {
+      const seasonsCollection = collection(this.firestore, 'seasons');
+      const storedSeason = {...season, isActive: true, isCurrent: true}
+      const s = addDoc(seasonsCollection, storedSeason)
+        .then((docRef) => ({ ...storedSeason, id: docRef.id }));
+        return from(s) as Observable<Season>;
+    });
+  }
+
+  /**
+   * Close current season
+   */
+
+  closeSeason(seasonId: string): Observable<void> {
+    return runInInjectionContext(this.injector, () => {
+      return from((async () => {
+        try {
+          const seasonDoc = doc(this.firestore, 'seasons', seasonId);
+          await updateDoc(seasonDoc, { isCurrent: false });
+        } catch (error) {
+          throw error;
+        }
+      })());
+    });
+  }
+
+  /**
    * Deactivate a season
    */
   deactivateSeason(seasonId: string): Observable<void> {
@@ -66,16 +97,17 @@ export class MainService {
     });
   }
 
+
+
   /**
    * Activate a season
    */
   activateSeason(season: Season): Observable<Season> {
     return runInInjectionContext(this.injector, () => {
-      const seasonsCollection = collection(this.firestore, 'seasons');
-      const storedSeason = {...season, isActive: true}
-      const s = addDoc(seasonsCollection, storedSeason)
-        .then((docRef) => ({ ...storedSeason, id: docRef.id }));
-        return from(s) as Observable<Season>
+      const seasonsCollection = doc(this.firestore, 'seasons', season.id);
+      const storedSeason = {...season, isActive: true};
+      updateDoc(seasonsCollection, storedSeason);
+      return of(storedSeason);
     });
   }
 

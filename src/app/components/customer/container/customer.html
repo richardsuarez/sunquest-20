@@ -175,7 +175,11 @@
                             <ng-container matColumnDef="actions">
                                 <th mat-header-cell *matHeaderCellDef></th>
                                 <td mat-cell *matCellDef="let booking" style="display: flex; justify-content: space-evenly; padding: 10px 5px">
-                                    <button mat-raised-button color="primary" (click)="editBooking(booking, record.customer)">Edit</button>
+                                    @if(activeSeason && activeSeason.isCurrent){
+                                        <button mat-raised-button color="primary" (click)="editBooking(booking, record.customer)">Edit</button>
+                                    } @else {
+                                        <button mat-raised-button color="primary" (click)="viewBooking(booking)">View</button>
+                                    }
                                     @if((deletingBooking$ | async) === booking.id){
                                         <button mat-raised-button disabled style="color: red;">
                                             <mat-icon>

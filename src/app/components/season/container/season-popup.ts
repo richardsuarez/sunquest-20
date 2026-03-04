@@ -36,7 +36,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 export class SeasonPopup implements OnInit, OnDestroy {
   private store = inject(Store);
   private destroy$ = new Subject<void>();
-  newSeason: Season = { id: '', seasonName: '', year: 0, isActive: false };
+  newSeason: Season = { id: '', seasonName: '', year: 0, isActive: false , isCurrent: false};
   seasons: Season[] = [];
   today = new Date();
 
@@ -67,7 +67,7 @@ export class SeasonPopup implements OnInit, OnDestroy {
         if(season){
           this.seasonNameControl.setErrors({'seasonExists': true});
           this.yearControl.setErrors({'seasonExists': true});
-          this.newSeason = { id: '', seasonName: '', year: 0, isActive: false };
+          this.newSeason = { id: '', seasonName: '', year: 0, isActive: false, isCurrent: false };
         } else {
           this.seasonNameControl.setErrors(null);
           this.yearControl.setErrors(null);
@@ -83,24 +83,29 @@ export class SeasonPopup implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  activateSeason(season: Season){
+    const currentActiveSeason = this.seasons.find(s => s.isActive === true);
+    this.store.dispatch(MainActions.activateSeason({currentActiveSeason, seasonToActivate: season}));
+  }
+
   closePopup() {
     this.dialogRef.close();
   }
 
   closeSeason(season: Season) {
     if (!season.id) return;
-    this.store.dispatch(MainActions.deactivateSeason({ seasonId: season.id }));
+    this.store.dispatch(MainActions.closeSeason({ seasonId: season.id }));
   }
 
   openSeason() {
     if (this.newSeason.seasonName === '' || this.newSeason.year === 0) return;
-    this.store.dispatch(MainActions.activateSeason({ season: this.newSeason }));
+    this.store.dispatch(MainActions.openSeason({ season: this.newSeason }));
   }
 
-  isThereAnActiveSeason() {
+  isThereACurrentSeason() {
     let aux = 0;
     for (let s of this.seasons) {
-      if (s.isActive) {
+      if (s.isCurrent) {
         aux = 1;
         break;
       }
