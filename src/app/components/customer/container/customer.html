@@ -1,5 +1,5 @@
     <div class="headers">
-        <h1>Customers</h1>
+        <h1>Records</h1>
         <button mat-button mat-raised-button (click)="addCustomer()" style="background-color: #ED2D89; color: white">
             Add Customer
         </button>
@@ -205,13 +205,13 @@
                 </div>
             </mat-card-content>
         </mat-card>
-        @if(!(customerList$ | async) || (customerList$ | async)?.length === 0){
+        @if((customerList$ | async) && (customerList$ | async)?.length === 0){
             <div style="text-align: center; margin-top: 20px">
-                <h2>No customers found.</h2>
+                <h2>No records found.</h2>
             </div>
         }
     </div>
 
-    <mat-paginator class="pagination" [length]="totalPagination$ | async" [pageSize]="searchCriteria.pageSize"
+    <!-- <mat-paginator class="pagination" [length]="totalPagination$ | async" [pageSize]="searchCriteria.pageSize"
         aria-label="Select page" (page)="onPageChange($event)">
-    </mat-paginator>
+    </mat-paginator> -->

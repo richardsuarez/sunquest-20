@@ -6,7 +6,7 @@
             @if(gettingPaidBookings$ | async){
                 <mat-spinner diameter="20"></mat-spinner>
             }
-            <span>Paid bookings <strong>{{ paidBookings$ | async }}</strong></span>
+            <span>Paid bookings <strong>{{ paidBookings$ | async }}</strong> as of today</span>
         </div>
         <router-outlet />
     </div>

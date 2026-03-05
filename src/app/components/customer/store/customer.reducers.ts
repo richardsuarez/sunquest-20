@@ -10,12 +10,7 @@ const initialState: CustomerState = {
     customerList: null,
     customerViewModel: null,
     bookingList: [],
-    searchCriteria: {
-        searchValue: '',
-        pageSize: 20,
-    },
-    firstCustomerViewed: null,
-    lastCustomerViewed: null,
+    searchCriteria: '',
     savingCustomer: false,
     totalPagination: 0,
     appError: null,
@@ -32,22 +27,6 @@ export const customerReducer = createReducer(
         ...state,
         loading: false,
         customerList: action.customerList,
-        firstCustomerViewed: action.customerList[0], // store a reference to the first customer in the list
-        lastCustomerViewed: action.customerList[action.customerList.length - 1], // store a reference to the last customer in the list
-        totalPagination: action.total
-    })),
-
-    on(CustomerActions.getPreviousCustomerListStart, (state) => ({
-        ...state,
-        loading: true,
-        appError: null
-    })),
-    on(CustomerActions.getPreviousCustomerListEnd, (state, action) => ({
-        ...state,
-        loading: false,
-        customerList: action.customerList,
-        firstCustomerViewed: action.customerList[0], // store a reference to the first customer in the list
-        lastCustomerViewed: action.customerList[action.customerList.length - 1], // store a reference to the last customer in the list
     })),
 
     on(CustomerActions.failure, (state, action) => ({
@@ -131,20 +110,13 @@ export const customerReducer = createReducer(
         ...state,
         searchCriteria: action.criteria
     })),
-    on(CustomerActions.resetLastCustomer, (state) => ({
-        ...state,
-        lastCustomerViewed: null
-    })),
     on(CustomerActions.resetCustomerViewModel, (state) => ({
         ...state,
         customerViewModel: null
     })),
     on(CustomerActions.resetSearchCriteria, (state) => ({
         ...state,
-        searchCriteria: {
-            searchValue: '',
-            pageSize: 20,
-        },
+        searchCriteria: '',
     }))
     ,
     on(CustomerActions.getVehiclesEnd, (state, action) => ({

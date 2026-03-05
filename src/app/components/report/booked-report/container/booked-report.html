@@ -35,7 +35,11 @@
     <div class="body">
         @if(bookings$ | async; as bookings){
             @if(bookings.length > 0){
-                <div style="display: flex; justify-content: flex-end; padding: 10px;">
+                <div style="display: flex; justify-content: flex-end; padding: 10px; gap: 10px;">
+                    <button mat-raised-button (click)="showTruckAssignmentPopup()" style="background-color: #3498db; color: white">
+                        <mat-icon>assignment</mat-icon>
+                        Assign Trucks
+                    </button>
                     <button mat-raised-button (click)="printReport()" style="background-color: #ED2D89; color: white">
                         <mat-icon>print</mat-icon>
                         Print Report

@@ -17,7 +17,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { PopupComponent } from '../../../shared/popup/popup.component';
 import { Router } from '@angular/router';
-import { SearchCriteria, CustomerRecord } from '../model/customer.model';
+import { CustomerRecord } from '../model/customer.model';
 import { Store } from '@ngrx/store';
 import * as CustomerActions from '../store/customer.actions'
 import * as MainAction from '../../main/store/main.actions';
@@ -28,6 +28,7 @@ import { MatTableModule } from '@angular/material/table';
 import { BookingDetailsPopupComponent } from '../../calendar/components/booking-details-popup/booking-details-popup.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltip } from "@angular/material/tooltip";
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-customer',
@@ -61,7 +62,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   loading$!: Observable<boolean>;
   customerList$!: Observable<Customer[] | null>;
   searchCustomer = new FormControl<string | null>('');
-  searchCriteria!: SearchCriteria;
+  searchCriteria!: string;
   totalPagination$!: Observable<number>;
   seasons$!: Observable<Season[]>;
   bookings$!: Observable<Booking[]>;
@@ -76,6 +77,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
     private readonly store: Store,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
+    private readonly snackBar: MatSnackBar,
     private readonly cdr: ChangeDetectorRef
   ) {
     this.loading$ = this.store.select(loading);
@@ -100,8 +102,9 @@ export class CustomerComponent implements OnInit, OnDestroy {
         this.customerList = customers;
         if (customers.length === 0) {
           this.records = [];
+        } else {
+          this.store.dispatch(CustomerActions.getBookingsStart({ customers }));
         }
-        this.store.dispatch(CustomerActions.getBookingsStart({ customers }));
       }
     });
 
@@ -121,10 +124,6 @@ export class CustomerComponent implements OnInit, OnDestroy {
         this.bookingTagForDeletion = result;
       }
     });
-
-    this.store.dispatch(CustomerActions.resetLastCustomer());
-    this.store.dispatch(CustomerActions.getNextCustomerListStart());
-
   }
 
   ngOnDestroy() {
@@ -305,39 +304,17 @@ export class CustomerComponent implements OnInit, OnDestroy {
     return new Date(booking.departureDate) < today;
   }
 
-  onPageChange(event: any) {
-
-    if (event.previousPageIndex < event.pageIndex) {
-      // looking for the next page
-      this.store.dispatch(CustomerActions.updateSearchCriteria({
-        criteria: {
-          searchValue: this.searchCriteria.searchValue || '',
-          pageSize: this.searchCriteria.pageSize
-        }
-      }));
-      this.store.dispatch(CustomerActions.getNextCustomerListStart());
-    } else {
-      this.store.dispatch(CustomerActions.updateSearchCriteria({
-        criteria: {
-          searchValue: this.searchCriteria.searchValue || '',
-          pageSize: this.searchCriteria.pageSize
-        }
-      }));
-      this.store.dispatch(CustomerActions.getPreviousCustomerListStart());
-    }
-    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
-  }
-
   onSearch() {
-    if (this.searchCustomer.value === this.searchCriteria.searchValue) return
+    if(this.searchCustomer.value === ''){
+      this.snackBar.open('Type something to search', 'Close', {duration: 3000});
+      return;
+    }
 
+    //if (this.searchCustomer.value === this.searchCriteria) return
+    
     this.store.dispatch(CustomerActions.updateSearchCriteria({
-      criteria: {
-        searchValue: this.searchCustomer.value || '',
-        pageSize: this.searchCriteria.pageSize,
-      }
+      criteria: this.searchCustomer.value || ''
     }));
-    this.store.dispatch(CustomerActions.resetLastCustomer());
     this.store.dispatch(CustomerActions.getNextCustomerListStart());
   }
 
