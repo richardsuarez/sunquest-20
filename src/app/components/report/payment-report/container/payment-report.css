@@ -15,7 +15,7 @@
 
 .print-controls {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     padding: 15px;
     gap: 30px;

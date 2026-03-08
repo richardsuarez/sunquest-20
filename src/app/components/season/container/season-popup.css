@@ -1,12 +1,11 @@
 .season-popup-container {
   padding: 30px;
-  width: 300px;  
+  width: 375px;
   max-height: 500px;
 }
 
 .season-popup-container h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
+  margin: 0;
   font-size: 20px;
   font-weight: 500;
 }
@@ -29,7 +28,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 30px
 }
 
 .season-card {
@@ -89,12 +87,11 @@ mat-select{
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 
 .season-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  width: 25%;
 }
 
 .season-name {
@@ -106,20 +103,20 @@ mat-select{
 .season-year {
   font-size: 14px;
   color: #666;
-  background-color: #f5f5f5;
   padding: 4px 8px;
-  border-radius: 4px;
 }
 
 .season-actions {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 10px
+  gap: 10px;
+  width: 60%;
 }
 
 .status-badge {
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   border-radius: 16px;
   font-size: 12px;
   font-weight: 600;
@@ -127,7 +124,8 @@ mat-select{
 }
 
 .badge {
-  display: inline-block;
+  text-align: center;
+  width: 60px
 }
 
 .active-badge {
@@ -136,10 +134,22 @@ mat-select{
   color: white;
 }
 
-
-.closed-badge {
+.non-active-badge {
   padding: 4px;
   background-color: #bdbdbd;
+  color: white;
+}
+
+
+.archive-badge {
+  padding: 4px;
+  background-color: #f54545;
+  color: white;
+}
+
+.current-badge {
+  padding: 4px;
+  background-color: #3498db;
   color: white;
 }
 
@@ -155,13 +165,4 @@ mat-select{
     align-items: flex-start;
     gap: 12px;
   }
-
-  .season-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  /* .action-button {
-    flex: 1;
-  } */
 }

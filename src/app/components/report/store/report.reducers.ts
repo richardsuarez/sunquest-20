@@ -76,5 +76,9 @@ export const reportReducer = createReducer(
     on(ReportActions.cleanTruckList, (state) => ({
         ...state,
         trucks: null,
+    })),
+    on(ReportActions.clearBookings, (state) => ({
+        ...state,
+        bookings: null,
     }))
 );

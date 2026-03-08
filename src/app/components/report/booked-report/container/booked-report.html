@@ -3,7 +3,7 @@
         <h1>Booked Report</h1>
         <div style="display: flex; justify-content: flex-end; gap: 10px; align-items: center">
             <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
-                <mat-label>Date range</mat-label>
+                <mat-label>Pickup Date Range</mat-label>
                 <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
                     <input matStartDate required placeholder="Start date" formControlName="start">
                     <input matEndDate required placeholder="End date" formControlName="end">
@@ -35,7 +35,11 @@
     <div class="body">
         @if(bookings$ | async; as bookings){
             @if(bookings.length > 0){
-                <div style="display: flex; justify-content: flex-end; padding: 10px;">
+                <div style="display: flex; justify-content: flex-end; padding: 10px; gap: 10px;">
+                    <button mat-raised-button (click)="showTruckAssignmentPopup()" style="background-color: #3498db; color: white">
+                        <mat-icon>assignment</mat-icon>
+                        Assign Trucks
+                    </button>
                     <button mat-raised-button (click)="printReport()" style="background-color: #ED2D89; color: white">
                         <mat-icon>print</mat-icon>
                         Print Report

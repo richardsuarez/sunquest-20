@@ -120,11 +120,14 @@
     </div>
 
     <!-- Notes -->
-    <div class="section" *ngIf="booking.notes">
-      <h3 class="section-title">Notes</h3>
-      <div class="notes-box">
-        {{ booking.notes }}
+     @if(booking.notes){
+      <div class="section">
+        <h3 class="section-title">Notes</h3>
+        <div class="notes-box">
+          {{ booking.notes }}
+        </div>
       </div>
-    </div>
+     }
+    
   </div>
 </div>

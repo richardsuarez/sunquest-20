@@ -1,5 +1,5 @@
 import { createAction, props } from "@ngrx/store";
-import { Customer, CustomerRecord, SearchCriteria, Vehicle } from "../model/customer.model";
+import { Customer, CustomerRecord, Vehicle } from "../model/customer.model";
 import { Booking } from "../../book/model/booking.model";
 
 
@@ -9,15 +9,6 @@ export const getNextCustomerListStart = createAction(
 
 export const getNextCustomerListEnd = createAction(
     '[Customer] End retrieving the next customer list',
-    props<{ customerList: Customer[], total: number }>()
-);
-
-export const getPreviousCustomerListStart = createAction(
-    '[Customer] Start retrieving the previous customer list',
-);
-
-export const getPreviousCustomerListEnd = createAction(
-    '[Customer] End retrieving the previous customer list',
     props<{ customerList: Customer[] }>()
 );
 
@@ -67,11 +58,7 @@ export const loadCustomer = createAction(
 
 export const updateSearchCriteria = createAction(
     '[Customer] Update search criteria',
-    props<{criteria: SearchCriteria}>()
-);
-
-export const resetLastCustomer = createAction(
-    '[Customer] Reset last customer'
+    props<{criteria: string}>()
 );
 
 export const resetCustomerViewModel = createAction(

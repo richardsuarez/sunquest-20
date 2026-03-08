@@ -20,11 +20,6 @@ export interface Customer {
     vehicles?: Vehicle[];
 }
 
-export interface SearchCriteria {
-    searchValue: string;
-    pageSize: number
-}
-
 export interface Address{
     address1: string | null;
     address2: string | null;

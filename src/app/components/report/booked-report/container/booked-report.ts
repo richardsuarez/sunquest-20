@@ -21,6 +21,8 @@ import { Router } from '@angular/router';
 import { Customer, Vehicle } from '../../../customer/model/customer.model';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { PrintViewBookedReport } from '../print-view-booked-report/print-view-booked-report';
+import { MatDialog } from '@angular/material/dialog';
+import { TruckAssignment } from '../truck-assignment/truck-assignment';
 
 @Component({
   selector: 'app-booked-report',
@@ -57,6 +59,7 @@ export class BookedReport implements OnInit, OnDestroy {
   constructor(
     private readonly store: Store,
     private readonly router: Router,
+    private readonly matDialog: MatDialog,
   ) {
     this.loading$ = this.store.select(loading);
     this.bookings$ = this.store.select(bookings);
@@ -64,6 +67,7 @@ export class BookedReport implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.store.dispatch(ReportActions.clearBookings());
     this.seasons$.pipe(takeUntil(this.destroy$)).subscribe(seasons => {
       this.activeSeason = seasons.find(s => s.isActive === true) || null;
     });
@@ -72,6 +76,10 @@ export class BookedReport implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  showTruckAssignmentPopup(){
+    this.matDialog.open(TruckAssignment);
   }
 
   editBooking(booking: Booking) {

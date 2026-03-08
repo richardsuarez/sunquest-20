@@ -18,22 +18,29 @@
 
   <div class="popover-content">
     <!-- Loading state -->
-    <div *ngIf="loading" class="loading">
+    @if(loading){
+    <div class="loading">
       <p>Loading bookings...</p>
     </div>
+    }
 
     <!-- Error state -->
-    <div *ngIf="error && !loading" class="error">
+    @if(error && !loading){
+    <div class="error">
       <p>{{ error }}</p>
     </div>
+    }
 
     <!-- Empty state -->
-    <div *ngIf="!loading && !error && tripBookings.length === 0" class="empty">
+    @if(!loading && !error && tripBookings.length === 0){
+    <div class="empty">
       <p>No bookings for this trip</p>
     </div>
+    }
 
     <!-- Bookings list -->
-    <div *ngIf="!loading && tripBookings.length > 0 && !isMobile" style="padding: 10px;">
+    @if(!loading && tripBookings.length > 0 && !isMobile){
+    <div style="padding: 10px;">
       <table mat-table [dataSource]="tripBookings" style="text-align: start">
         <ng-container matColumnDef="customer">
           <th mat-header-cell *matHeaderCellDef>Customer</th>
@@ -113,68 +120,75 @@
         <tr mat-row *matRowDef="let booking; columns: bookingTableColumns;"></tr>
       </table>
     </div>
+    }
 
-    <div *ngIf="!loading && tripBookings.length > 0 && isMobile">
-      <!-- Mobile-friendly card layout for bookings -->
-      <div class="booking-cards-container-mobile">
-        <button [disabled]="bookingIndex === 0" mat-icon-button (click)="previousBooking()">
-          <mat-icon>chevron_left</mat-icon>
-        </button>
-        <mat-card class="booking-card">
-          <!-- Customer Section -->
+    @if(!loading && tripBookings.length > 0 && isMobile){
+    <div class="booking-cards-container-mobile">
+      <button [disabled]="bookingIndex === 0" mat-icon-button (click)="previousBooking()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <mat-card class="booking-card">
+        <!-- Customer Section -->
+        <div class="card-section">
+          <span class="card-label">Customer</span>
+          <span class="card-value">{{ getPrimaryCustomer(currentBooking) }}</span>
+        </div>
+
+        <!-- Vehicles Section -->
+         @if(getBookingVehicles(currentBooking).length > 0){
           <div class="card-section">
-            <span class="card-label">Customer</span>
-            <span class="card-value">{{ getPrimaryCustomer(currentBooking) }}</span>
-          </div>
-
-          <!-- Vehicles Section -->
-          <div class="card-section" *ngIf="getBookingVehicles(currentBooking).length > 0">
             <span class="card-label">Vehicles</span>
             <div class="vehicles-list">
-              <div class="vehicle-item" *ngFor="let vehicle of getBookingVehicles(currentBooking)">
-                <div class="vehicle-detail">
-                  <span class="detail-label">Year:</span>
-                  <span class="detail-value">{{ vehicle.year }}</span>
+              @for(vehicle of getBookingVehicles(currentBooking); track vehicle){
+                <div class="vehicle-item">
+                  <div class="vehicle-detail">
+                    <span class="detail-label">Year:</span>
+                    <span class="detail-value">{{ vehicle.year }}</span>
+                  </div>
+                  <div class="vehicle-detail">
+                    <span class="detail-label">Make:</span>
+                    <span class="detail-value">{{ vehicle.make }}</span>
+                  </div>
+                  <div class="vehicle-detail">
+                    <span class="detail-label">Model:</span>
+                    <span class="detail-value">{{ vehicle.model }}</span>
+                  </div>
+                  <div class="vehicle-detail">
+                    <span class="detail-label">Plate:</span>
+                    <span class="detail-value">{{ vehicle.plate }}</span>
+                  </div>
+                  <div class="vehicle-detail">
+                    <span class="detail-label">VIN:</span>
+                    <span class="detail-value">{{ vehicle.vin }}</span>
+                  </div>
                 </div>
-                <div class="vehicle-detail">
-                  <span class="detail-label">Make:</span>
-                  <span class="detail-value">{{ vehicle.make }}</span>
-                </div>
-                <div class="vehicle-detail">
-                  <span class="detail-label">Model:</span>
-                  <span class="detail-value">{{ vehicle.model }}</span>
-                </div>
-                <div class="vehicle-detail">
-                  <span class="detail-label">Plate:</span>
-                  <span class="detail-value">{{ vehicle.plate }}</span>
-                </div>
-                <div class="vehicle-detail">
-                  <span class="detail-label">VIN:</span>
-                  <span class="detail-value">{{ vehicle.vin }}</span>
-                </div>
-              </div>
+              }
+              
             </div>
           </div>
+         }        
 
-          <!-- Actions Section -->
-          <div class="card-actions">
-            <button mat-button color="primary" (click)="displayBooking(currentBooking)">Details</button>
-            <button mat-button style="color: red;" (click)="deleteBooking(currentBooking)">Cancel</button>
-          </div>
-        </mat-card>
-        <button [disabled]="bookingIndex === tripBookings.length - 1" mat-icon-button (click)="nextBooking()">
-          <mat-icon>chevron_right</mat-icon>
-        </button>
-      </div>
-      <div style="text-align: center;">
-        <span class="availability-title">{{ bookingIndex + 1 }}/{{tripBookings.length}}</span>
-      </div>
+        <!-- Actions Section -->
+        <div class="card-actions">
+          <button mat-button color="primary" (click)="displayBooking(currentBooking)">Details</button>
+          <button mat-button style="color: red;" (click)="deleteBooking(currentBooking)">Cancel</button>
+        </div>
+      </mat-card>
+      <button [disabled]="bookingIndex === tripBookings.length - 1" mat-icon-button (click)="nextBooking()">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
+    <div style="text-align: center;">
+      <span class="availability-title">{{ bookingIndex + 1 }}/{{tripBookings.length}}</span>
+    </div>
+    }
   </div>
 
   <!-- Trip Actions Footer -->
   <div class="popover-footer">
-    <button mat-button color="primary" (click)="editTrip()">Edit Trip</button>
+    @if(activeSeason && activeSeason.isCurrent){
+      <button mat-button color="primary" (click)="editTrip()">Edit Trip</button>
+    }    
     <button mat-button style="color: red;" (click)="deleteTrip()">Delete Trip</button>
   </div>
 </div>

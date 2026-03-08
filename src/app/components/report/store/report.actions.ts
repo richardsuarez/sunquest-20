@@ -18,6 +18,7 @@ export const getBookReport = createAction('[Report] Get booking report with truc
 export const getBookReportSuccess = createAction('[Report] Successfully got booking report with trucks', props<{bookReport: BookReport}>());
 
 export const clearBookReport = createAction('[Report] Set as null bookReport property');
+export const clearBookings = createAction('[Report] Reset booking list');
 
 // #region customer-report
 

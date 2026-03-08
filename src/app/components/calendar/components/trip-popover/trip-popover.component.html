@@ -14,13 +14,18 @@
                     <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
                         <mat-label>Truck</mat-label>
                         <mat-select formControlName="truckId">
-                            <mat-option *ngFor="let truck of truckList" [value]="truck.id">
-                                {{ truck.truckNumber }} ({{ truck.companyName }})
-                            </mat-option>
+                            @for(truck of truckList; track truck){
+                                <mat-option [value]="truck.id">
+                                    {{ truck.truckNumber }} ({{ truck.companyName }})
+                                </mat-option>
+                            }
                         </mat-select>
-                        <mat-error *ngIf="tripForm.get('truckId')?.hasError('required')">
-                            Truck is required
-                        </mat-error>
+                        @if(tripForm.get('truckId')?.hasError('required')){
+                            <mat-error>
+                                Truck is required
+                            </mat-error>
+                        }
+                        
                     </mat-form-field>
                     <!-- Load Number -->
                     <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
@@ -41,9 +46,11 @@
                             <mat-option value="Florida">Florida</mat-option>
                             <mat-option value="New York">New York</mat-option>
                         </mat-select>
-                        <mat-error *ngIf="tripForm.get('origin')?.hasError('required')">
-                            Origin is required
-                        </mat-error>
+                        @if(tripForm.get('origin')?.hasError('required')){
+                            <mat-error>
+                                Origin is required
+                            </mat-error>
+                        }
                     </mat-form-field>
 
                     <!-- Destination -->
@@ -53,9 +60,11 @@
                             <mat-option value="Florida">Florida</mat-option>
                             <mat-option value="New York">New York</mat-option>
                         </mat-select>
-                        <mat-error *ngIf="tripForm.get('destination')?.hasError('required')">
-                            Destination is required
-                        </mat-error>
+                        @if(tripForm.get('destination')?.hasError('required')){
+                            <mat-error>
+                                Destination is required
+                            </mat-error>
+                        }
                     </mat-form-field>
                 </div>
             } @else {
@@ -76,9 +85,12 @@
                         placeholder="Choose departure date">
                     <mat-datepicker-toggle matSuffix [for]="departurePickerStart"></mat-datepicker-toggle>
                     <mat-datepicker #departurePickerStart></mat-datepicker>
-                    <mat-error *ngIf="tripForm.get('departureDate')?.hasError('required')">
+                    @if(tripForm.get('departureDate')?.hasError('required')){
+                        <mat-error>
                         Departure Date is required
                     </mat-error>
+                    }
+                    
                 </mat-form-field>
 
                 <!-- Arrival Date -->
@@ -88,9 +100,12 @@
                         placeholder="Choose arrival date" [min]="tripForm.controls.departureDate.value">
                     <mat-datepicker-toggle matSuffix [for]="arrivalPickerStart"></mat-datepicker-toggle>
                     <mat-datepicker #arrivalPickerStart></mat-datepicker>
-                    <mat-error *ngIf="tripForm.get('arrivalDate')?.hasError('required')">
-                        Arrival Date is required
-                    </mat-error>
+                    @if(tripForm.get('arrivalDate')?.hasError('required')){
+                        <mat-error >
+                            Arrival Date is required
+                        </mat-error>
+                    }
+                    
                 </mat-form-field>
             </div>
         </form>

@@ -12,12 +12,16 @@ export const loadCustomersFail = createAction('[Main] Load Customer Fail', props
 export const loadSeasons = createAction('[Main] Load Seasons');
 export const loadSeasonsSuccess = createAction('[Main] Load Seasons Success', props<{ seasons: Season[] }>());
 export const loadSeasonsFail = createAction('[Main] Load Seasons Fail', props<{ error: string }>());
-export const activateSeason = createAction('[Main] Activate Season', props<{ season: Season }>());
+export const openSeason = createAction('[Main] Open Season', props<{ season: Season }>());
+export const openSeasonSuccess = createAction('[Main] Open Season Success', props<{ season: Season }>());
+export const openSeasonFail = createAction('[Main] Open Season Fail', props<{ error: string }>());
+
+export const activateSeason = createAction('[Main] Activate Season', props<{ currentActiveSeason: Season | undefined, seasonToActivate: Season }>());
 export const activateSeasonSuccess = createAction('[Main] Activate Season Success', props<{ season: Season }>());
 export const activateSeasonFail = createAction('[Main] Activate Season Fail', props<{ error: string }>());
-export const deactivateSeason = createAction('[Main] Deactivate Season', props<{ seasonId: string }>());
-export const deactivateSeasonSuccess = createAction('[Main] Deactivate Season Success', props<{ seasonId: string }>());
-export const deactivateSeasonFail = createAction('[Main] Deactivate Season Fail', props<{ error: string }>());
+export const closeSeason = createAction('[Main] Close Season', props<{ seasonId: string }>());
+export const closeSeasonSuccess = createAction('[Main] Close Season Success', props<{ seasonId: string }>());
+export const closeSeasonFail = createAction('[Main] Close Season Fail', props<{ error: string }>());
 
 export const setBreakpoint = createAction('[Main] Set Breakpoint', props<{ isMobile: boolean }>());
 export const loadBooking = createAction('[Main] Load booking', props<{ booking: Booking }>());

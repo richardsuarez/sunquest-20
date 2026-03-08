@@ -3,49 +3,58 @@
         <div style="cursor: pointer" routerLink="/main/calendar">
             <img src="../../../../assets/logo.png" alt="Sun Quest logo" width="150px">
         </div>
-        <nav *ngIf="!isMobile" class="menu">
-            <div class="shortcut" routerLink="/main/calendar">Calendar</div>
-            <div class="shortcut" routerLink="/main/customer">Customers</div>
-            <div class="shortcut" routerLink="/main/truck">Trucks</div>
-            <div id="report-menu-header" class="shortcut" (click)="toggleReportMenu()">Report</div>
-            <!--<div class="shortcut" routerLink="/main/report/book">Report</div>-->
-            
-        </nav>
-        <nav *ngIf="!isMobile" class="menu">
-            <div class="shortcut" style="cursor: pointer" (click)="openSeasonPopup()">Season</div>
-            <button mat-raised-button style="display: flex; align-items: center; gap: 5px" (click)="logout()">
-                <mat-icon>logout</mat-icon>
-                Log Out
-            </button>
-        </nav>
-        <div style="display: flex; align-items: center; gap: 30px" *ngIf="isMobile">
-            <button mat-icon-button style="height: 36px; width: 36px; padding: 0px !important"
-                (click)="toggleMobileMainMenu()">
-                <mat-icon style="font-size: 36px; height: 36px; width: 36px;">menu</mat-icon>
-            </button>
-            <button mat-icon-button style="display: flex; align-items: center; gap: 5px" (click)="logout()">
-                <mat-icon>logout</mat-icon>
-            </button>
-        </div>
+        @if(!isMobile){
+            <nav class="menu">
+                <div class="shortcut" routerLink="/main/calendar">Calendar</div>
+                <div class="shortcut" routerLink="/main/customer">Customers</div>
+                <div class="shortcut" routerLink="/main/truck">Trucks</div>
+                <div id="report-menu-header" class="shortcut" (click)="toggleReportMenu()">Report</div>
+                <!--<div class="shortcut" routerLink="/main/report/book">Report</div>-->
+            </nav>
+        }
+        @if(!isMobile){
+            <nav class="menu">
+                <div class="shortcut" style="cursor: pointer" (click)="openSeasonPopup()">Season</div>
+                <button mat-raised-button style="display: flex; align-items: center; gap: 5px" (click)="logout()">
+                    <mat-icon>logout</mat-icon>
+                    Log Out
+                </button>
+            </nav>
+        }
+        @if(isMobile){
+            <div style="display: flex; align-items: center; gap: 30px">
+                <button mat-icon-button style="height: 36px; width: 36px; padding: 0px !important"
+                    (click)="toggleMobileMainMenu()">
+                    <mat-icon style="font-size: 36px; height: 36px; width: 36px;">menu</mat-icon>
+                </button>
+                <button mat-icon-button style="display: flex; align-items: center; gap: 5px" (click)="logout()">
+                    <mat-icon>logout</mat-icon>
+                </button>
+            </div>
+        }
     </div>
 </div>
-<div *ngIf="isMobile" class="dropdown-menu" [class.open]="mobileMainMenu">
-    <button mat-menu-item routerLink="/main/calendar" (click)="toggleMobileMainMenu()">Calendar</button>
-    <button mat-menu-item routerLink="/main/customer" (click)="toggleMobileMainMenu()">Customers</button>
-    <button mat-menu-item routerLink="/main/truck" (click)="toggleMobileMainMenu()">Trucks</button>
-    <button mat-menu-item routerLink="/main/report/booked" (click)="toggleMobileMainMenu()">Booked Report</button>
-    <button mat-menu-item routerLink="/main/report/customer" (click)="toggleMobileMainMenu()">Customer Report</button>
-    <button mat-menu-item routerLink="/main/report/payment" (click)="toggleMobileMainMenu()">Payment Report</button>
-    <button mat-menu-item routerLink="/main/report/work" (click)="toggleMobileMainMenu()">Work Order</button>
-    <button mat-menu-item (click)="openSeasonPopup()">Season</button>
-</div>
 
-<div id="report-menu" *ngIf="!isMobile && showReportMenu"
-    style="width: 150px;"
-    [style.top.px]="reportMenuPosition.top" 
-    [style.left.px]="reportMenuPosition.left">
-    <div style="width: 100%; padding: 10px; cursor: pointer" routerLink="/main/report/booked" (click)="toggleReportMenu()">Booked Report</div>
-    <div style="width: 100%; padding: 10px; cursor: pointer" routerLink="/main/report/customer" (click)="toggleReportMenu()">Customer Report</div>
-    <div style="width: 100%; padding: 10px; cursor: pointer" routerLink="/main/report/payment" (click)="toggleReportMenu()">Payment Report</div>
-    <div style="width: 100%; padding: 10px; cursor: pointer" routerLink="/main/report/work" (click)="toggleReportMenu()">Work Order</div>
-</div>
+@if(isMobile){
+    <div class="dropdown-menu" [class.open]="mobileMainMenu">
+        <button mat-menu-item routerLink="/main/calendar" (click)="toggleMobileMainMenu()">Calendar</button>
+        <button mat-menu-item routerLink="/main/customer" (click)="toggleMobileMainMenu()">Customers</button>
+        <button mat-menu-item routerLink="/main/truck" (click)="toggleMobileMainMenu()">Trucks</button>
+        <button mat-menu-item routerLink="/main/report/booked" (click)="toggleMobileMainMenu()">Booked Report</button>
+        <button mat-menu-item routerLink="/main/report/customer" (click)="toggleMobileMainMenu()">Customer Report</button>
+        <button mat-menu-item routerLink="/main/report/payment" (click)="toggleMobileMainMenu()">Payment Report</button>
+        <button mat-menu-item routerLink="/main/report/work" (click)="toggleMobileMainMenu()">Work Order</button>
+        <button mat-menu-item (click)="openSeasonPopup()">Season</button>
+    </div>
+}
+
+@if(!isMobile && showReportMenu){
+    <div id="report-menu" style="width: 150px;"
+        [style.top.px]="reportMenuPosition.top" 
+        [style.left.px]="reportMenuPosition.left">
+        <div style="width: 100%; padding: 10px; cursor: pointer" routerLink="/main/report/booked" (click)="toggleReportMenu()">Booked Report</div>
+        <div style="width: 100%; padding: 10px; cursor: pointer" routerLink="/main/report/customer" (click)="toggleReportMenu()">Customer Report</div>
+        <div style="width: 100%; padding: 10px; cursor: pointer" routerLink="/main/report/payment" (click)="toggleReportMenu()">Payment Report</div>
+        <div style="width: 100%; padding: 10px; cursor: pointer" routerLink="/main/report/work" (click)="toggleReportMenu()">Work Order</div>
+    </div>
+}

@@ -91,6 +91,7 @@ export class WorkOrder implements OnInit, OnDestroy {
     ]).subscribe(res => {
       this.isMobile = res.matches;
     });
+    this.store.dispatch(ReportActions.clearBookings());
     this.bookings$.pipe(takeUntil(this.destroy$)).subscribe((bookings) => {
       if (bookings && bookings.length > 0) {
         this.bookingList = bookings;

@@ -302,7 +302,7 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
   }
 
   addTrip() {
-    if (!this.activeSeason) return;
+    if (!this.activeSeason || (this.activeSeason && this.activeSeason.isCurrent === false)) return;
 
     if (this.tripForm.invalid) {
       this.tripForm.markAllAsTouched();
@@ -476,7 +476,9 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
       truckId: this.currentSelectedTruckId,
       notes: this.form.controls.notes.value,
       createdAt: new Date(),
-      season: this.activeSeason ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
+      season: this.originalBooking && this.originalBooking.season
+        ? this.originalBooking.season
+        : this.activeSeason && this.activeSeason.isCurrent ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
     };
 
     // dispatch booking action — effect will persist and handle snackbar/navigation

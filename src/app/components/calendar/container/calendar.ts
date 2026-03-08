@@ -15,6 +15,7 @@ import * as CalendarSelectors from '../store/calendar.selectors';
 import * as MainSelectors from '../../main/store/main.selectors';
 import { Season } from '../../season/models/season.model';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { PopupComponent } from '../../../shared/popup/popup.component';
 
 @Component({
   selector: 'app-calendar',
@@ -120,25 +121,38 @@ export class Calendar implements OnInit, OnDestroy {
   }
 
   newTrip() {
-    this.matDialog.open(TripPopoverComponent, {
-      data: {
-        trucks: this.truckList,
-        trip: {
-          loadNumber: '',
-          departureDate: new Date(),
-          arrivalDate: new Date(),
-          origin: '',
-          destination: '',
-          remLoadCap: 0,
-          remCarCap: 0,
-          delayDate: null,
-          season: this.activeSeason ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
+    if (this.activeSeason && this.activeSeason.isCurrent) {
+      this.matDialog.open(TripPopoverComponent, {
+        data: {
+          trucks: this.truckList,
+          trip: {
+            loadNumber: '',
+            departureDate: new Date(),
+            arrivalDate: new Date(),
+            origin: '',
+            destination: '',
+            remLoadCap: 0,
+            remCarCap: 0,
+            delayDate: null,
+            season: this.activeSeason ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
+          },
+          truckTrip: null,
         },
-        truckTrip: null,
-      },
-      maxWidth: '500px',
-      width: '90vw',
-    });
+        maxWidth: '500px',
+        width: '90vw',
+      });
+    } else {
+      this.matDialog.open(
+        PopupComponent,
+        {
+          data: {
+            title: 'Archived season',
+            message: `Cannot create trip because the active season is archived. Please create a new season or switch to the current one.`,
+            cancelButton: 'OK',
+          }
+        }
+      );
+    }
   }
 
   onDateSelected(day: Day) {
@@ -148,9 +162,9 @@ export class Calendar implements OnInit, OnDestroy {
   onEventClick(clickData: EventClickData) {
     const event = clickData.event;
     this.store.dispatch(CalendarActions.loadSelectedTrip({ trip: event.trip! }));
-    
+
     this.matDialog.open(CalendarPopoverComponent, {
-      data:{
+      data: {
         isMobile: this.isMobile,
         truckId: event.truckId || null,
         startDate: this.currentMonthStart,

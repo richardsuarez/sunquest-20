@@ -3,19 +3,16 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { withLatestFrom, switchMap, map, catchError, of, tap, filter, combineLatest, concatMap, from, Observable, concat, endWith } from 'rxjs';
 import { CustomerService } from '../service/customer.service';
-import { searchCriteria, lastCustomer, customerViewModel, firstCustomer } from './customer.selectors';
+import { searchCriteria } from './customer.selectors';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import * as CustomerActions from './customer.actions';
-import { Customer, SearchCriteria } from '../model/customer.model';
 import { Router } from '@angular/router';
 import * as MainActions from '../../main/store/main.actions';
-import { Booking } from '../../book/model/booking.model';
 
 @Injectable()
 export class CustomerEffects {
     private injector = inject(EnvironmentInjector);
     readonly getNextCustomerList$;
-    readonly getPreviousCustomerList$;
     readonly getBookingList$;
     readonly addCustomerStart$;
     readonly addCustomerEnd$;
@@ -40,43 +37,14 @@ export class CustomerEffects {
         this.getNextCustomerList$ = createEffect(() =>
             this.actions$.pipe(
                 ofType(CustomerActions.getNextCustomerListStart),
-                withLatestFrom(this.store.select(searchCriteria), this.store.select(lastCustomer)),
-                switchMap(([, criteria, customer]) =>
+                withLatestFrom(this.store.select(searchCriteria)),
+                switchMap(([, criteria]) =>
                     runInInjectionContext(this.injector, () =>
-                        from(this.customerService.getNextCustomerList(criteria, customer)).pipe(
-                            switchMap((customerList$) =>
-                                combineLatest([
-                                    customerList$,
-                                    from(this.customerService.getCustomerCount(criteria)),
-                                ]).pipe(
-                                    map(([response, count]) =>
-                                        CustomerActions.getNextCustomerListEnd({ customerList: response, total: count })
-                                    ),
-                                    catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        );
-
-        this.getPreviousCustomerList$ = createEffect(() =>
-            this.actions$.pipe(
-                ofType(CustomerActions.getPreviousCustomerListStart),
-                withLatestFrom(this.store.select(searchCriteria), this.store.select(firstCustomer)),
-                filter((value): value is [ReturnType<typeof CustomerActions.getPreviousCustomerListStart>, SearchCriteria, Customer] => !!value[2]),
-                switchMap(([, criteria, customer]) =>
-                    runInInjectionContext(this.injector, () =>
-                        from(this.customerService.getPreviousCustomerList(criteria, customer)).pipe(
-                            switchMap((customerList$) =>
-                                customerList$.pipe(
-                                    map((response) =>
-                                        CustomerActions.getPreviousCustomerListEnd({ customerList: response })
-                                    ),
-                                    catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
-                                )
-                            )
+                        from(this.customerService.getCustomerList(criteria)).pipe(
+                            map((customerList) =>
+                                CustomerActions.getNextCustomerListEnd({ customerList })
+                            ),
+                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )
                     )
                 )
