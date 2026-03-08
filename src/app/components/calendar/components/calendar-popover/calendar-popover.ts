@@ -17,6 +17,8 @@ import { MatTableModule } from "@angular/material/table";
 import { TripPopoverComponent } from '../trip-popover/trip-popover.component';
 import * as CalendarActions from '../../store/calendar.actions';
 import { Vehicle } from '../../../customer/model/customer.model';
+import { Season } from '../../../season/models/season.model';
+import { selectSeasons } from '../../../main/store/main.selectors';
 
 @Component({
   selector: 'app-calendar-popover',
@@ -36,6 +38,7 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
   truckId: string | null = null;
   startDate: Date = new Date();
   endDate: Date = new Date();
+  activeSeason!: Season | undefined;
   
   tripBookings: Booking[] = []
   selectedTrip$!: Observable<Trip | null>;
@@ -46,6 +49,7 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
   adjustedPosition: { top: number; left: number } = { top: 0, left: 0 };
   truckList: any[] = [];
   truckList$: Observable<any[]>;
+  seasons$!: Observable<Season[]>;
 
   currentBooking!: Booking;
   bookingIndex = 0;
@@ -64,9 +68,14 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
     this.bookings$ = this.store.select(currentMonthBookings)
     this.selectedTrip$ = this.store.select(selectedTrip);
     this.truckList$ = this.store.select(selectTrucks);
+    this.seasons$ = this.store.select(selectSeasons);
   }
 
   ngOnInit() {
+    this.seasons$.pipe(takeUntil(this.destroy$)).subscribe((seasons) => {
+      this.activeSeason = seasons.find(s => s.isActive);
+    });
+    
     this.selectedTrip$.pipe(takeUntil(this.destroy$)).subscribe(trip => {
       if(trip){
         this.trip = trip;

@@ -147,7 +147,7 @@ table {
   }
 }
 
-.currentSeason { 
+.activeSeason { 
   color: green;
   font-weight: bold;
 }

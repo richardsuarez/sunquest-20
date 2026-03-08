@@ -186,7 +186,9 @@
 
   <!-- Trip Actions Footer -->
   <div class="popover-footer">
-    <button mat-button color="primary" (click)="editTrip()">Edit Trip</button>
+    @if(activeSeason && activeSeason.isCurrent){
+      <button mat-button color="primary" (click)="editTrip()">Edit Trip</button>
+    }    
     <button mat-button style="color: red;" (click)="deleteTrip()">Delete Trip</button>
   </div>
 </div>

@@ -91,6 +91,7 @@ export class PaymentReport implements OnInit, OnDestroy {
 
     this.bookings$.pipe(takeUntil(this.destroy$)).subscribe(bookings => {
       if (bookings && this.selectedTrip) {
+        this.tableData = [];
         bookings.forEach(booking => {
           const auxData = {
             recNo: this.searchRecNo(booking),

@@ -187,7 +187,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
     return `tel:${phone}`;
   }
 
-  isCurrentSeason(season: string): boolean {
+  isActiveSeason(season: string): boolean {
     const aux = this.activeSeason?.seasonName + '-' + this.activeSeason?.year;
     return season === aux;
   }

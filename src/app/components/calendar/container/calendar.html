@@ -18,10 +18,12 @@
     </app-calendar-view>
 
     <!-- Floating Add Trip Button -->
-    <button mat-button
-        class="add-trip-fab" 
-        (click)="newTrip()"
-        aria-label="Add new trip">
-        Add Trip
-    </button>
+     @if(activeSeason?.isCurrent){
+        <button mat-button
+            class="add-trip-fab" 
+            (click)="newTrip()"
+            aria-label="Add new trip">
+            Add Trip
+        </button>
+     }
 </div>
