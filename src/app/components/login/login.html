@@ -5,27 +5,40 @@
         <mat-form-field floatLabel="always" appearance="outline" subscriptSizing="dynamic">
             <mat-label>Email</mat-label>
             <input matInput type="email" required formControlName="email">
-            <mat-error *ngIf="form_login.controls.email.hasError('email')">Invalid email</mat-error>
+            @if(form_login.controls.email.hasError('email')){
+                <mat-error>Invalid email</mat-error>
+            }
         </mat-form-field>
         <mat-form-field floatLabel="always" appearance="outline" subscriptSizing="dynamic">
             <mat-label>Password</mat-label>
             <input matInput [type]="isVisible ? 'text': 'password'" required formControlName="password">
-            <mat-icon matSuffix *ngIf="!isVisible" (click)="isVisible = true;">visibility</mat-icon>
-            <mat-icon matSuffix *ngIf="isVisible" (click)="isVisible = false;">visibility_off</mat-icon>
-            <mat-error *ngIf="form_login.controls.password.hasError('Invalid')">Invalid email</mat-error>
-        </mat-form-field>
-        <div *ngIf="appError$ | async" class="error">
-            {{formatError(appError$ | async)}}
-        </div>
-        <button *ngIf="!(signing$ | async)" mat-raised-button style="background-color: #ED2D89; color: white"
-            type="submit" (click)="signIn()">Sign In</button>
-        <button *ngIf="(signing$ | async)" mat-button mat-raised-button disabled>
-            <mat-icon>
-                <mat-spinner diameter="18"></mat-spinner>
-            </mat-icon>
-            Signing...
-        </button>
+            @if(!isVisible){
+                <mat-icon matSuffix (click)="isVisible = true;">visibility</mat-icon>
+            } @else {
+                <mat-icon matSuffix (click)="isVisible = false;">visibility_off</mat-icon>
+            }
 
+            @if(form_login.controls.password.hasError('Invalid')){
+                <mat-error>Invalid email</mat-error>
+            }
+        </mat-form-field>
+        @if(appError$ | async){
+            <div class="error">
+                {{formatError(appError$ | async)}}
+            </div>
+        }
+        @if(!(signing$ | async)){
+            <button mat-raised-button style="background-color: #ED2D89; color: white"
+            type="submit" (click)="signIn()">Sign In</button>
+        } @else {
+            <button mat-button mat-raised-button disabled>
+                <mat-icon>
+                    <mat-spinner diameter="18"></mat-spinner>
+                </mat-icon>
+                Signing...
+            </button>
+        }
+        
         <div class="version">
             Version: {{ appVersion }}
         </div>

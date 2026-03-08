@@ -7,7 +7,8 @@
     </div>
     <div class="body">
         <h1>{{ crudTitle() }} Customer</h1>
-        <form *ngIf="!isMobile" [formGroup]="customerForm" class="form-desktop">
+        @if(!isMobile){
+            <form [formGroup]="customerForm" class="form-desktop">
             <div class="information-region">
                 <h3>Primary Customer</h3>
                 <div style="display: flex; justify-content: space-between; gap: 20px !important">
@@ -170,9 +171,8 @@
             </div>
             <div class="vehicle-region">
                 <h3>Vehicles</h3>
-
-                <div *ngIf="customerVM$ | async as customerVM">
-                    <div *ngIf="customerVM.vehicles && customerVM.vehicles.length">
+                @if(customerVM$ | async; as customerVM){
+                    @if(customerVM.vehicles && customerVM.vehicles.length){
                         <table mat-table [dataSource]="customerVM.vehicles" class="mat-elevation-z8"
                             style="border: 1px solid gray; margin-bottom: 20px">
                             <ng-container matColumnDef="recNo">
@@ -226,15 +226,16 @@
                             <tr mat-header-row *matHeaderRowDef="vehiclesProperties"></tr>
                             <tr mat-row *matRowDef="let row; columns: vehiclesProperties;"></tr>
                         </table>
-                    </div>
-                    <div *ngIf="customerVM.DocumentID && (!customerVM.vehicles || customerVM.vehicles.length === 0)"
-                        style="margin-bottom: 20px">
-                        <div style="margin: 10px">No register vehicles for this customer</div>
-                    </div>
-                </div>
+                    } @else {
+                        <div style="margin-bottom: 20px">
+                            <div style="margin: 10px">No register vehicles for this customer</div>
+                        </div>
+                    }
+                }
 
                 <!-- temporary vehicles (not yet persisted) -->
-                <div *ngIf="tempVehicles && tempVehicles.length" style="margin-bottom: 20px">
+                 @if(tempVehicles && tempVehicles.length){
+                    <div style="margin-bottom: 20px">
                     <h4 style="margin-bottom: 0px !important">Pending Vehicles</h4>
                     <table mat-table [dataSource]="tempVehicles" class="mat-elevation-z8"
                         style="border: 1px solid gray; margin-bottom: 20px">
@@ -289,6 +290,8 @@
                         <tr mat-row *matRowDef="let row; columns: vehiclesProperties;"></tr>
                     </table>
                 </div>
+                 }
+                
 
                 <!-- inline add vehicle form -->
                 <form [formGroup]="vehicleForm" style="margin-top: 50px">
@@ -344,11 +347,13 @@
                 </form>
             </div>
         </form>
+        }
+        
 
         <!-- Vehicles section -->
 
-
-        <form *ngIf="isMobile" [formGroup]="customerForm" class="form-mobile">
+        @if(isMobile){
+            <form [formGroup]="customerForm" class="form-mobile">
             <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
                 <mat-label>First Name</mat-label>
                 <input type="text" matInput required formControlName="primaryFirstName" appAllowAlphaAndSpecificChar>
@@ -496,9 +501,10 @@
             </div>
 
             <h3>Vehicles</h3>
-
-            <div class="vehicles-list" *ngIf="currentCustomer?.vehicles && currentCustomer?.vehicles?.length">
-                <div class="vehicle-item" *ngFor="let vehicle of currentCustomer?.vehicles">
+            @if(currentCustomer?.vehicles && currentCustomer?.vehicles?.length){
+                <div class="vehicles-list">
+                    @for(vehicle of currentCustomer?.vehicles; track vehicle){
+                        <div class="vehicle-item">
                     <div style="width: 75%">
                         <div class="vehicle-detail">
                             <span class="detail-label">Rec No:</span>
@@ -533,52 +539,60 @@
                         <button mat-button style="color: red;" (click)="deleteVehicle(vehicle.id)">Delete</button>
                     </div>
                 </div>
+                    }
+                
             </div>
-
-            <div *ngIf="currentCustomer && (!currentCustomer.vehicles || currentCustomer.vehicles.length === 0)"
-                style="margin-bottom: 20px; width: 100%">
-                <div style="margin: 10px">No register vehicles for this customer</div>
-            </div>
-            <!-- temporary vehicles (not yet persisted) -->
-            <h3 *ngIf="tempVehicles && tempVehicles.length > 0">Pending vehicles</h3>
-            <div class="vehicles-list">
-                <div class="vehicle-item" *ngFor="let vehicle of tempVehicles">
-                    <div style="width: 75%">
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Rec No:</span>
-                            <span class="detail-value">{{ vehicle.recNo }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Color:</span>
-                            <span class="detail-value">{{ vehicle.color }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Year:</span>
-                            <span class="detail-value">{{ vehicle.year }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Make:</span>
-                            <span class="detail-value">{{ vehicle.make }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Model:</span>
-                            <span class="detail-value">{{ vehicle.model }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Plate:</span>
-                            <span class="detail-value">{{ vehicle.plate }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">VIN:</span>
-                            <span class="detail-value">{{ vehicle.vin }}</span>
-                        </div>
-                    </div>
-                    <div class="card-actions" style="width: 25%">
-                        <button mat-button style="color: red;" (click)="deleteTempVehicle(vehicle)">Delete</button>
-                    </div>
+            }
+            
+            @if(currentCustomer && (!currentCustomer.vehicles || currentCustomer.vehicles.length === 0)){
+                <div style="margin-bottom: 20px; width: 100%">
+                    <div style="margin: 10px">No register vehicles for this customer</div>
                 </div>
-            </div>
-
+            }
+            
+            <!-- temporary vehicles (not yet persisted) -->
+             @if(tempVehicles && tempVehicles.length > 0){
+                <h3>Pending vehicles</h3>
+                <div class="vehicles-list">
+                    @for(vehicle of tempVehicles; track vehicle){
+                        <div class="vehicle-item">
+                            <div style="width: 75%">
+                                <div class="vehicle-detail">
+                                    <span class="detail-label">Rec No:</span>
+                                    <span class="detail-value">{{ vehicle.recNo }}</span>
+                                </div>
+                                <div class="vehicle-detail">
+                                    <span class="detail-label">Color:</span>
+                                    <span class="detail-value">{{ vehicle.color }}</span>
+                                </div>
+                                <div class="vehicle-detail">
+                                    <span class="detail-label">Year:</span>
+                                    <span class="detail-value">{{ vehicle.year }}</span>
+                                </div>
+                                <div class="vehicle-detail">
+                                    <span class="detail-label">Make:</span>
+                                    <span class="detail-value">{{ vehicle.make }}</span>
+                                </div>
+                                <div class="vehicle-detail">
+                                    <span class="detail-label">Model:</span>
+                                    <span class="detail-value">{{ vehicle.model }}</span>
+                                </div>
+                                <div class="vehicle-detail">
+                                    <span class="detail-label">Plate:</span>
+                                    <span class="detail-value">{{ vehicle.plate }}</span>
+                                </div>
+                                <div class="vehicle-detail">
+                                    <span class="detail-label">VIN:</span>
+                                    <span class="detail-value">{{ vehicle.vin }}</span>
+                                </div>
+                            </div>
+                            <div class="card-actions" style="width: 25%">
+                                <button mat-button style="color: red;" (click)="deleteTempVehicle(vehicle)">Delete</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+             }
 
             <form [formGroup]="vehicleForm" style="width: 100%">
                 <div style="display: flex; justify-content: space-between; width: 100%">
@@ -636,26 +650,28 @@
                 </div>
             </form>
         </form>
+        }
+        
         <div [class.form-actions-desktop]="!isMobile" [class.form-actions-mobile]="isMobile">
             <button mat-raised-button (click)="navigateBack()" style="color: black">Back</button>
-            <button
-                *ngIf="(customerForm.dirty || (tempVehicles && tempVehicles.length > 0)) && !(savingCustomer$ | async)"
-                mat-raised-button type="submit" (click)="onSubmit()"
-                style="background-color: #ED2D89; color: white;">
-                Save
-            </button>
-            <button *ngIf="(customerForm.dirty || (tempVehicles && tempVehicles.length > 0)) && (savingCustomer$ | async)"
-                mat-raised-button disabled style="background-color: gray; color: white;">
-                <mat-icon *ngIf="savingCustomer$">
-                    <mat-spinner diameter="18"></mat-spinner>
-                </mat-icon>
-                Saving...
-            </button>
-
-            <button *ngIf="customerForm.pristine && (tempVehicles && tempVehicles.length === 0) " mat-raised-button
-                style="background-color: gray; color: white" disabled>
-                Save
-            </button>
+            @if((customerForm.dirty || (tempVehicles && tempVehicles.length > 0)) && !(savingCustomer$ | async)){
+                <button mat-raised-button type="submit" (click)="onSubmit()" style="background-color: #ED2D89; color: white;">
+                    Save
+                </button>
+            }
+            @if((customerForm.dirty || (tempVehicles && tempVehicles.length > 0)) && (savingCustomer$ | async)){
+                <button mat-raised-button disabled style="background-color: gray; color: white;">
+                    <mat-icon>
+                        <mat-spinner diameter="18"></mat-spinner>
+                    </mat-icon>
+                    Saving...
+                </button>
+            }
+            @if(customerForm.pristine && (tempVehicles && tempVehicles.length === 0)){
+                <button mat-raised-button style="background-color: gray; color: white" disabled>
+                    Save
+                </button>
+            }
         </div>
     </div>
 </div>
