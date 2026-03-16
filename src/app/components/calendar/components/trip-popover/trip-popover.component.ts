@@ -75,7 +75,7 @@ export class TripPopoverComponent implements OnInit, OnDestroy, AfterViewInit {
             this.originalTruckId = data.truckTrip || null;
             this.tripForm.patchValue({
                 truckId: data.truckTrip,
-                loadNumber: data.trip.loadNumber,
+                loadNumber: String(data.trip.loadNumber),
                 departureDate: data.trip.departureDate,
                 arrivalDate: data.trip.arrivalDate,
                 origin: data.trip.origin,
@@ -103,9 +103,7 @@ export class TripPopoverComponent implements OnInit, OnDestroy, AfterViewInit {
             if(!this.trip?.id && trips) {
                 let highestLoadNumber = 0;
                 trips.forEach(t => {
-                    if (Number.parseInt(t.loadNumber) > highestLoadNumber) {
-                        highestLoadNumber = Number.parseInt(t.loadNumber);
-                    }
+                    highestLoadNumber = Math.max(t.loadNumber, highestLoadNumber);
                 });
                 highestLoadNumber += 1;
                 this.tripForm.controls.loadNumber.setValue(highestLoadNumber.toString());
@@ -164,7 +162,7 @@ export class TripPopoverComponent implements OnInit, OnDestroy, AfterViewInit {
             this.store.dispatch(CalendarActions.addTripStart({
                 truckId: tripData.truckId ?? this.originalTruckId ?? '',
                 trip: {
-                    loadNumber: tripData.loadNumber || '',
+                    loadNumber: Number.parseInt(tripData.loadNumber ?? '0') || 0,
                     departureDate: tripData.departureDate || new Date(),
                     arrivalDate: tripData.arrivalDate || new Date(),
                     origin: tripData.origin || '',

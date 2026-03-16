@@ -54,7 +54,7 @@ export class BookEffects {
                                     ...action.trip,
                                     remCarCap: remCarCapDelta,
                                     remLoadCap: remWeightCapDelta,
-                                    loadNumber: action.trip?.loadNumber || ''
+                                    loadNumber: action.trip?.loadNumber || 0
                                 }
                                 return runInInjectionContext(this.injector, () =>
                                     this.bookingService.updateTrip(action.booking.truckId, updatedTrip).pipe(

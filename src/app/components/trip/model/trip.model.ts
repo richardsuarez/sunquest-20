@@ -1,6 +1,6 @@
 export interface Trip {
   id?: string;
-  loadNumber: string;
+  loadNumber: number;
   departureDate: Date;
   arrivalDate: Date;
   origin: string;

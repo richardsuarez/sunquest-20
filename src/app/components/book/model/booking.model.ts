@@ -22,7 +22,8 @@ export interface Booking {
   departureDate: Date | null;
   tripId: string | null;
   truckId: string | null;
-  notes: string | null;
+  deliveryNotes: string | null;
+  pickupNotes: string | null;
   createdAt?: Date;
   season: string | null;
 }

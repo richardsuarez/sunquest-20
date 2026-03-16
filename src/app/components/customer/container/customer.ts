@@ -235,19 +235,19 @@ export class CustomerComponent implements OnInit, OnDestroy {
           vehicles: customer.vehicles?.filter(v => v.id === vehicle.id)
         }
         this.router.navigate(['main/book/new']);
-        this.store.dispatch(MainAction.loadCustomer({ customer:  auxCustomer}));
-        this.store.dispatch(MainAction.createEmptyBooking()); 
+        this.store.dispatch(MainAction.loadCustomer({ customer: auxCustomer }));
+        this.store.dispatch(MainAction.createEmptyBooking());
       } else {
         this.matDialog.open(
-        PopupComponent,
-        {
-          data: {
-            title: 'No vehicle provided',
-            message: `Cannot create booking because there is no vehicle provided. Please add one and try later.`,
-            cancelButton: 'OK',
+          PopupComponent,
+          {
+            data: {
+              title: 'No vehicle provided',
+              message: `Cannot create booking because there is no vehicle provided. Please add one and try later.`,
+              cancelButton: 'OK',
+            }
           }
-        }
-      );
+        );
       }
     } else {
       this.matDialog.open(
@@ -305,13 +305,13 @@ export class CustomerComponent implements OnInit, OnDestroy {
   }
 
   onSearch() {
-    if(this.searchCustomer.value === ''){
-      this.snackBar.open('Type something to search', 'Close', {duration: 3000});
+    if (this.searchCustomer.value === '') {
+      this.snackBar.open('Type something to search', 'Close', { duration: 3000 });
       return;
     }
 
     //if (this.searchCustomer.value === this.searchCriteria) return
-    
+
     this.store.dispatch(CustomerActions.updateSearchCriteria({
       criteria: this.searchCustomer.value || ''
     }));

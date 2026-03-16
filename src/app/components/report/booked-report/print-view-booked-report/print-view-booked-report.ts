@@ -22,6 +22,7 @@ export class PrintViewBookedReport implements AfterViewInit {
   @Input() bookings!: Booking[];
   @Input() startDate!: Date;
   @Input() endDate!: Date;
+  @Input() truckList!: Truck[] | null;
 
   ngAfterViewInit() {
     window.print();
@@ -32,6 +33,13 @@ export class PrintViewBookedReport implements AfterViewInit {
       return booking.customer.vehicles[0].recNo || '';
     }
     return 'No provided';
+  }
+
+  truckCompanyName(truckId: string | null): string {
+    if (truckId && this.truckList) {
+      return this.truckList.find(t => t.id?.localeCompare(truckId) === 0)?.companyName ?? '';
+    }
+    return ''
   }
 
   vehicleMake(customer: Customer): string {

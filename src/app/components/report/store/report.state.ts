@@ -12,6 +12,7 @@ export interface ReportState{
     bookings: Booking[] | null;
     trucks: Truck[] | null;
     customerList: Customer[] | null;
+    assigningTruck: string | null;
 }
 
 export const initialReportState: ReportState = {
@@ -23,4 +24,5 @@ export const initialReportState: ReportState = {
     bookings: null,
     trucks: null,
     customerList: null,
+    assigningTruck: null,
 };

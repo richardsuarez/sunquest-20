@@ -226,4 +226,35 @@ export class CalendarService {
       })());
     });
   }
+
+  updateDepartureDateofBookings(trip: Trip): Observable<void> {
+    return runInInjectionContext(this.injector, () => {
+      return from((async () => {
+        try {
+          const bookingsRef = collection(this.firestore, this.collectionName);
+          // Query all bookings that have tripId equal to the trip id
+          const q = query(bookingsRef, where('tripId', '==', trip.id));
+
+          let snapshot;
+          try {
+            snapshot = await getDocsFromServer(q);
+          } catch (err) {
+            console.error('[CalendarService] updateDepartureDateofBookings() - server query failed', err);
+            snapshot = await getDocsFromCache(q);
+          }
+
+          // Update all bookings for this trip with the new departure date
+          const updatePromises = snapshot.docs.map(docSnapshot =>
+            updateDoc(doc(this.firestore, `${this.collectionName}/${docSnapshot.id}`), {
+              departureDate: trip.departureDate
+            })
+          );
+          await Promise.all(updatePromises);
+        } catch (error) {
+          console.error('[CalendarService] updateDepartureDateofBookings() - failed to update bookings departure date for tripId:', trip.id, 'Error:', error);
+          throw error;
+        }
+      })());
+    });
+  }
 }
