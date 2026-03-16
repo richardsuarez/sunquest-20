@@ -67,6 +67,12 @@
                                                                 <p>{{ booking.pickupAt | date:
                                                                     'MM/dd/yyyy' }}</p>
                                                             </div>
+                                                            @if(booking.pickupNotes){
+                                                                <p style="margin-top: 10px">Notes</p>
+                                                                <p style="font-weight: bold">{{ booking.pickupNotes }}</p>
+                                                            } @else {
+                                                                <p style="margin-top: 10px">No notes</p>
+                                                            }
                                                         </div>
                                                     </td>
                                                     <td>
@@ -77,9 +83,14 @@
                                                             <p style="display: flex; align-items: center; gap: 5px">
                                                                 {{ booking.arrivalAt | date: 'MM/dd/yyyy' }}
                                                             </p>
+                                                            @if(booking.deliveryNotes){
+                                                                <p style="margin-top: 10px">Notes</p>
+                                                                <p style="font-weight: bold">{{ booking.deliveryNotes }}</p>
+                                                            } @else {
+                                                                <p style="margin-top: 10px">No notes</p>
+                                                            }
                                                         </div>
                                                     </td>
-                                                    <td>{{ booking.notes }}</td>
                                                 </tr>
                                             }
                                         </tbody>
@@ -128,7 +139,6 @@
                                             <th>Vehicle</th>
                                             <th>Pickup</th>
                                             <th>Arrival</th>
-                                            <th>Notes</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -158,6 +168,12 @@
                                                             <p>{{ booking.pickupAt | date:
                                                                 'MM/dd/yyyy' }}</p>
                                                         </div>
+                                                        @if(booking.pickupNotes){
+                                                            <p style="margin-top: 10px">Notes</p>
+                                                            <p style="font-weight: bold">{{ booking.pickupNotes }}</p>
+                                                        } @else {
+                                                            <p style="margin-top: 10px">No notes</p>
+                                                        }
                                                     </div>
                                                 </td>
                                                 <td>
@@ -168,9 +184,14 @@
                                                         <p style="display: flex; align-items: center; gap: 5px">
                                                             {{ booking.arrivalAt | date: 'MM/dd/yyyy' }}
                                                         </p>
+                                                        @if(booking.deliveryNotes){
+                                                            <p style="margin-top: 10px">Notes</p>
+                                                            <p style="font-weight: bold">{{ booking.deliveryNotes }}</p>
+                                                        } @else {
+                                                            <p style="margin-top: 10px">No notes</p>
+                                                        }
                                                     </div>
                                                 </td>
-                                                <td>{{ booking.notes }}</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -208,7 +229,6 @@
                                 <th>Vehicle</th>
                                 <th>Pickup</th>
                                 <th>Arrival</th>
-                                <th>Notes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -234,15 +254,26 @@
                                         <div>
                                             <p>{{ formatAddress(booking.pickupAddress) }}</p>
                                             <p>{{ booking.pickupAt | date: 'MM/dd/yyyy'}}</p>
+                                            @if(booking.pickupNotes){
+                                                <p style="margin-top: 10px">Notes</p>
+                                                <p style="font-weight: bold">{{ booking.pickupNotes }}</p>
+                                            } @else {
+                                                <p style="margin-top: 10px">No notes</p>
+                                            }
                                         </div>
                                     </td>
                                     <td>
                                         <div>
                                             <p>{{ formatAddress(booking.arrivalAddress) }}</p>
                                             <p>{{ booking.arrivalAt | date: 'MM/dd/yyyy'}}</p>
+                                            @if(booking.deliveryNotes){
+                                                <p style="margin-top: 10px">Notes</p>
+                                                <p style="font-weight: bold">{{ booking.deliveryNotes }}</p>
+                                            } @else {
+                                                <p style="margin-top: 10px">No notes</p>
+                                            }
                                         </div>
                                     </td>
-                                    <td>{{ booking.notes }}</td>
                                 </tr>
                             }
                         </tbody>

@@ -120,7 +120,8 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
     amount: new FormControl<number | null>(0),
     origin: new FormControl<string | null>(null),
     destination: new FormControl<string | null>(null),
-    notes: new FormControl<string | null>(null),
+    deliveryNotes: new FormControl<string | null>(null),
+    pickupNotes: new FormControl<string | null>(null),
   });
 
   deliveryAddressForm = new FormGroup({
@@ -251,7 +252,8 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         this.form.controls.amount.setValue(booking.paycheck?.amount || 0);
         this.form.controls.origin.setValue(booking.from || null);
         this.form.controls.destination.setValue(booking.to || null);
-        this.form.controls.notes.setValue(booking.notes || null);
+        this.form.controls.deliveryNotes.setValue(booking.deliveryNotes || null);
+        this.form.controls.pickupNotes.setValue(booking.pickupNotes || null);
 
         this.arrivalAt = booking.arrivalAt || new Date();
         this.pickupAt = booking.pickupAt!;
@@ -474,7 +476,8 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
       departureDate: this.currentSelectedTrip ? this.currentSelectedTrip.departureDate : null,
       tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id! : null,
       truckId: this.currentSelectedTruckId,
-      notes: this.form.controls.notes.value,
+      deliveryNotes: this.form.controls.deliveryNotes.value,
+      pickupNotes: this.form.controls.pickupNotes.value,
       createdAt: new Date(),
       season: this.originalBooking && this.originalBooking.season
         ? this.originalBooking.season
