@@ -1,7 +1,6 @@
 import { createReducer, on } from "@ngrx/store";
 import { initialReportState } from "./report.state";
 import * as ReportActions from './report.actions'
-import { Truck } from "../../truck/model/truck.model";
 
 export const reportReducer = createReducer(
     initialReportState,
@@ -80,5 +79,14 @@ export const reportReducer = createReducer(
     on(ReportActions.clearBookings, (state) => ({
         ...state,
         bookings: null,
+    })),
+    on(ReportActions.addTripAndUpdateBookingsStart, (state, action) => ({
+        ...state,
+        assigningTruck: action.truckId,
+    })),
+    on(ReportActions.addTripAndUpdateBookingsSuccess, (state, action) => ({
+        ...state,
+        assigningTruck: null,
+        bookings: action.bookings,
     }))
 );

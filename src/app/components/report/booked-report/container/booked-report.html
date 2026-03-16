@@ -5,8 +5,8 @@
             <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>Pickup Date Range</mat-label>
                 <mat-date-range-input [formGroup]="dateRange" [rangePicker]="picker">
-                    <input matStartDate required placeholder="Start date" formControlName="start">
-                    <input matEndDate required placeholder="End date" formControlName="end">
+                    <input required matStartDate required placeholder="Start date" formControlName="start">
+                    <input required matEndDate required placeholder="End date" formControlName="end">
                 </mat-date-range-input>
                 <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-date-range-picker #picker></mat-date-range-picker>
@@ -14,6 +14,13 @@
                     <mat-error>Please select a range</mat-error>
                 }
             </mat-form-field>
+            <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic">
+                    <mat-label>From-To</mat-label>
+                    <mat-select matInput [formControl]="fromTo" required>
+                        <mat-option value="FL to NY">FL to NY</mat-option>
+                        <mat-option value="NY to FL">NY to FL</mat-option>
+                    </mat-select>
+                </mat-form-field>
             @if(!(loading$ | async)){
                 <button mat-raised-button type="submit" (click)="searchResult()"
                     style="background-color: #ED2D89; color: white">
@@ -32,88 +39,168 @@
     @if(loading$ | async){
         <mat-progress-bar class="indeterminate"></mat-progress-bar>
     }
-    <div class="body">
-        @if(bookings$ | async; as bookings){
+    @if(bookingList; as bookings){
             @if(bookings.length > 0){
-                <div style="display: flex; justify-content: flex-end; padding: 10px; gap: 10px;">
-                    <button mat-raised-button (click)="showTruckAssignmentPopup()" style="background-color: #3498db; color: white">
-                        <mat-icon>assignment</mat-icon>
-                        Assign Trucks
-                    </button>
-                    <button mat-raised-button (click)="printReport()" style="background-color: #ED2D89; color: white">
-                        <mat-icon>print</mat-icon>
-                        Print Report
-                    </button>
+                <div style="display: block">
+                    <div style="display: flex; justify-content: flex-end; padding: 10px; gap: 10px;">
+                        <button mat-raised-button (click)="assignTrucks = true" style="background-color: #ED2D89; color: white">
+                            <mat-icon>assignment</mat-icon>
+                            Assign Trucks
+                        </button>
+                        <button mat-raised-button (click)="printReport()" style="background-color: #ED2D89; color: white">
+                            <mat-icon>print</mat-icon>
+                            Print Report
+                        </button>
+                    </div>
+                    <div style="display: flex; width: 100%;">
+                        <div [class.small-view]="assignTrucks" [class.normal-view]="!assignTrucks">
+                            <table mat-table [dataSource]="bookings" class="mat-elevation-z8" >
+                                <ng-container matColumnDef="week">
+                                    <th mat-header-cell *matHeaderCellDef> Week # </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ booking.pickupAt | date : 'w' }} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="pickupDate">
+                                    <th mat-header-cell *matHeaderCellDef> PU Date </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ booking.pickupAt | date : 'EEE, MM/dd/yy' }} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="lastName">
+                                    <th mat-header-cell *matHeaderCellDef> Last Name </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ booking.customer?.primaryLastName || '' }} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="recNo">
+                                    <th mat-header-cell *matHeaderCellDef> Rec No </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ searchRecNo(booking) }} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="car">
+                                    <th mat-header-cell *matHeaderCellDef> Car </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ vehicleMake(booking.customer) }} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="model">
+                                    <th mat-header-cell *matHeaderCellDef> Nodel </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ vehicleModel(booking.customer) }} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="origin">
+                                    <th mat-header-cell *matHeaderCellDef> Origin </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ booking.pickupAddress.city }} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="destination">
+                                    <th mat-header-cell *matHeaderCellDef> Destination </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ booking.arrivalAddress.city }} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="date">
+                                    <th mat-header-cell *matHeaderCellDef> Arrival Date </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ booking.arrivalAt | date : 'EEE, MM/dd/yy' }} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="truck">
+                                    <th mat-header-cell *matHeaderCellDef> Truck </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ truckCompanyName(booking.truckId) }} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="depDate">
+                                    <th mat-header-cell *matHeaderCellDef> Dep. Date </th>
+                                    <td mat-cell *matCellDef="let booking"> {{ booking.departureDate | date: 'EEE, MM/dd/yy' }} </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="['week', 'pickupDate','lastName', 'recNo', 'car', 'model', 'origin', 'destination', 'date', 'truck', 'depDate']"></tr>
+                                <tr mat-row [class.confirmed-trip]="booking.truckId && booking.tripId" *matRowDef="let booking; columns: ['week', 'pickupDate', 'lastName', 'recNo', 'car', 'model', 'origin', 'destination', 'date', 'truck', 'depDate'];"></tr>
+
+                            </table>
+                        </div>
+                        
+                        @if(assignTrucks){
+                        <div style="justify-content: center; width: 25%">
+                            <div class="header-truck-assignment">
+                                <button mat-button (click)="assignTrucks = false"><mat-icon>close</mat-icon></button>
+                            </div>
+                            <form class="form-truck-assignment">
+                                <mat-form-field appearance="outline" subscriptSizing="dynamic" style="width: 75%">
+                                    <mat-label>Select truck to assign</mat-label>
+                                    <input type="text" matInput [formControl]="typingTruck" [matAutocomplete]="truckSelect">
+                                    <mat-autocomplete #truckSelect="matAutocomplete" >
+                                        @for (truck of filteredOptions | async; track truck) {
+                                            <mat-option [disabled]="isTruckAlreadyAssigned(truck)" [value]="truck.companyName" (onSelectionChange)="assignTruckTemporarily(truck)">
+                                                {{truck.truckNumber}} - {{ truck.companyName }}
+                                            </mat-option>                                            
+                                        }
+                                    </mat-autocomplete>
+                                </mat-form-field>
+                            </form>
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                @for(tempTrip of temporaryTrips; track tempTrip){
+                                    <div [class.assigned-truck]="!duplicatedTrip(tempTrip)" [class.duplicated-trip]="duplicatedTrip(tempTrip)">
+                                        <p>{{ tempTrip.truck.truckNumber }} - {{ tempTrip.truck.companyName }}</p>
+                                        @if(tempTrip.truck.carCapacity){
+                                            <p>Cars: {{ tempTrip.truck.carCapacity - tempTrip.trip.remCarCap }}/{{ tempTrip.truck.carCapacity }}</p>
+                                        }
+                                        
+                                        <form style="display: flex; justify-content: center;align-items: center; margin-top: 5px; width: 100%; gap: 5%">
+                                            <mat-form-field appearance="outline" subscriptSizing="dynamic" style="width: 45% !important">
+                                                <mat-label>Departure Date</mat-label>
+                                                <input matInput [formControl]="tempTrip.depDate" [matDatepicker]="departurePickerStart"
+                                                    placeholder="Choose departure date">
+                                                <mat-datepicker-toggle matSuffix [for]="departurePickerStart"></mat-datepicker-toggle>
+                                                <mat-datepicker #departurePickerStart></mat-datepicker>
+                                            </mat-form-field>
+                                            <mat-form-field appearance="outline" subscriptSizing="dynamic" style="width: 45%">
+                                                <mat-label>Arrival Date</mat-label>
+                                                <input matInput [formControl]="tempTrip.arrivalDate" [matDatepicker]="arrivalPickerStart"
+                                                    placeholder="Choose arrival date">
+                                                <mat-datepicker-toggle matSuffix [for]="arrivalPickerStart"></mat-datepicker-toggle>
+                                                <mat-datepicker #arrivalPickerStart></mat-datepicker>
+                                            </mat-form-field>
+                                        </form>
+                                        <div class="actions">
+                                            <button mat-raised-button (click)="cancelTrip(tempTrip)" >Cancel</button>
+                                            @if(!duplicatedTrip(tempTrip)){
+                                                @if(currentAssigningTruck && currentAssigningTruck === tempTrip.truck.id){
+                                                    <button mat-raised-button disabled style="display: flex; align-items: center; gap: 5px; background-color: gray; color: white">
+                                                        <mat-spinner diameter="18"></mat-spinner>
+                                                        <span>Confirm</span>
+                                                    </button>    
+                                                } @else {
+                                                    <button mat-raised-button (click)="confirmCreationOfTrip(tempTrip)" style="background-color: #ED2D89; color: white">Confirm</button>
+                                                }
+                                            } @else {
+                                                <button mat-raised-button disabled style="background-color: gray; color: white">Confirm</button>
+                                            }
+                                            
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            
+                        </div>
+                    }
+                    </div>
+                    
                 </div>
-                <table mat-table [dataSource]="bookings" class="mat-elevation-z8">
-
-                    <ng-container matColumnDef="week">
-                        <th mat-header-cell *matHeaderCellDef> Week # </th>
-                        <td mat-cell *matCellDef="let booking"> {{ weekNumber(booking.departureDate) }} </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="pickupDate">
-                        <th mat-header-cell *matHeaderCellDef> PU Date </th>
-                        <td mat-cell *matCellDef="let booking"> {{ booking.pickupAt | date : 'EEE, MM/dd/yy' }} </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="lastName">
-                        <th mat-header-cell *matHeaderCellDef> Last Name </th>
-                        <td mat-cell *matCellDef="let booking"> {{ booking.customer?.primaryLastName || '' }} </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="recNo">
-                        <th mat-header-cell *matHeaderCellDef> Rec No </th>
-                        <td mat-cell *matCellDef="let booking"> {{ searchRecNo(booking) }} </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="car">
-                        <th mat-header-cell *matHeaderCellDef> Car </th>
-                        <td mat-cell *matCellDef="let booking"> {{ vehicleMake(booking.customer) }} </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="model">
-                        <th mat-header-cell *matHeaderCellDef> Nodel </th>
-                        <td mat-cell *matCellDef="let booking"> {{ vehicleModel(booking.customer) }} </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="origin">
-                        <th mat-header-cell *matHeaderCellDef> Origin </th>
-                        <td mat-cell *matCellDef="let booking"> {{ booking.pickupAddress.city }} </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="destination">
-                        <th mat-header-cell *matHeaderCellDef> Destination </th>
-                        <td mat-cell *matCellDef="let booking"> {{ booking.arrivalAddress.city }} </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="date">
-                        <th mat-header-cell *matHeaderCellDef> Arrival Date </th>
-                        <td mat-cell *matCellDef="let booking"> {{ booking.arrivalAt | date : 'EEE, MM/dd/yy' }} </td>
-                    </ng-container>
-
-                    <tr mat-header-row *matHeaderRowDef="['week', 'pickupDate','lastName', 'recNo', 'car', 'model', 'origin', 'destination', 'date']"></tr>
-                    <tr mat-row *matRowDef="let booking; columns: ['week', 'pickupDate', 'lastName', 'recNo', 'car', 'model', 'origin', 'destination', 'date'];"></tr>
-
-                </table>
             } @else {
-                <div style="display: felx; justify-content: center; text-align: center">
+                <div style="display: flex; justify-content: center; text-align: center">
                     <p>No bookings found.</p>
                 </div>
             }
             
         } @else {
-            <div style="display: felx; justify-content: center; text-align: center">
+            <div style="display: flex; justify-content: center; text-align: center">
                 <p>Select date range.</p>
             </div>
         }
-    </div>
 } @else {
     @if(dateRange.controls.start.value && dateRange.controls.end.value){
         <app-print-view-booked-report
             [bookings]="(bookings$ | async) || []"
             [startDate]="dateRange.controls.start.value"
             [endDate]="dateRange.controls.end.value"
+            [truckList]="truckList"
         >
         </app-print-view-booked-report>
     }   

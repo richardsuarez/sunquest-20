@@ -364,7 +364,7 @@
                         <h2>Load: {{ originalTrip.loadNumber }}</h2>
                         <h3>{{ originalTrip.origin }} <mat-icon>arrow_forward</mat-icon>{{ originalTrip.destination }}</h3>
                         <h3 class="trip-dates">
-                            <span>Departure: {{ originalTrip.departureDate | date: 'MMM dd, yyyy' }}</span>
+                            <span>Departure: {{ originalTrip.departureDate | date: 'EEE, MM/dd/yyyy' }}</span>
                         </h3>
                     </div>
                 } @else {
@@ -532,7 +532,7 @@
                                         <mat-form-field appearance="outline" floatLabel="always"
                                             [class.form-field-mobile]="isMobile$ | async">
                                             <mat-label>Load Number</mat-label>
-                                            <input matInput formControlName="loadNumber" type="text">
+                                            <input matInput formControlName="loadNumber" type="text" appAllowOnlyNumbers>
                                         </mat-form-field>
 
                                         <mat-form-field appearance="outline" floatLabel="always"

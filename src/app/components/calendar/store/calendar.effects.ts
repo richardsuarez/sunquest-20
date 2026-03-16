@@ -209,10 +209,15 @@ export class CalendarEffects {
         ofType(CalendarActions.updateTripStart),
         switchMap(action => runInInjectionContext(this.injector, () =>
           this.calendarService.updateTrip(action.truckId, action.trip).pipe(
-            map(() => CalendarActions.updateTripSuccess({
-              truckId: action.truckId,
-              trip: action.trip
-            })),
+            switchMap(() => 
+              this.calendarService.updateDepartureDateofBookings(action.trip).pipe(
+                map(() => CalendarActions.updateTripSuccess({
+                truckId: action.truckId,
+                trip: action.trip
+              })),
+              catchError(err => of(CalendarActions.updateTripFail({ error: err })))
+              )
+            ),
             catchError(err => of(CalendarActions.updateTripFail({ error: err })))
           )
         ))

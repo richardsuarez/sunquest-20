@@ -1,11 +1,12 @@
 import { EnvironmentInjector, inject, Injectable, runInInjectionContext } from "@angular/core";
-import { collection, collectionGroup, Firestore, getDocFromServer, getDocs, getDocsFromCache, getDocsFromServer, orderBy, query, where } from "@angular/fire/firestore";
+import { addDoc, collection, collectionGroup, doc, Firestore, getDocFromServer, getDocs, getDocsFromCache, getDocsFromServer, orderBy, query, updateDoc, where } from "@angular/fire/firestore";
 import { Season } from "../../season/models/season.model";
 import { from, Observable, of } from "rxjs";
 import { Booking } from "../../book/model/booking.model";
 import { BookingGroup, BookReport, TruckReport } from "../models/report.models";
 import { Truck } from "../../truck/model/truck.model";
 import { Customer, Vehicle } from "../../customer/model/customer.model";
+import { Trip } from "../../trip/model/trip.model";
 
 @Injectable(
     { providedIn: 'root' }
@@ -14,17 +15,47 @@ export class ReportService {
     private readonly firestore = inject(Firestore);
     private readonly injector = inject(EnvironmentInjector);
 
-    getBookings(start: Date, end: Date, season: Season) {
+    addTrip(truckId: string, trip: Partial<Trip>): Observable<Trip> {
+        return runInInjectionContext(this.injector, () => {
+            const tripsRef = collection(this.firestore, `trucks/${truckId}/trips`);
+            const now = new Date();
+            const p = addDoc(tripsRef, {
+                ...trip,
+                truckId,
+                createdAt: now
+            }).then(docRef => ({
+                ...(trip as Trip),
+                id: docRef.id,
+                truckId,
+                createdAt: now
+            } as Trip));
+            return from(p) as Observable<Trip>;
+        });
+    }
+
+    getBookings(start: Date, end: Date, season: Season, origin?: string) {
         return runInInjectionContext(this.injector, () => {
             return from((async () => {
                 try {
                     const bookingsCollection = collection(this.firestore, 'bookings');
-                    const q = query(
-                        bookingsCollection,
-                        where('season', '==', `${season.seasonName}-${season.year}`),
-                        where('pickupAt', '>=', start),
-                        where('pickupAt', '<=', end)
-                    );
+                    let q;
+                    if (!origin) {
+                        q = query(
+                            bookingsCollection,
+                            where('season', '==', `${season.seasonName}-${season.year}`),
+                            where('pickupAt', '>=', start),
+                            where('pickupAt', '<=', end)
+                        );
+                    } else {
+                        q = query(
+                            bookingsCollection,
+                            where('season', '==', `${season.seasonName}-${season.year}`),
+                            where('from', '==', origin),
+                            where('pickupAt', '>=', start),
+                            where('pickupAt', '<=', end)
+                        );
+                    }
+
                     let snapshot;
                     try {
                         snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
@@ -210,6 +241,33 @@ export class ReportService {
                 );
                 return trucksWithTrips;
             })());
+        });
+    }
+
+    getAllTrucks(): Observable<Truck[]> {
+        return runInInjectionContext(this.injector, () => {
+            const trucksRef = collection(this.firestore, 'trucks');
+
+            const p = getDocsFromServer(trucksRef)
+                .then(snapshot => {
+                    return snapshot.docs.map(d => {
+                        const data = d.data() as any;
+                        // normalize Firestore Timestamps to JS Date
+                        const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+                        return ({ ...data, id: d.id, departureDate } as Truck);
+                    });
+                })
+                .catch(async (err) => {
+                    console.warn('[TruckService] getTrucks() - getDocsFromServer failed, falling back to cache. Error:', err);
+                    const snapshot = await getDocsFromCache(trucksRef);
+                    return snapshot.docs.map(d => {
+                        const data = d.data() as any;
+                        const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
+                        return ({ ...data, id: d.id, departureDate } as Truck);
+                    });
+                });
+
+            return from(p) as Observable<Truck[]>;
         });
     }
 
@@ -463,7 +521,7 @@ export class ReportService {
                         const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
                         const createdAt = data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt)) : null;
 
-                        
+
                         bookings.push({
                             ...doc.data() as Booking,
                             id: doc.id,
@@ -476,6 +534,59 @@ export class ReportService {
                     return bookings;
                 } catch (error) {
                     console.error('Error fetching bookings for trip:', error);
+                    throw error;
+                }
+            })());
+        });
+    }
+
+    updateBooking(booking: Booking): Observable<void> {
+        return runInInjectionContext(this.injector, () => {
+            return from((async () => {
+                try {
+                    const bookingDocRef = doc(this.firestore, `bookings/${booking.id}`);
+                    await updateDoc(bookingDocRef, {
+                        tripId: booking.tripId,
+                        truckId: booking.truckId,
+                        departureDate: booking.departureDate
+                    });
+                } catch (error) {
+                    console.error('Error updating booking with id:', booking.id, 'Error:', error);
+                    throw error;
+                }
+            })());
+        });
+    }
+
+    getLastLoadNumberOfAtruck(truckId: string, season: Season): Observable<number> {
+        return runInInjectionContext(this.injector, () => {
+            return from((async () => {
+                try {
+                    const tripsRef = collection(this.firestore, `trucks/${truckId}/trips`);
+                    const q = query(
+                        tripsRef,
+                        where('season', '==', `${season.seasonName}-${season.year}`)
+                    );
+
+                    let snapshot;
+                    try {
+                        snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
+                    } catch (error) {
+                        console.error('[ReportService] getLastLoadNumberOfAtruck() - server query failed', error);
+                        snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
+                    }
+
+                    let maxLoadNumber = 0;
+                    snapshot.forEach(doc => {
+                        const data = doc.data() as any;
+                        if (data.loadNumber && typeof data.loadNumber === 'number') {
+                            maxLoadNumber = Math.max(maxLoadNumber, data.loadNumber);
+                        }
+                    });
+
+                    return maxLoadNumber;
+                } catch (error) {
+                    console.error('[ReportService] getLastLoadNumberOfAtruck() - failed to get load number for truckId:', truckId, 'Error:', error);
                     throw error;
                 }
             })());

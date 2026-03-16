@@ -319,7 +319,7 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
     this.store.dispatch(BookActions.addTripStart({
       truckId: tripData.truckId,
       trip: {
-        loadNumber: tripData.loadNumber || '',
+        loadNumber: Number.parseInt(tripData.loadNumber ?? '0') || 0,
         departureDate: tripData.departureDate || new Date(),
         arrivalDate: tripData.arrivalDate || new Date(),
         origin: tripData.origin || '',
@@ -579,9 +579,7 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
       const trips = this.trips[truckId!];
       let highestLoadNumber = 0;
       trips.forEach(t => {
-        if (Number.parseInt(t.loadNumber) > highestLoadNumber) {
-          highestLoadNumber = Number.parseInt(t.loadNumber);
-        }
+        highestLoadNumber = Math.max(t.loadNumber, highestLoadNumber);
       });
       highestLoadNumber += 1;
       this.tripForm.controls.loadNumber.setValue(highestLoadNumber.toString());

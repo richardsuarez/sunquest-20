@@ -10,3 +10,4 @@ export const bookingReport = createSelector(selectReportState, (state: ReportSta
 export const bookings = createSelector(selectReportState, (state: ReportState) => state.bookings);
 export const trucks = createSelector(selectReportState, (state: ReportState) => state.trucks);
 export const customerList = createSelector(selectReportState, (state: ReportState) => state.customerList);
+export const assigningTruck = createSelector(selectReportState, (state: ReportState) => state.assigningTruck);
