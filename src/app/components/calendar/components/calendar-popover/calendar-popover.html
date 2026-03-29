@@ -1,6 +1,24 @@
 <div class="booking-popover" #popoverContainer>
   <div class="popover-header">
     <div class="availability-section">
+      <span class="availability-title">Truck</span>
+      <div class="availability-info">
+        <span class="availability-value">{{ getTruckInfo() }}</span>
+      </div>
+    </div>
+    <div class="availability-section">
+      <span class="availability-title">Load</span>
+      <div class="availability-info">
+        <span class="availability-value">{{ trip?.loadNumber }}</span>
+      </div>
+    </div>
+    <div class="availability-section">
+      <span class="availability-title">Direction</span>
+      <div class="availability-info">
+        <span class="availability-value">{{ trip?.origin }} to {{ trip?.destination }}</span>
+      </div>
+    </div>
+    <div class="availability-section">
       <span class="availability-title">Remaining Capacity</span>
       <div class="availability-info">
         <div class="availability-item">
@@ -9,7 +27,7 @@
         </div>
         <div class="availability-item">
           <img src="assets/weight.png" alt="weight" class="availability-icon">
-          <span class="availability-value">{{ trip?.remLoadCap }}</span>
+          <span class="availability-value">{{ trip?.remLoadCap }} lb</span>
         </div>
       </div>
     </div>

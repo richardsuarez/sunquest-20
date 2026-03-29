@@ -58,7 +58,7 @@ export class CalendarService {
         try {
           const trucksRef = collection(this.firestore, 'trucks');
           let snapshot;
-          
+
           try {
             snapshot = await getDocsFromServer(trucksRef);
           } catch (err) {
@@ -142,7 +142,7 @@ export class CalendarService {
           let snapshot;
           try {
             snapshot = await runInInjectionContext(this.injector, () => getDocsFromServer(q));
-          } catch(error) {
+          } catch (error) {
             console.error('[CalendarService] getBookingsForDateRange() - getDocsFromServer failed, falling back to cache. Error:', error);
             snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
           }
@@ -256,5 +256,23 @@ export class CalendarService {
         }
       })());
     });
+  }
+
+  updateNewTripForBookings(bookings: Booking[], tripId: string) {
+    return runInInjectionContext(this.injector, () => {
+      return from((async () => {
+        try {
+          const updatePromises = bookings.map(booking =>
+            updateDoc(doc(this.firestore, `${this.collectionName}/${booking.id}`), {
+              tripId: tripId,
+            })
+          );
+          await Promise.all(updatePromises);
+        } catch (error) {
+          console.error('[CalendarService] updateNewTripForBookings() - failed to update bookings tripId:', tripId, 'Error:', error);
+          throw error;
+        }
+      })())
+    })
   }
 }

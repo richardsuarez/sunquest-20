@@ -9,79 +9,73 @@
     <div class="dialog-content">
         <form [formGroup]="tripForm" class="trip-form">
             <!-- Truck Selection -->
-            @if(!trip?.id){
-                <div style="display: flex; justify-content: space-evenly;">
-                    <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
-                        <mat-label>Truck</mat-label>
-                        <mat-select formControlName="truckId">
-                            @for(truck of truckList; track truck){
-                                <mat-option [value]="truck.id">
-                                    {{ truck.truckNumber }} ({{ truck.companyName }})
-                                </mat-option>
-                            }
-                        </mat-select>
-                        @if(tripForm.get('truckId')?.hasError('required')){
-                            <mat-error>
-                                Truck is required
-                            </mat-error>
+            <div style="display: flex; justify-content: space-evenly;">
+                <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+                    <mat-label>Truck</mat-label>
+                    <mat-select required formControlName="truckId">
+                        @for(truck of truckList; track truck){
+                            <mat-option [disabled]="truck.id === originalTruckId" [value]="truck.id">
+                                {{ truck.truckNumber }} ({{ truck.companyName }})
+                            </mat-option>
                         }
+                    </mat-select>
+                    @if(tripForm.get('truckId')?.hasError('required')){
+                        <mat-error>
+                            Truck is required
+                        </mat-error>
+                    }
                         
-                    </mat-form-field>
-                    <!-- Load Number -->
-                    <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
-                        <mat-label>Load</mat-label>
-                        <div style="display: flex; align-items: center; justify-content: space-between">
-                            <input type="text" matInput required formControlName="loadNumber" appAllowOnlyNumbers >
-                            @if(loadingTruckTrips$ | async){
-                                <mat-spinner diameter="20"></mat-spinner>
-                            }
-                        </div>
-                    </mat-form-field>
-                </div>
-                <div style="display: flex; justify-content: space-evenly;">
-                    <!-- Origin -->
-                    <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
-                        <mat-label>Origin</mat-label>
-                        <mat-select required formControlName="origin" (selectionChange)="updateTripDestination($event)">
-                            <mat-option value="Florida">Florida</mat-option>
-                            <mat-option value="New York">New York</mat-option>
-                        </mat-select>
-                        @if(tripForm.get('origin')?.hasError('required')){
-                            <mat-error>
-                                Origin is required
-                            </mat-error>
+                </mat-form-field>
+                <!-- Load Number -->
+                <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+                    <mat-label>Load</mat-label>
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                        <input type="text" matInput required formControlName="loadNumber" appAllowOnlyNumbers >
+                        @if(loadingTruckTrips$ | async){
+                            <mat-spinner diameter="20"></mat-spinner>
                         }
-                    </mat-form-field>
+                    </div>
+                    @if(tripForm.get('loadNumber')?.hasError('required')){
+                        <mat-error>
+                            Load number is required
+                        </mat-error>
+                    }
+                </mat-form-field>
+            </div>
+            <div style="display: flex; justify-content: space-evenly;">
+                <!-- Origin -->
+                <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+                    <mat-label>Origin</mat-label>
+                    <mat-select required formControlName="origin" (selectionChange)="updateTripDestination($event)">
+                        <mat-option value="Florida">Florida</mat-option>
+                        <mat-option value="New York">New York</mat-option>
+                    </mat-select>
+                    @if(tripForm.get('origin')?.hasError('required')){
+                        <mat-error>
+                            Origin is required
+                        </mat-error>
+                    }
+                </mat-form-field>
 
-                    <!-- Destination -->
-                    <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
-                        <mat-label>Destination</mat-label>
-                        <mat-select required formControlName="destination" (selectionChange)="updateTripOrigin($event)">
-                            <mat-option value="Florida">Florida</mat-option>
-                            <mat-option value="New York">New York</mat-option>
-                        </mat-select>
-                        @if(tripForm.get('destination')?.hasError('required')){
-                            <mat-error>
-                                Destination is required
-                            </mat-error>
-                        }
-                    </mat-form-field>
-                </div>
-            } @else {
-                <div class="trip-header">
-                    <h3>{{ getTruckInfo() }}</h3>
-                    <h2>{{ trip?.origin }} <mat-icon>arrow_forward</mat-icon>{{ trip?.destination }}</h2> 
-                   
-                </div>
-            }
-
-            
-
+                <!-- Destination -->
+                <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
+                    <mat-label>Destination</mat-label>
+                    <mat-select required formControlName="destination" (selectionChange)="updateTripOrigin($event)">
+                        <mat-option value="Florida">Florida</mat-option>
+                        <mat-option value="New York">New York</mat-option>
+                    </mat-select>
+                    @if(tripForm.get('destination')?.hasError('required')){
+                        <mat-error>
+                            Destination is required
+                        </mat-error>
+                    }
+                </mat-form-field>
+            </div>
             <div style="display: flex; justify-content: space-evenly;">
                 <!-- Departure Date -->
                 <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
                     <mat-label>Departure Date</mat-label>
-                    <input matInput formControlName="departureDate" [matDatepicker]="departurePickerStart"
+                    <input required matInput formControlName="departureDate" [matDatepicker]="departurePickerStart"
                         placeholder="Choose departure date">
                     <mat-datepicker-toggle matSuffix [for]="departurePickerStart"></mat-datepicker-toggle>
                     <mat-datepicker #departurePickerStart></mat-datepicker>
@@ -96,7 +90,7 @@
                 <!-- Arrival Date -->
                 <mat-form-field appearance="outline" class="form-field" subscriptSizing="dynamic">
                     <mat-label>Arrival Date</mat-label>
-                    <input matInput formControlName="arrivalDate" [matDatepicker]="arrivalPickerStart"
+                    <input required matInput formControlName="arrivalDate" [matDatepicker]="arrivalPickerStart"
                         placeholder="Choose arrival date" [min]="tripForm.controls.departureDate.value">
                     <mat-datepicker-toggle matSuffix [for]="arrivalPickerStart"></mat-datepicker-toggle>
                     <mat-datepicker #arrivalPickerStart></mat-datepicker>
@@ -105,7 +99,6 @@
                             Arrival Date is required
                         </mat-error>
                     }
-                    
                 </mat-form-field>
             </div>
         </form>
@@ -114,5 +107,14 @@
     <div class="dialog-footer">
         <button mat-raised-button (click)="onCancel()">Cancel</button>
         <button mat-raised-button style="background-color: #ED2D89; color: white" (click)="onSave()">Save</button>
+        <!--@if(!(savingTrip$ | async)) {
+            <button mat-raised-button style="background-color: #ED2D89; color: white" (click)="onSave()">Save</button>
+        }  @else {
+            <button mat-raised-button style="background-color: gray; color: white">
+                <mat-spinner diameter="18"></mat-spinner>
+                Saving...
+            </button>
+        } -->
+        
     </div>
 </div>

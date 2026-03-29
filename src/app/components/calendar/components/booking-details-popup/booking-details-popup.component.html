@@ -83,6 +83,16 @@
           <span class="value">{{ formatAddress(booking.arrivalAddress) }}</span>
         </div>
       </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Pickup Notes</span>
+          <span class="value">{{ booking.pickupNotes }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Delivery Notes</span>
+          <span class="value">{{ booking.deliveryNotes }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- Route Info -->
@@ -117,17 +127,6 @@
           <span class="value amount">{{ booking.paycheck.amount ? ('$' + booking.paycheck.amount.toFixed(2)) : '$0.00' }}</span>
         </div>
       </div>
-    </div>
-
-    <!-- Notes -->
-     @if(booking.notes){
-      <div class="section">
-        <h3 class="section-title">Notes</h3>
-        <div class="notes-box">
-          {{ booking.notes }}
-        </div>
-      </div>
-     }
-    
+    </div>    
   </div>
 </div>
