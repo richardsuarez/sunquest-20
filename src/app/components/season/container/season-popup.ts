@@ -62,7 +62,7 @@ export class SeasonPopup implements OnInit, OnDestroy {
       const seasonName = this.seasonNameControl.value || '';
       const year = this.yearControl.value || 0;
 
-      if(seasonName && year && this.seasons && this.seasons.length > 0) {
+      if(seasonName && year && this.seasons) {
         const season = this.seasons.find(s => s.seasonName === seasonName && s.year === year);
         if(season){
           this.seasonNameControl.setErrors({'seasonExists': true});
