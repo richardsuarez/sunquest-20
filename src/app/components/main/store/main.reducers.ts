@@ -128,7 +128,29 @@ export const mainReducer = createReducer(
   })),
   on(MainActions.createEmptyBooking, (state) => ({
       ...state,
-      bookingViewModel: {} as Booking
+      bookingViewModel: {
+        customer: null,
+        vehicleId: '',
+        paycheck: {
+          checkNumber: null,
+          bankName: null,
+          amount: 0,
+        },
+        arrivalAddress: null,
+        arrivalAt: null,
+        arrivalWeekOfYear: null,
+        pickupAddress: null,
+        pickupAt: null,
+        pickupWeekOfYear: null,
+        from: null,
+        to: null,
+        departureDate: null,
+        tripId: null,
+        truckId: null,
+        deliveryNotes: null,
+        pickupNotes: null,
+        season: null,
+      } as Booking
   })),
   on(MainActions.deleteBookingStart, (state, action) => ({
       ...state,

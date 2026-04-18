@@ -228,16 +228,16 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
     this.tripsMap$.pipe(takeUntil(this.destroy$)).subscribe((tripMap) => {
       this.trips = tripMap;
       if (this.originalBooking && this.originalBooking.truckId && this.trips[this.originalBooking.truckId]) {
-          for (const trip of this.trips[this.originalBooking.truckId]) {
-            if (trip.id === this.originalBooking.tripId) {
-              this.originalTrip = trip;
-              this.originalTruckId = this.originalBooking.truckId;
-              this.currentSelectedTrip = trip;
-              this.currentSelectedTruckId = this.originalBooking.truckId;
-              break;
-            }
+        for (const trip of this.trips[this.originalBooking.truckId]) {
+          if (trip.id === this.originalBooking.tripId) {
+            this.originalTrip = trip;
+            this.originalTruckId = this.originalBooking.truckId;
+            this.currentSelectedTrip = trip;
+            this.currentSelectedTruckId = this.originalBooking.truckId;
+            break;
           }
         }
+      }
     });
 
     this.tripForm.controls.truckId.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((truckId) => {
@@ -289,14 +289,14 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit() {
     this.isMobile$.pipe(takeUntil(this.destroy$)).subscribe(mobile => {
-      if(mobile === true){
+      if (mobile === true) {
         const element = document.getElementById('bookForm');
         element!.scrollIntoView({
           behavior: "smooth",   // "auto" (default) or "smooth"
         });
       }
     })
-    
+
     const cardHeader = document.getElementById('cardHeader');
     const cardContent = document.getElementById('cardContent');
     const card = document.getElementById('card');
@@ -429,7 +429,7 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
     return this.crud === 'new' ? 'New' : 'Edit';
   }
 
-  getBookingTruckNumber(){
+  getBookingTruckNumber() {
     const truck = this.truckList.find(t => t.id === this.originalTruckId)
     return truck?.truckNumber;
   }
@@ -456,33 +456,63 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
 
     const arrivalAt = this.arrivalAt || new Date();
     const pickupAt = this.pickupAt || new Date();
-    const booking = {
-      id: this.originalBooking? this.originalBooking.id : undefined,
-      customer: this.currentCustomer,
-      vehicleId: this.currentCustomer.vehicles[0].id!,
-      paycheck: {
-        checkNumber: this.form.controls.checkNumber.value,
-        bankName: this.form.controls.bankName.value,
-        amount: this.form.controls.amount.value || 0,
-      },
-      arrivalAt,
-      arrivalAddress: this.deliveryAddressForm.getRawValue(),
-      arrivalWeekOfYear: this.weekNumber(arrivalAt),
-      pickupAt,
-      pickupAddress: this.pickupAddressForm.getRawValue(),
-      pickupWeekOfYear: this.weekNumber(pickupAt),
-      from: this.form.controls.origin.value,
-      to: this.form.controls.destination.value,
-      departureDate: this.currentSelectedTrip ? this.currentSelectedTrip.departureDate : null,
-      tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id! : null,
-      truckId: this.currentSelectedTruckId,
-      deliveryNotes: this.form.controls.deliveryNotes.value,
-      pickupNotes: this.form.controls.pickupNotes.value,
-      createdAt: new Date(),
-      season: this.originalBooking && this.originalBooking.season
-        ? this.originalBooking.season
-        : this.activeSeason && this.activeSeason.isCurrent ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
-    };
+    let booking;
+    if (this.originalBooking?.id) {
+      booking = {
+        id: this.originalBooking.id,
+        customer: this.currentCustomer,
+        vehicleId: this.currentCustomer.vehicles[0].id!,
+        paycheck: {
+          checkNumber: this.form.controls.checkNumber.value,
+          bankName: this.form.controls.bankName.value,
+          amount: this.form.controls.amount.value || 0,
+        },
+        arrivalAt,
+        arrivalAddress: this.deliveryAddressForm.getRawValue(),
+        arrivalWeekOfYear: this.weekNumber(arrivalAt),
+        pickupAt,
+        pickupAddress: this.pickupAddressForm.getRawValue(),
+        pickupWeekOfYear: this.weekNumber(pickupAt),
+        from: this.form.controls.origin.value,
+        to: this.form.controls.destination.value,
+        departureDate: this.currentSelectedTrip ? this.currentSelectedTrip.departureDate : this.originalBooking?.departureDate!,
+        tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id! : this.originalBooking?.tripId!,
+        truckId: this.currentSelectedTruckId,
+        deliveryNotes: this.form.controls.deliveryNotes.value,
+        pickupNotes: this.form.controls.pickupNotes.value,
+        createdAt: new Date(),
+        season: this.originalBooking && this.originalBooking.season
+          ? this.originalBooking.season
+          : this.activeSeason && this.activeSeason.isCurrent ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
+      };
+    } else {
+      booking = {
+        customer: this.currentCustomer,
+        vehicleId: this.currentCustomer.vehicles[0].id!,
+        paycheck: {
+          checkNumber: this.form.controls.checkNumber.value,
+          bankName: this.form.controls.bankName.value,
+          amount: this.form.controls.amount.value || 0,
+        },
+        arrivalAt,
+        arrivalAddress: this.deliveryAddressForm.getRawValue(),
+        arrivalWeekOfYear: this.weekNumber(arrivalAt),
+        pickupAt,
+        pickupAddress: this.pickupAddressForm.getRawValue(),
+        pickupWeekOfYear: this.weekNumber(pickupAt),
+        from: this.form.controls.origin.value,
+        to: this.form.controls.destination.value,
+        departureDate: this.currentSelectedTrip ? this.currentSelectedTrip.departureDate : null,
+        tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id! : null,
+        truckId: this.currentSelectedTruckId,
+        deliveryNotes: this.form.controls.deliveryNotes.value,
+        pickupNotes: this.form.controls.pickupNotes.value,
+        createdAt: new Date(),
+        season: this.originalBooking && this.originalBooking.season
+          ? this.originalBooking.season
+          : this.activeSeason && this.activeSeason.isCurrent ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
+      };
+    }
 
     // dispatch booking action — effect will persist and handle snackbar/navigation
     if (this.crud === 'new') {
@@ -498,15 +528,15 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         }
       } else {
         // if user unselects the original trip and does not select any, then we need to update the original trip capacity by adding back the booked load and cars
-        if(this.originalTrip && !this.currentSelectedTrip) {
+        if (this.originalTrip && !this.currentSelectedTrip) {
           this.updateOriginalTrip();
         } else {
           // if user selects a new trip without having an original trip, then we just need to update the new trip capacity by subtracting the booked load and cars
-          this.updateCurrentTrip(booking); 
+          this.updateCurrentTrip(booking);
         }
       }
       // whatever the case, we always update the booking info because user might change other booking info without changing trip (e.g. change notes or change check number, etc..)
-           
+
       this.store.dispatch(BookActions.updateBookingStart({ booking }));
     }
 
@@ -549,16 +579,16 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  updatePaidBookingsOfAtripIfNeedIt(booking: Booking){
-    if(this.currentSelectedTrip){
-      if(!this.isBookingFullPaid(this.originalBooking) && this.isBookingFullPaid(booking)){
+  updatePaidBookingsOfAtripIfNeedIt(booking: Booking) {
+    if (this.currentSelectedTrip) {
+      if (!this.isBookingFullPaid(this.originalBooking) && this.isBookingFullPaid(booking)) {
         const currentTripForUpdate = {
           ...this.currentSelectedTrip,
           paidBookings: this.currentSelectedTrip.paidBookings + 1,
         }
         this.store.dispatch(BookActions.updateTripStart({ truckId: this.currentSelectedTruckId!, trip: currentTripForUpdate }));
       } else {
-        if(this.isBookingFullPaid(this.originalBooking) && !this.isBookingFullPaid(booking)){
+        if (this.isBookingFullPaid(this.originalBooking) && !this.isBookingFullPaid(booking)) {
           const currentTripForUpdate = {
             ...this.currentSelectedTrip,
             paidBookings: this.currentSelectedTrip.paidBookings - 1,
@@ -570,7 +600,7 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private isBookingFullPaid(booking: Booking | null): boolean {
-    if(booking){
+    if (booking) {
       return booking.paycheck && booking.paycheck.amount >= 1200;
     }
     return false;

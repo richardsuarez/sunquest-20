@@ -258,13 +258,15 @@ export class CalendarService {
     });
   }
 
-  updateNewTripForBookings(bookings: Booking[], tripId: string) {
+  updateNewTripForBookings(bookings: Booking[], tripId: string, newTruckId: string, newDepartureDate: Date): Observable<void> {
     return runInInjectionContext(this.injector, () => {
       return from((async () => {
         try {
           const updatePromises = bookings.map(booking =>
             updateDoc(doc(this.firestore, `${this.collectionName}/${booking.id}`), {
               tripId: tripId,
+              truckId: newTruckId,
+              departureDate: newDepartureDate,
             })
           );
           await Promise.all(updatePromises);

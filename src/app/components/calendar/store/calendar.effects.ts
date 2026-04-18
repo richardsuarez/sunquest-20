@@ -329,7 +329,7 @@ export class CalendarEffects {
                   paidBookings: action.newTrip.paidBookings,
                 } as Partial<Trip>).pipe(
                   switchMap((trip) =>
-                    this.calendarService.updateNewTripForBookings(action.bookings, trip.id ?? '').pipe(
+                    this.calendarService.updateNewTripForBookings(action.bookings, trip.id ?? '', action.newTruck ?? '', action.newTrip.departureDate).pipe(
                       map(() => CalendarActions.changeTruckForTripSuccess({originaltruckId: action.originaltruckId, oldTrip: action.originalTrip, trip: action.newTrip, newTruck: action.newTruck})),
                       catchError(err => of(CalendarActions.changeTruckForTripFail({ error: err }))),
                     )

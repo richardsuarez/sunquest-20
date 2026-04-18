@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { withLatestFrom, switchMap, map, catchError, of, tap, filter, combineLatest, concatMap, from, Observable, concat, endWith } from 'rxjs';
 import { CustomerService } from '../service/customer.service';
-import { searchCriteria } from './customer.selectors';
+import { customerList, searchCriteria } from './customer.selectors';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import * as CustomerActions from './customer.actions';
 import { Router } from '@angular/router';
@@ -20,6 +20,7 @@ export class CustomerEffects {
     readonly updateVehicleStart$;
     readonly getVehicles$;
     readonly deleteVehicleStart$;
+    readonly deleteCustomerStart$;
     readonly deleteRecordStart$;
     readonly deleteCustomerEnd$;
     readonly updateCustomerStart$;
@@ -133,11 +134,29 @@ export class CustomerEffects {
                                 )
                             ),
                             // delete vehicle from customer
-                            of(CustomerActions.deleteVehicleStart({ customerId: action.record.customer.DocumentID, vehicleId: action.record.vehicle!.id! }))
+                            of(CustomerActions.deleteVehicleStart({ customerId: action.record.customer.DocumentID, vehicleId: action.record.vehicle!.id! })),
+                            // delete customer
+                            from(this.store.select(customerList)).pipe(
+                                switchMap((customerList) => {
+                                    if (customerList && customerList.length > 0) {
+                                        const customer = customerList.find(c => c.DocumentID === action.record.customer.DocumentID);
+                                        if (customer?.vehicles && customer.vehicles.length === 0) {
+                                            return of(CustomerActions.deleteCustomerStart({ id: action.record.customer.DocumentID }));
+                                        }
+                                    }
+                                    return of();
+                                })
+                            ),
                         );
+                    } else {
+                        if (action.record.vehicle && action.record.vehicle.id) {
+                            // If no bookings, just dispatch deleteVehicleStart
+                            return of(CustomerActions.deleteVehicleStart({ customerId: action.record.customer.DocumentID, vehicleId: action.record.vehicle!.id! }));
+                        } else {
+                            // If no bookings and no vehicle, just dispatch deleteCustomerStart
+                            return of(CustomerActions.deleteCustomerStart({ id: action.record.customer.DocumentID }));
+                        }
                     }
-                    // If no bookings, just dispatch deleteCustomerEnd
-                    return of(CustomerActions.deleteVehicleStart({ customerId: action.record.customer.DocumentID, vehicleId: action.record.vehicle!.id! }));
                 })
             )
         );
@@ -191,8 +210,22 @@ export class CustomerEffects {
                     runInInjectionContext(this.injector, () =>
                         this.customerService.deleteVehicle(action.customerId, action.vehicleId).pipe(
                             switchMap(() => [
-                                CustomerActions.deleteVehicleEnd({customerId: action.customerId, vehicleId: action.vehicleId}),
+                                CustomerActions.deleteVehicleEnd({ customerId: action.customerId, vehicleId: action.vehicleId }),
                             ]),
+                            catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
+                        )
+                    )
+                )
+            )
+        );
+
+        this.deleteCustomerStart$ = createEffect(() =>
+            this.actions$.pipe(
+                ofType(CustomerActions.deleteCustomerStart),
+                switchMap((action) =>
+                    runInInjectionContext(this.injector, () =>
+                        this.customerService.deleteCustomer(action.id).pipe(
+                            map(() => CustomerActions.deleteCustomerEnd({ customerId: action.id })),
                             catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
                         )
                     )
@@ -226,12 +259,12 @@ export class CustomerEffects {
                                 if (action.vehicles && action.vehicles.length && action.customer?.DocumentID) {
                                     let vehicleActions: any[] = [];
                                     action.vehicles.forEach((v: any) => {
-                                        if(v.id){
+                                        if (v.id) {
                                             vehicleActions.push(CustomerActions.updateVehicleStart({ customer: action.customer, vehicle: v }))
                                         } else {
                                             vehicleActions.push(CustomerActions.addVehicleStart({ customer: action.customer, vehicle: v }))
                                         }
-                                        
+
                                     });
                                     return [
                                         CustomerActions.resetCustomerViewModel(),
