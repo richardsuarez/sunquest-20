@@ -126,7 +126,7 @@ export class Calendar implements OnInit, OnDestroy {
         data: {
           trucks: this.truckList,
           trip: {
-            loadNumber: '',
+            loadNumber: 0,
             departureDate: new Date(),
             arrivalDate: new Date(),
             origin: '',

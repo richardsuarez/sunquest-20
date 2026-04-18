@@ -13,6 +13,7 @@ export interface CalendarState {
   calendarEvents: CalendarEventsByDate;
   currentMonthBookings: Booking[];
   tempTruckTrips: Trip[] | null;
+  savingTrip: boolean;
 }
 
 export const initialCalendarState: CalendarState = {
@@ -25,4 +26,5 @@ export const initialCalendarState: CalendarState = {
   calendarEvents: {},
   currentMonthBookings: [],
   tempTruckTrips: null,
+  savingTrip: false,
 };

@@ -145,6 +145,14 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
     return booking.customer.primaryFirstName + ' ' + booking.customer.primaryMiddleName + ' ' + booking.customer.primaryLastName;
   }
 
+  getTruckInfo(): string{
+    const truck = this.truckList.find(t => t.id === this.truckId);
+    if(truck){
+      return `${truck.truckNumber} - ${truck.companyName}`;
+    }
+    return '';
+  }
+
   displayBooking(booking: Booking) {
     if (!booking) return;
 
@@ -187,6 +195,7 @@ export class CalendarPopoverComponent implements OnInit, OnDestroy {
         trucks: this.truckList,
         trip: this.trip,
         truckTrip: this.truckId,
+        bookings: this.tripBookings,
       },
       maxWidth: '500px',
       width: '90vw',

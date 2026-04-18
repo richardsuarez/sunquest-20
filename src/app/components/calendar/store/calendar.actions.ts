@@ -3,6 +3,8 @@ import { CalendarEvent } from '../model/calendar-event.model';
 import { Booking } from '../../book/model/booking.model';
 import { Trip } from '../../trip/model/trip.model';
 import { Season } from '../../season/models/season.model';
+import { MatDialogRef } from '@angular/material/dialog';
+import { TripPopoverComponent } from '../components/trip-popover/trip-popover.component';
 
 export const addCalendarEvent = createAction('[Calendar] Add Event', props<{ event: CalendarEvent }>());
 export const removeCalendarEvent = createAction('[Calendar] Remove Event', props<{ eventId: string; dateKey: string }>());
@@ -41,3 +43,7 @@ export const deleteTripFail = createAction('[Calendar] Delete trip fail', props<
 export const deleteBookingsByTripStart = createAction('[Calendar] Delete bookings by trip start', props<{ tripId: string }>());
 export const deleteBookingsByTripSuccess = createAction('[Calendar] Delete bookings by trip success', props<{ tripId: string }>());
 export const deleteBookingsByTripFail = createAction('[Calendar] Delete bookings by trip fail', props<{ error: Error }>());
+
+export const changeTruckForTripStart = createAction('[Calendar] Change the truck for a trip', props<{ originaltruckId: string, originalTrip: Trip, newTrip: Trip, newTruck: string, bookings: Booking[] }>());
+export const changeTruckForTripSuccess = createAction('[Calendar] Change the truck for a trip success',  props<{ originaltruckId: string, oldTrip: Trip, trip: Trip, newTruck: string }>());
+export const changeTruckForTripFail = createAction('[Calendar] Change the truck for a trip fail', props<{error: Error}>());

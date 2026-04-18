@@ -247,7 +247,7 @@ export const calendarReducer = createReducer(
     // Find the old trip to get its date for event removal
     const oldTrips = state.trips[truckId] || [];
     const oldTripIndex = oldTrips.findIndex(t => t.id === trip.id);
-    
+
     if (oldTripIndex === -1) {
       return state; // Trip not found, no update needed
     }
@@ -351,4 +351,77 @@ export const calendarReducer = createReducer(
     loadingTruckTrips: false,
     tempTruckTrips: action.trips,
   })),
+  on(CalendarActions.updateTripStart, (state) => ({
+    ...state,
+    savingTrip: true,
+  })),
+  on(CalendarActions.updateTripSuccess, (state) => ({
+    ...state,
+    savingTrip: false,
+  })),
+  on(CalendarActions.updateTripFail, (state) => ({
+    ...state,
+    savingTrip: false,
+  })),
+  on(CalendarActions.changeTruckForTripStart, (state) => ({
+    ...state,
+    savingTrip: true,
+  })),
+  on(CalendarActions.changeTruckForTripSuccess, (state, { originaltruckId, oldTrip, trip, newTruck }) => {
+    // Find the old trip to get its date for event removal
+    const oldTrips = state.trips[originaltruckId] || [];
+
+    // Remove the old trip from trip list
+    let updatedTrips = {
+      ...state.trips,
+      [originaltruckId]: oldTrips.filter(t => t.id !== oldTrip.id),
+    }
+
+    // Remove old event from the old date
+    const updatedEvents: { [key: string]: CalendarEvent[] } = { ...state.calendarEvents };
+    const oldDateKey = formatDateKey(new Date(oldTrip.departureDate));
+
+    const oldDateEvents = updatedEvents[oldDateKey] || [];
+    updatedEvents[oldDateKey] = oldDateEvents.filter(e => e.id !== `trip-${oldTrip.id}`);
+    if (updatedEvents[oldDateKey].length === 0) {
+      delete updatedEvents[oldDateKey];
+    }
+
+    // Add trip to the trips list
+    updatedTrips = {
+      ...state.trips,
+      [newTruck]: [
+        ...((state.trips && state.trips[newTruck]) || []),
+        trip
+      ]
+    };
+
+    // Create a calendar event for the new trip
+    const dateKey = formatDateKey(new Date(trip.departureDate));
+    const tripEvent: CalendarEvent = {
+      id: `trip-${trip.id}`,
+      title: `Truck: ${state.trucks.find(t => t.id === newTruck)?.truckNumber || 'N/A'}`,
+      description: `${trip.origin || 'N/A'} → ${trip.destination || 'N/A'}`,
+      startDate: trip.delayDate ? new Date(trip.delayDate) : new Date(trip.departureDate),
+      endDate: new Date(trip.arrivalDate),
+      color: trip.delayDate ? '#f04539ff' : '#3a89f0ff',
+      trip,
+      truckId: newTruck,
+      bookings: []
+    };
+
+    // Add the event to calendar events
+    const existingEvents = updatedEvents[dateKey] || [];
+    updatedEvents[dateKey] = [...existingEvents.filter((e: CalendarEvent) => e.id !== tripEvent.id), tripEvent];
+
+    return {
+      ...state,
+      trips: updatedTrips,
+      calendarEvents: cleanCalendarEvents(updatedEvents)
+    };
+  }),
+  on(CalendarActions.changeTruckForTripFail, (state) => ({
+    ...state,
+    savingTrip: false,
+  }))
 );

@@ -8,6 +8,8 @@ import { CalendarService } from '../service/calendar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { selectSeasons } from '../../main/store/main.selectors';
+import { Trip } from '../../trip/model/trip.model';
+import { error } from '../../login/store/login.selectors';
 
 @Injectable()
 export class CalendarEffects {
@@ -20,10 +22,16 @@ export class CalendarEffects {
   readonly loadBookingsForMonth$;
   readonly deleteBooking$;
   readonly addTrip$;
+  readonly addTripSuccess$;
   readonly updateTrip$;
+  readonly updateTripSuccess$;
+  readonly updateTripFail$;
   readonly deleteTrip$;
   readonly deleteBookingsByTrip$;
   readonly deleteBookingsEnd$;
+  readonly changeTruckForTrip$;
+  readonly changeTruckForTripSuccess$;
+  readonly changeTruckForTripFail$
 
   constructor(
     private readonly actions$: Actions,
@@ -110,7 +118,7 @@ export class CalendarEffects {
         switchMap(action =>
           this.calendarService.getTruckTrips(action.truckId, action.season).pipe(
             switchMap(trips => {
-              return of(CalendarActions.getAllTruckTripsOnThisSeasonSuccess({trips}))
+              return of(CalendarActions.getAllTruckTripsOnThisSeasonSuccess({ trips }))
             })
           )
         )
@@ -129,7 +137,7 @@ export class CalendarEffects {
                 const booking = action.booking;
                 const trip = action.trip;
                 const vehicle = booking.customer?.vehicles && booking.customer?.vehicles[0];
-                
+
                 const remCarCapDelta = trip.remCarCap + 1; // Add back the car
                 const remLoadCapDelta = trip.remLoadCap + (vehicle?.weight ?? 0); // Add back the weight
                 const updatedTrip = {
@@ -204,18 +212,27 @@ export class CalendarEffects {
       )
     );
 
+    this.addTripSuccess$ = createEffect(() => 
+      this.actions$.pipe(
+        ofType(CalendarActions.addTripSuccess),
+        tap(() => {
+          this.snackBar.open('Trip added successfully. Proceed to close the Add Trip window', 'Close', {duration: 5000});
+        })
+      ), {dispatch: false},
+    )
+
     this.updateTrip$ = createEffect(() =>
       this.actions$.pipe(
         ofType(CalendarActions.updateTripStart),
         switchMap(action => runInInjectionContext(this.injector, () =>
           this.calendarService.updateTrip(action.truckId, action.trip).pipe(
-            switchMap(() => 
+            switchMap(() =>
               this.calendarService.updateDepartureDateofBookings(action.trip).pipe(
                 map(() => CalendarActions.updateTripSuccess({
-                truckId: action.truckId,
-                trip: action.trip
-              })),
-              catchError(err => of(CalendarActions.updateTripFail({ error: err })))
+                  truckId: action.truckId,
+                  trip: action.trip
+                })),
+                catchError(err => of(CalendarActions.updateTripFail({ error: err })))
               )
             ),
             catchError(err => of(CalendarActions.updateTripFail({ error: err })))
@@ -223,6 +240,25 @@ export class CalendarEffects {
         ))
       )
     );
+
+    this.updateTripSuccess$ = createEffect(() => 
+      this.actions$.pipe(
+        ofType(CalendarActions.updateTripSuccess),
+        tap(() => {
+          this.snackBar.open('Trip updateded successfully. Proceed to close the Edit Trip window', 'Close', {duration: 5000});
+        })
+      ), {dispatch: false},
+    )
+
+    this.updateTripFail$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(CalendarActions.updateTripFail),
+        tap((action) => {
+          console.error(action.error);
+          this.snackBar.open('Error when trying to update trip', 'Close', { duration: 3000 })
+        })
+      ), { dispatch: false }
+    )
 
     this.deleteTrip$ = createEffect(() =>
       this.actions$.pipe(
@@ -271,5 +307,59 @@ export class CalendarEffects {
         )
       )
     );
+
+    this.changeTruckForTrip$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(CalendarActions.changeTruckForTripStart),
+        switchMap(action => runInInjectionContext(this.injector, () =>
+          this.calendarService.deleteTrip(action.originaltruckId, action.originalTrip.id!).pipe(
+            switchMap(() =>
+              this.calendarService.addTrip(
+                action.newTruck,
+                {
+                  loadNumber: action.newTrip.loadNumber,
+                  departureDate: action.newTrip.departureDate,
+                  arrivalDate: action.newTrip.arrivalDate,
+                  origin: action.newTrip.origin,
+                  destination: action.newTrip.destination,
+                  remLoadCap: action.newTrip.remLoadCap,
+                  remCarCap: action.newTrip.remCarCap,
+                  delayDate: action.newTrip.delayDate,
+                  season: action.newTrip.season,
+                  paidBookings: action.newTrip.paidBookings,
+                } as Partial<Trip>).pipe(
+                  switchMap((trip) =>
+                    this.calendarService.updateNewTripForBookings(action.bookings, trip.id ?? '', action.newTruck ?? '', action.newTrip.departureDate).pipe(
+                      map(() => CalendarActions.changeTruckForTripSuccess({originaltruckId: action.originaltruckId, oldTrip: action.originalTrip, trip: action.newTrip, newTruck: action.newTruck})),
+                      catchError(err => of(CalendarActions.changeTruckForTripFail({ error: err }))),
+                    )
+                  ),
+                  catchError(err => of(CalendarActions.changeTruckForTripFail({ error: err }))),
+                )
+            ),
+            catchError(err => of(CalendarActions.changeTruckForTripFail({ error: err }))),
+          )
+        ))
+      )
+    );
+
+    this.changeTruckForTripSuccess$ = createEffect(() => 
+      this.actions$.pipe(
+        ofType(CalendarActions.changeTruckForTripSuccess),
+        tap(() => {
+          this.snackBar.open('Trip saved successfully. Proceed to close the Edit Trip window', 'Close', {duration: 5000});
+        })
+      ), {dispatch: false},
+    )
+
+    this.changeTruckForTripFail$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(CalendarActions.changeTruckForTripFail),
+        tap((action) => {
+          console.error(action.error);
+          this.snackBar.open('Error when trying to change truck for a trip', 'Close', { duration: 3000 });
+        })
+      )
+    )
   }
 }
