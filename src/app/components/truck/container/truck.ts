@@ -74,9 +74,9 @@ export class TruckList implements OnInit {
     const ref = this.dialog.open(PopupComponent, {
       data: {
         title: 'Delete Truck',
-        message: `Are you sure you want to delete truck ${truck.truckNumber}?`,
-        cancelButton: 'Cancel',
-        successButton: 'Delete'
+        message: `This action will also delete ALL trips for this truck. Are you sure you want to delete truck ${truck.truckNumber}?`,
+        cancelButton: 'No',
+        successButton: 'Yes',
       }
     });
 
