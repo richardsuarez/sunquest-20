@@ -25,6 +25,7 @@ import { updateCustomerStart, addCustomerStart } from '../store/customer.actions
 import { MatTableModule } from '@angular/material/table';
 import * as CustomerActions from '../store/customer.actions';
 import { MatCardModule } from '@angular/material/card';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-customer-edit',
@@ -123,6 +124,7 @@ export class CustomerEdit implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly matDialog: MatDialog,
+    private readonly snackBar: MatSnackBar,
   ) {
     this.savingCustomer$ = this.store.select(savingCustomer)
     this.customerVM$ = this.store.select(customerViewModel)
@@ -174,8 +176,8 @@ export class CustomerEdit implements OnInit, OnDestroy {
   private suggestNewRecordNumberForVehicle() {
     if (this.currentCustomer && this.currentCustomer.vehicles) {
       const rec = this.customerForm.controls.recNo.value;
-      if(!rec) return;
-      if(this.currentCustomer.vehicles.length === 0 && this.tempVehicles.length === 0) {
+      if (!rec) return;
+      if (this.currentCustomer.vehicles.length === 0 && this.tempVehicles.length === 0) {
         this.vehicleForm.controls.recNo.setValue(rec);
         return;
       }
@@ -228,40 +230,60 @@ export class CustomerEdit implements OnInit, OnDestroy {
   onSubmit() {
     if (this.customerForm.valid && (!this.customerForm.pristine || (this.tempVehicles && this.tempVehicles.length > 0))) {
       if (this.crud === 'edit' && this.currentCustomer) {
-        const auxCustomer = {...this.currentCustomer, ...this.customerForm.getRawValue()};
+        const auxCustomer = { ...this.currentCustomer, ...this.customerForm.getRawValue() };
         this.store.dispatch(updateCustomerStart({ customer: auxCustomer, vehicles: this.tempVehicles }));
       }
       else if (this.crud === 'new') {
         this.store.dispatch(addCustomerStart({ customer: this.customerForm.getRawValue(), vehicles: this.tempVehicles }));
+      } else {
+        this.customerForm.markAllAsTouched();
       }
-    } else {
-      this.customerForm.markAllAsTouched();
     }
   }
 
-  addVehicle() {
-    if (this.vehicleForm.valid) {
-      const vehicle: Partial<Vehicle> = this.vehicleForm.getRawValue();
-      this.tempVehicles = [...this.tempVehicles, vehicle];
-      this.vehicleForm.reset();
-      this.suggestNewRecordNumberForVehicle();
-    } else {
-      this.vehicleForm.markAllAsTouched();
+    addVehicle() {
+      if (this.vehicleForm.valid) {
+        const vehicle: Partial<Vehicle> = this.vehicleForm.getRawValue();
+        // checking if the recNo for the new vehicle is valid and unique among both existing vehicles and temp vehicles
+        if (this.currentCustomer && this.currentCustomer.recNo && !vehicle.recNo?.startsWith(this.currentCustomer.recNo)) {
+          this.snackBar.open(`Vehicle record number must start with ${this.currentCustomer.recNo}`, 'Close', { duration: 5000 });
+          return;
+        }
+
+        if (vehicle.recNo !== '' && vehicle.recNo !== null) {
+          if (this.currentCustomer && this.currentCustomer.vehicles) {
+            const recNoExistsInExisting = this.currentCustomer.vehicles.some(v => v.recNo === vehicle.recNo);
+            if (recNoExistsInExisting) {
+              this.snackBar.open('Vehicle record number already exists', 'Close', { duration: 5000 });
+              return;
+            }
+          }
+          const recNoExistsInTemp = this.tempVehicles.some(v => v.recNo === vehicle.recNo);
+          if (recNoExistsInTemp) {
+            this.snackBar.open('Vehicle record number already exists in Pending Vehicles list', 'Close', { duration: 5000 });
+            return;
+          }
+        }
+        this.tempVehicles = [...this.tempVehicles, vehicle];
+        this.vehicleForm.reset();
+        this.suggestNewRecordNumberForVehicle();
+      } else {
+        this.vehicleForm.markAllAsTouched();
+      }
+    }
+
+    editVehicle(vehicle: Vehicle){
+      this.vehicleForm.patchValue(vehicle);
+      this.editingVehicleId = vehicle.id ?? null;
+    }
+
+    deleteVehicle(vehicleId ?: string | null) {
+      if (!this.currentCustomer || !this.currentCustomer.DocumentID || !vehicleId) return;
+      this.store.dispatch(CustomerActions.deleteVehicleStart({ customerId: this.currentCustomer.DocumentID, vehicleId }));
+    }
+
+    deleteTempVehicle(vehicle: Partial<Vehicle>) {
+      this.tempVehicles = this.tempVehicles.filter((tempVeh) => tempVeh.id !== vehicle.id);
     }
   }
-
-  editVehicle(vehicle: Vehicle){
-    this.vehicleForm.patchValue(vehicle);
-    this.editingVehicleId = vehicle.id ?? null;
-  }
-
-  deleteVehicle(vehicleId?: string | null) {
-    if (!this.currentCustomer || !this.currentCustomer.DocumentID || !vehicleId) return;
-    this.store.dispatch(CustomerActions.deleteVehicleStart({ customerId: this.currentCustomer.DocumentID, vehicleId }));
-  }
-
-  deleteTempVehicle(vehicle: Partial<Vehicle>) {
-    this.tempVehicles = this.tempVehicles.filter((tempVeh) => tempVeh.id !== vehicle.id);
-  }
-}
 

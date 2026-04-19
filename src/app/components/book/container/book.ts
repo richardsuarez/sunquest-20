@@ -174,9 +174,6 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
     this.customer$.pipe(takeUntil(this.destroy$)).subscribe(customer => {
       this.currentCustomer = customer;
       if (customer) {
-        if (customer.DocumentID && !customer.vehicles) {
-          this.store.dispatch(getVehiclesStart({ customerId: customer.DocumentID }));
-        }
         if (customer.vehicles) {
           customer.vehicles.forEach(v => {
             if (v.id) {

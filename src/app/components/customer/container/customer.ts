@@ -288,10 +288,14 @@ export class CustomerComponent implements OnInit, OnDestroy {
     }
   }
 
-  editBooking(booking: Booking, customer: Customer) {
+  editBooking(booking: Booking, customer: Customer, recordVehicle: Vehicle | null) {
     if (booking.customer) {
       this.router.navigate(['main/book/edit']);
-      this.store.dispatch(MainAction.loadCustomer({ customer }));
+      if(recordVehicle) {
+        this.store.dispatch(MainAction.loadCustomer({ customer: { ...customer, vehicles: [recordVehicle] } }));
+      } else {
+        this.store.dispatch(MainAction.loadCustomer({ customer }));
+      }
       this.store.dispatch(MainAction.loadBooking({ booking }));
     }
   }

@@ -44,7 +44,6 @@ export class TruckEdit implements OnDestroy {
     companyName: new FormControl<string | null>(null, Validators.required),
     loadCapacity: new FormControl<number | null>(null, [Validators.required]),
     carCapacity: new FormControl<number | null>(null, [Validators.required]),
-    loadNumber: new FormControl<string | null>(null),
   });
   selectedTruck: Truck | null = null;
 
