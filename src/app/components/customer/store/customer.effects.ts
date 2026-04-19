@@ -27,6 +27,8 @@ export class CustomerEffects {
     readonly updateCustomerEnd$;
     readonly failure$;
 
+    alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
     constructor(
         private readonly actions$: Actions,
         private readonly customerService: CustomerService,
@@ -87,13 +89,24 @@ export class CustomerEffects {
 
                                 // If the action included vehicles, dispatch addVehicleStart for each one
                                 if (action.vehicles && action.vehicles.length && customer?.DocumentID) {
-                                    const vehicleActions = action.vehicles.map((v: any) =>
-                                        CustomerActions.addVehicleStart({ customer, vehicle: { ...v, recNo: customer.recNo } })
-                                    );
+                                    let vehicleActions: Array<any> = [];
+                                    if (action.vehicles && action.vehicles.length === 1) {
+                                        vehicleActions = [CustomerActions.addVehicleStart({ customer, vehicle: { ...action.vehicles[0], recNo: customer.recNo } })];
+                                    } else {
+                                        if (action.vehicles && action.vehicles.length > 1) {
+                                            for (let i = 0; i < action.vehicles.length; i++) {
+                                                const v = action.vehicles[i];
+                                                if (!v.recNo) {
+                                                    vehicleActions.push(CustomerActions.addVehicleStart({ customer, vehicle: { ...v, recNo: `${customer.recNo}${this.alphabet[i]}` } }));
+                                                } else {
+                                                    vehicleActions.push(CustomerActions.addVehicleStart({ customer, vehicle: v }));
+                                                }
+                                            }
+                                        }
+                                    }
                                     baseActions.push(...vehicleActions);
                                     return baseActions;
                                 }
-
                                 return baseActions;
                             }),
                             catchError((error: Error) => of(CustomerActions.failure({ appError: error })))
