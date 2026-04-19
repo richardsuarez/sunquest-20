@@ -63,12 +63,6 @@ export class TruckEdit implements OnDestroy {
         });
       }
     });
-
-    this.saving$.pipe(takeUntil(this.destroy$)).subscribe(savingState => {
-      if (savingState === false) {
-        this.dialogRef.close();
-      }
-    });
   }
 
   ngOnDestroy(): void {
@@ -87,7 +81,7 @@ export class TruckEdit implements OnDestroy {
       this.store.dispatch(TruckActions.addTruckStart({ truck: payload }));
     } else {
       // selectedTruck should be present
-      this.store.select(selectedTruck as any).pipe(takeUntil(this.destroy$)).subscribe(s => {
+      this.store.select(selectedTruck).pipe(takeUntil(this.destroy$)).subscribe(s => {
         if (s && s.id) {
           this.store.dispatch(TruckActions.updateTruckStart({ id: s.id, truck: payload }));
         }

@@ -62,7 +62,7 @@ export class TruckService {
       const trucksRef = collection(this.firestore, this.collectionName);
       const now = new Date();
       const p = addDoc(trucksRef, { ...truck, createdAt: now })
-        .then(docRef => ({ ...(truck as Truck), id: docRef.id, createdAt: now } as Truck));
+        .then(docRef => ({ ...truck, id: docRef.id, createdAt: now } as Truck));
       return from(p) as Observable<Truck>;
     });
   }

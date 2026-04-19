@@ -6,7 +6,7 @@
   </div>
 
   <div class="body">
-    <form [formGroup]="form">
+    <form [formGroup]="form" (ngSubmit)="save()">
       @if(selectedTruck?.createdAt){
         <div style="margin-bottom:12px; color: #666; font-size:0.9rem">
           Joined: {{ selectedTruck?.createdAt | date }}
@@ -38,7 +38,7 @@
 
       <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px">
         <button mat-button (click)="cancel()">Cancel</button>
-        @if((saving$ | async) === null){
+        @if((saving$ | async) === false){
           <button mat-raised-button style="background-color: #ED2D89; color: white" (click)="save()">Save</button>
         }
         @if((saving$ | async) === true){

@@ -5,7 +5,7 @@ export interface TruckState {
   trucks: Truck[];
   trips: Trip[];
   loading: boolean;
-  saving: boolean | null;
+  saving: boolean;
   error: Error | null;
   selectedTruck: Truck | null;
 }
@@ -14,7 +14,7 @@ export const initialTruckState: TruckState = {
   trucks: [],
   trips: [],
   loading: false,
-  saving: null,
+  saving: false,
   error: null,
   selectedTruck: null,
 };
