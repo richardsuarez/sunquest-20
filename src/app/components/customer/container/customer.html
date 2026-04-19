@@ -177,7 +177,7 @@
                                     <th mat-header-cell *matHeaderCellDef></th>
                                     <td mat-cell *matCellDef="let booking" style="display: flex; justify-content: space-evenly; padding: 10px 5px">
                                         @if(activeSeason && activeSeason.isCurrent){
-                                            <button mat-raised-button color="primary" (click)="editBooking(booking, record.customer)">Edit</button>
+                                            <button mat-raised-button color="primary" (click)="editBooking(booking, record.customer, record.vehicle)">Edit</button>
                                         } @else {
                                             <button mat-raised-button color="primary" (click)="viewBooking(booking)">View</button>
                                         }
