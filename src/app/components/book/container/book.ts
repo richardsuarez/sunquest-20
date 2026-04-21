@@ -712,6 +712,14 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         this.pickupAddressForm.controls.state.setValue(this.currentCustomer.floridaAddress.state);
         this.pickupAddressForm.controls.zipCode.setValue(this.currentCustomer.floridaAddress.zipCode);
       }
+
+      if(this.currentCustomer && this.currentCustomer.floridaNotes){
+        this.form.controls.pickupNotes.setValue(this.currentCustomer.floridaNotes);
+      }
+
+      if(this.currentCustomer && this.currentCustomer.newYorkNotes){
+        this.form.controls.deliveryNotes.setValue(this.currentCustomer.newYorkNotes);
+      }
     } else if (this.form.controls.origin.value === 'New York') {
       this.form.controls.destination.setValue('Florida');
       if (this.currentCustomer && this.currentCustomer.floridaAddress) {
@@ -732,6 +740,14 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         this.pickupAddressForm.controls.city.setValue(this.currentCustomer.newYorkAddress.city);
         this.pickupAddressForm.controls.state.setValue(this.currentCustomer.newYorkAddress.state);
         this.pickupAddressForm.controls.zipCode.setValue(this.currentCustomer.newYorkAddress.zipCode);
+      }
+
+      if(this.currentCustomer && this.currentCustomer.newYorkNotes){
+        this.form.controls.pickupNotes.setValue(this.currentCustomer.newYorkNotes);
+      }
+
+      if(this.currentCustomer && this.currentCustomer.floridaNotes){
+        this.form.controls.deliveryNotes.setValue(this.currentCustomer.floridaNotes);
       }
     }
   }

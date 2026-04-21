@@ -109,7 +109,27 @@
                             <p style="color: darkgray; margin-left: 20px;">No provided</p>
                             }
                         </section>
+                        <section class="info-section">
+                            <h4>Florida Notes</h4>
+                            @if(customer.floridaNotes){
+                            <div style="margin-left: 20px;">
+                                <p>{{ customer.floridaNotes }}</p>
+                            </div>
+                            } @else {
+                            <p style="color: darkgray; margin-left: 20px;">No notes</p>
+                            }
 
+                        </section>
+                        <section class="info-section">
+                            <h4>New York Notes</h4>
+                            @if(customer.newYorkNotes){
+                            <div style="margin-left: 20px;">
+                                <p>{{ customer.newYorkNotes }}</p>
+                            </div>
+                            } @else {
+                            <p style="color: darkgray; margin-left: 20px;">No notes</p>
+                            }
+                        </section>
                     </div>
                 </div>
             </mat-card-content>

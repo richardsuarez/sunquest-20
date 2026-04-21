@@ -18,6 +18,8 @@ export interface Customer {
     newYorkAddress: Address;
     joinedOn: Date | null;
     vehicles?: Vehicle[];
+    floridaNotes: string | null;
+    newYorkNotes: string | null;
 }
 
 export interface Address{
