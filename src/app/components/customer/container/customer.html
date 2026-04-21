@@ -20,7 +20,7 @@
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
     }
     <div class="body">
-        @for(record of records; track record){
+        @for(record of records; track record.recNo){
             <mat-card [class.record-card-desktop]="!(isMobile$ | async)"
                 [class.record-card-mobile]="isMobile$ | async">
                 <mat-card-header>

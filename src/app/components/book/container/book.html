@@ -537,7 +537,7 @@
                                     [class.form-field-mobile]="isMobile$ | async">
                                     <mat-label>Truck</mat-label>
                                     <mat-select formControlName="truckId">
-                                        @for(truck of trucks; track truck){
+                                        @for(truck of trucks; track truck.id){
                                         <mat-option [value]="truck.id">
                                             Truck #{{truck.truckNumber}}
                                         </mat-option>

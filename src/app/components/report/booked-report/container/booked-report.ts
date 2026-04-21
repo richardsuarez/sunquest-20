@@ -155,13 +155,44 @@ export class BookedReport implements OnInit, OnDestroy {
           // still have space for another car
           if (!b.truckId && !b.tripId) {
             // if booking is unassigned
-            if (b.customer?.vehicles &&
-              remLoadCap &&
-              b.customer?.vehicles[0].weight &&
-              b.customer?.vehicles[0].weight < remLoadCap) {
-              auxBooking = { ...b, truckId: truck.id! } as Booking;
-              remCarCap = remCarCap - 1;
-              remLoadCap = remLoadCap - b.customer?.vehicles[0].weight;
+            if (!b.customer?.vehicles) {
+              this.snackbar.open(
+                `Unable to assign the selected truck. ${b.customer?.primaryLastName} has no vehicles`,
+                'Close',
+                { duration: 5000 }
+              );
+              return;
+            } else {
+              if (!remLoadCap) {
+                this.snackbar.open(
+                  'Unable to assign the selected truck. Selected truck has no remaining load capacity',
+                  'Close',
+                  { duration: 5000 }
+                );
+                return;
+              } else {
+                if (!b.customer?.vehicles[0].weight) {
+                  this.snackbar.open(
+                    `Unable to assign the selected truck. ${b.customer?.primaryLastName}'s ${b.customer?.vehicles[0].make} has no weight information`,
+                    'Close',
+                    { duration: 5000 }
+                  );
+                  return;
+                } else {
+                  if (b.customer?.vehicles[0].weight > remLoadCap) {
+                    this.snackbar.open(
+                      `Unable to assign the selected truck. ${b.customer?.primaryLastName}'s ${b.customer?.vehicles[0].make} weight exceed remaining load capacity of the truck`,
+                      'Close',
+                      { duration: 5000 }
+                    );
+                    return;
+                  } else {
+                    auxBooking = { ...b, truckId: truck.id! } as Booking;
+                    remCarCap = remCarCap - 1;
+                    remLoadCap = remLoadCap - b.customer?.vehicles[0].weight;
+                  }
+                }
+              }
             }
           }
         }
@@ -196,7 +227,7 @@ export class BookedReport implements OnInit, OnDestroy {
         'Unable to assign the selected truck. All bookings are assigned or temporarily assigned',
         'Close',
         { duration: 5000 }
-      )
+      );
     }
   }
 

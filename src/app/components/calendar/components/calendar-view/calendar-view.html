@@ -20,7 +20,7 @@
 
   <!-- Calendar Days Grid -->
   <div class="calendar-grid">
-    @for(day of days; track day){
+    @for(day of days; track day.dateKey){
       <div class="day-cell" [class.other-month]="!day.isCurrentMonth" [class.today]="day.isToday"
         (click)="selectDate(day)">
 
