@@ -112,6 +112,8 @@ export class CustomerEdit implements OnInit, OnDestroy {
       state: new FormControl<string | null>('NY'),
       zipCode: new FormControl<string | null>(''),
     }),
+    floridaNotes: new FormControl<string | null>(''),
+    newYorkNotes: new FormControl<string | null>(''),
   })
 
   upperCaseAlphabet: string[] = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));

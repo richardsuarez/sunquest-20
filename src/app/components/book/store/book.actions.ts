@@ -20,8 +20,8 @@ export const addTripSuccess = createAction('[Book] Add trip success', props<{ tr
 export const addTripFail = createAction('[Book] Add trip fail', props<{ error: Error }>());
 
 // Update trip capacities after a booking
-export const updateTripStart = createAction('[Book] Update trip', props<{ truckId: string, trip: Trip }>());
-export const updateTripEnd = createAction('[Book] Update trip');
+export const updateTripStart = createAction('[Book] Update trip start', props<{ truckId: string, trip: Trip }>());
+export const updateTripEnd = createAction('[Book] Update trip success');
 
 export const getTruckListStart = createAction('[Truck] Load trucks start');
 export const getTruckListSuccess = createAction('[Truck] Load trucks success', props<{ trucks: Truck[] }>());

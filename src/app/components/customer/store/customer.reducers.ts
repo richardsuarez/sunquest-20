@@ -50,9 +50,16 @@ export const customerReducer = createReducer(
         savingCustomer: true,
         appError: null,
     })),
-    on(CustomerActions.updateCustomerEnd, (state) => ({
+    on(CustomerActions.updateCustomerEnd, (state, action) => ({
         ...state,
-        savingCustomer: false
+        savingCustomer: false,
+        customerList: state.customerList
+            ? state.customerList.map(c => 
+                c.DocumentID === action.customer.DocumentID
+                    ? { ...c, ...action.customer }
+                    : c
+              )
+            : null,
     })),
     on(CustomerActions.deleteCustomerStart, (state) => ({
         ...state,
@@ -99,7 +106,8 @@ export const customerReducer = createReducer(
                 zipCode: '',
             },
             joinedOn: null,
-            zipCode: '',
+            floridaNotes: '',
+            newYorkNotes: '',
         }
     })),
     on(CustomerActions.loadCustomer, (state, action) => ({

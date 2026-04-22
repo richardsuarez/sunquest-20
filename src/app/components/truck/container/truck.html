@@ -11,7 +11,7 @@
 }
 
 <div class="body">
-  @for(t of trucks$ |async; track t){
+  @for(t of trucks$ |async; track t.id){
     <mat-card [class.truck-card-desktop]="!isMobile" [class.truck-card-mobile]="isMobile">
       <mat-card-header>
         <div mat-card-avatar class="truck-avatar">
