@@ -82,4 +82,23 @@ export class TruckService {
       return from(p) as Observable<void>;
     });
   }
+
+  deleteTrips(truckId: string): Observable<void> {
+    return runInInjectionContext(this.injector, () => {
+      const tripsRef = collection(this.firestore, `${this.collectionName}/${truckId}/trips`);
+      
+      const p = getDocsFromServer(tripsRef)
+        .then(snapshot => {
+          return Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref)));
+        })
+        .then(() => undefined)
+        .catch(async () => {
+          console.warn('[TruckService] deleteTrip() - getDocsFromServer failed, falling back to cache');
+          const snapshot = await getDocsFromCache(tripsRef);
+          return Promise.all(snapshot.docs.map(doc => deleteDoc(doc.ref))).then(() => undefined);
+        });
+      
+      return from(p) as Observable<void>;
+    });
+  }
 }

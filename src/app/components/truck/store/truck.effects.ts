@@ -34,7 +34,7 @@ export class TruckEffects {
                                 const asCreatedAt = (t as any).createdAt;
                                 const createdAt = asCreatedAt ? (typeof asCreatedAt.toDate === 'function' ? asCreatedAt.toDate() : new Date(asCreatedAt)) : null;
 
-                                return ({ ...t, createdAt,});
+                                return ({ ...t, createdAt, });
                             }) as Truck[];
                             return TruckActions.getTruckListSuccess({ trucks: truckList });
                         }),
@@ -90,8 +90,11 @@ export class TruckEffects {
             this.actions$.pipe(
                 ofType(TruckActions.deleteTruckStart),
                 switchMap(action => runInInjectionContext(this.injector, () =>
-                    this.truckService.deleteTruck(action.id).pipe(
-                        map(() => TruckActions.deleteTruckSuccess({ id: action.id })),
+                    this.truckService.deleteTrips(action.id).pipe(
+                        switchMap(() => this.truckService.deleteTruck(action.id).pipe(
+                            map(() => TruckActions.deleteTruckSuccess({ id: action.id })),
+                            catchError(err => of(TruckActions.deleteTruckFail({ error: err })))
+                        )),
                         catchError(err => of(TruckActions.deleteTruckFail({ error: err })))
                     )
                 ))
