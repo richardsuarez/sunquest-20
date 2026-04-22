@@ -69,7 +69,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   customerList: Customer[] = [];
   activeSeason!: Season | null;
   records: CustomerRecord[] = [];
-  bookingColumns: string[] = ['season', 'departureDate', 'from', 'to', 'paymentType', 'bank', 'amount', 'notes', 'actions'];
+  bookingColumns: string[] = ['season', 'departureDate', 'from', 'to', 'paymentType', 'bank', 'amount', /* 'notes', */ 'actions'];
   currentBookings: Booking[] | null = null;
   bookingTagForDeletion: string | null = null;
 

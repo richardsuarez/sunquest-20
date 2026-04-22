@@ -166,8 +166,9 @@
                     <mat-form-field appearance="outline" floatLabel="always"
                         [class.form-field-mobile]="isMobile$ | async" style="width: 49%">
                         <mat-label>Date</mat-label>
-                        <input required matInput [matDatepicker]="picker" [(ngModel)]="arrivalAt" [min]="today"
-                            appAllowOnlyNumbers>
+                        <!-- <input required matInput [matDatepicker]="picker" [(ngModel)]="arrivalAt" [min]="today"
+                            appAllowOnlyNumbers> -->
+                        <input required matInput [matDatepicker]="picker" [(ngModel)]="arrivalAt" appAllowOnlyNumbers>
                         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                         <mat-datepicker #picker></mat-datepicker>
                     </mat-form-field>
@@ -281,8 +282,9 @@
                     <mat-form-field appearance="outline" floatLabel="always"
                         [class.form-field-mobile]="isMobile$ | async" style="width: 49%">
                         <mat-label>Date</mat-label>
-                        <input required matInput [matDatepicker]="pickupPicker" [(ngModel)]="pickupAt" [min]="today"
-                            [max]="arrivalAt" appAllowOnlyNumbers>
+                        <!-- <input required matInput [matDatepicker]="pickupPicker" [(ngModel)]="pickupAt" [min]="today"
+                            [max]="arrivalAt" appAllowOnlyNumbers> -->
+                        <input required matInput [matDatepicker]="pickupPicker" [(ngModel)]="pickupAt" >
                         <mat-datepicker-toggle matIconSuffix [for]="pickupPicker"></mat-datepicker-toggle>
                         <mat-datepicker #pickupPicker></mat-datepicker>
                     </mat-form-field>
@@ -573,14 +575,14 @@
                                 <mat-form-field appearance="outline" floatLabel="always"
                                     [class.form-field-mobile]="isMobile$ | async">
                                     <mat-label>Departure Date</mat-label>
-                                    <input matInput [matDatepicker]="depPicker" formControlName="departureDate"
-                                        [min]="today">
+                                    <!--<input matInput [matDatepicker]="depPicker" formControlName="departureDate" [min]="today"> -->
+                                    <input matInput [matDatepicker]="depPicker" formControlName="departureDate">
                                     <mat-datepicker-toggle matSuffix [for]="depPicker"></mat-datepicker-toggle>
                                     <mat-datepicker #depPicker></mat-datepicker>
                                     <mat-hint>Week: {{weekNumber(tripForm.controls.departureDate.value)}}</mat-hint>
-                                    @if (tripForm.controls.departureDate.hasError('wrongDate')) {
+                                    <!-- @if (tripForm.controls.departureDate.hasError('wrongDate')) {
                                     <mat-error>Departure date must be less than or equal arrival date</mat-error>
-                                    }
+                                    } -->
                                 </mat-form-field>
                                 <mat-form-field appearance="outline" floatLabel="always"
                                     [class.form-field-mobile]="isMobile$ | async">
@@ -589,11 +591,11 @@
                                     <mat-datepicker-toggle matSuffix [for]="arrPicker"></mat-datepicker-toggle>
                                     <mat-datepicker #arrPicker></mat-datepicker>
                                     <mat-hint>Week: {{weekNumber(tripForm.controls.arrivalDate.value)}}</mat-hint>
-                                    @if (tripForm.controls.arrivalDate.hasError('wrongDate')) {
+                                    <!-- @if (tripForm.controls.arrivalDate.hasError('wrongDate')) {
                                     <mat-error>Arrival
                                         date must be grater
                                         than or equal departure date</mat-error>
-                                    }
+                                    } -->
                                 </mat-form-field>
 
                             </div>

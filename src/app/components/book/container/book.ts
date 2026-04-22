@@ -403,13 +403,13 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
       this.snackBar.open(`Selected trip origin (${trip.origin}) does not match route origin (${routeOrigin})`, 'Close', { duration: 5000 });
     } else if (trip.remCarCap < Object.values(this.vehicleSelection).length) {
       this.snackBar.open(`Selected trip only allows ${trip.remCarCap} more vehicle(s)`, 'Close', { duration: 5000 });
-    } else if (trip.remLoadCap < this.selectedVehiclesLoad()) {
+    } else /* if (trip.remLoadCap < this.selectedVehiclesLoad()) {
       this.snackBar.open(`Selected trip does not have enough load capacity`, 'Close', { duration: 5000 });
     } else if (this.arrivalAt && trip.departureDate > this.arrivalAt) {
       this.snackBar.open(`Selected trip departs after the desired arrival date`, 'Close', { duration: 5000 });
     } else if (this.pickupAt && trip.departureDate < this.pickupAt) {
       this.snackBar.open(`Selected trip departs before the desired pickup date`, 'Close', { duration: 5000 });
-    } else {
+    } else */  {
       // if user checks the checkbox then this currentSelectedTrip = trip, 
       // if user unchecks the checkbox then currentSelectedTrip = null
       if (this.currentSelectedTrip?.id === trip.id) {
@@ -419,7 +419,27 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         this.currentSelectedTrip = trip;
         this.currentSelectedTruckId = truckId;
       }
+
+      if(this.arrivalAt && trip.departureDate > this.arrivalAt){
+      this.matDialog.open(PopupComponent, {
+        data: {
+          title: 'Warning',
+          message: `Selected trip departs after the desired arrival date.`,
+          cancelButton: 'OK',
+        }
+      });
+    } else if(this.pickupAt && trip.departureDate < this.pickupAt){
+      this.matDialog.open(PopupComponent, {
+        data: {
+          title: 'Warning',
+          message: `Selected trip departs before the desired pickup date.`,
+          cancelButton: 'OK',
+        }
+      });
     }
+    }
+    
+    
   }
 
   crudTitle() {
@@ -436,8 +456,9 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
   }
 
   nextTrips(trips: any[]) {
-    const now = new Date();
-    return trips.filter(t => t.departureDate >= now);
+    /* const now = new Date();
+    return trips.filter(t => t.departureDate >= now); */
+    return trips;
   }
 
   async save() {
@@ -618,12 +639,13 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
 
   selectableTrip(trip: Trip): boolean {
     if ((this.form.controls.origin.value && trip.origin !== this.form.controls.origin.value) ||
-      (this.arrivalAt && trip.departureDate > this.arrivalAt) ||
-      (this.pickupAt && trip.departureDate < this.pickupAt) ||
+      //(this.arrivalAt && trip.departureDate > this.arrivalAt) ||
+      //(this.pickupAt && trip.departureDate < this.pickupAt) ||
       (this.vehicleSelection && Object.values(this.vehicleSelection).filter(v => v).length > trip.remCarCap) ||
       (this.vehicleSelection && this.selectedVehiclesLoad() > trip.remLoadCap)) {
       return false;
     }
+    
     return true;
   }
 
