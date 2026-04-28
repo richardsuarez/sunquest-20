@@ -154,6 +154,7 @@ export class TripPopoverComponent implements OnInit, OnDestroy, AfterViewInit {
                     truckId: tripData.truckId ?? this.originalTruckId ?? '',
                     trip: {
                         ...this.trip,
+                        loadNumber: Number.parseInt(tripData.loadNumber ?? '0'),
                         departureDate: tripData.departureDate || new Date(),
                         arrivalDate: tripData.arrivalDate || new Date(),
                     }
@@ -177,10 +178,6 @@ export class TripPopoverComponent implements OnInit, OnDestroy, AfterViewInit {
                     newTruck: truck?.id ?? '',
                     bookings: this.bookings || []
                 }));
-                console.log(this.bookings);
-                console.log('Original truck ID: ', this.originalTruckId);
-                console.log('Old Trip ID: ', this.trip.id);
-                console.log('New Truck ID: ', truck?.id);
             }
 
         } else {

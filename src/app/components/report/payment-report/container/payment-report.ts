@@ -143,7 +143,11 @@ export class PaymentReport implements OnInit, OnDestroy {
 
   isFullPaid(truck: Truck, trip: Trip): boolean{
     if(truck.carCapacity){
-      return truck.carCapacity - trip.remCarCap === trip.paidBookings
+      if(truck.carCapacity === trip.remCarCap){
+        return false;
+      } else {
+        return truck.carCapacity - trip.remCarCap === trip.paidBookings;
+      }
     }
     return false;
   }
