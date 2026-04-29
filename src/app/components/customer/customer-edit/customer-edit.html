@@ -362,320 +362,320 @@
             </div>
         </form>
         }
-        
-
         <!-- Vehicles section -->
 
         @if(isMobile){
             <form [formGroup]="customerForm" class="form-mobile">
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
-                <mat-label>First Name</mat-label>
-                <input type="text" matInput required formControlName="primaryFirstName" appAllowAlphaAndSpecificChar>
-            </mat-form-field>
-
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
-                <mat-label>Last Name</mat-label>
-                <input type="text" matInput required formControlName="primaryLastName" appAllowAlphaAndSpecificChar>
-            </mat-form-field>
-
-            <div style="display: flex; justify-content: space-between; width: 100%">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Middle Name</mat-label>
-                    <input type="text" matInput formControlName="primaryMiddleName" appAllowAlphaAndSpecificChar>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Title</mat-label>
-                    <mat-select matInput formControlName="primaryTitle">
-                        <mat-option value="Mr.">Mr.</mat-option>
-                        <mat-option value="Mrs.">Mrs.</mat-option>
-                    </mat-select>
-                </mat-form-field>
-            </div>
-
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
-                <mat-label>Email</mat-label>
-                <input type="email" matInput formControlName="email">
-            </mat-form-field>
-
-            <div style="display: flex; justify-content: space-between; width: 100%">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Phone</mat-label>
-                    <input type="text" matInput formControlName="primaryPhone" required placeholder="##########"
-                        appAllowOnlyNumbers>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Rec No.</mat-label>
-                    <input type="text" matInput formControlName="recNo" appAllowOnlyNumbers>
-                    <mat-hint>Leave it blank if new customer</mat-hint>
-                </mat-form-field>
-            </div>
-
-            <h3>Secondary Customer</h3>
-
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                <mat-label>First Name</mat-label>
-                <input type="text" matInput formControlName="secondaryFirstName" appAllowAlphaAndSpecificChar>
-            </mat-form-field>
-
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                <mat-label>Last Name</mat-label>
-                <input type="text" matInput formControlName="secondaryLastName" appAllowAlphaAndSpecificChar>
-            </mat-form-field>
-
-            <div style="display: flex; justify-content: space-between; width: 100%">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Middle Name</mat-label>
-                    <input type="text" matInput formControlName="secondaryMiddleName" appAllowAlphaAndSpecificChar>
+                <h3>Primary Customer</h3>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
+                    <mat-label>First Name</mat-label>
+                    <input type="text" matInput required formControlName="primaryFirstName" appAllowAlphaAndSpecificChar>
                 </mat-form-field>
 
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Title</mat-label>
-                    <mat-select formControlName="secondaryTitle">
-                        <mat-option value="Mr.">Mr.</mat-option>
-                        <mat-option value="Mrs.">Mrs.</mat-option>
-                    </mat-select>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
+                    <mat-label>Last Name</mat-label>
+                    <input type="text" matInput required formControlName="primaryLastName" appAllowAlphaAndSpecificChar>
                 </mat-form-field>
-            </div>
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                <mat-label>Secondary Phone</mat-label>
-                <input type="text" matInput formControlName="secondaryPhone" placeholder="##########"
-                    appAllowOnlyNumbers>
-            </mat-form-field>
 
-            <h3>Florida Address</h3>
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                <mat-label>Address 1</mat-label>
-                <input type="text" matInput required
-                    [formControl]="customerForm.controls.floridaAddress.controls.address1">
-            </mat-form-field>
-
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                <mat-label>Address 2</mat-label>
-                <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.address2">
-            </mat-form-field>
-            <div style="display: flex; justify-content: space-between; width: 100%">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Building</mat-label>
-                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.bldg"
-                        appAllowAlphanumeric>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Apartment</mat-label>
-                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.apt"
-                        appAllowAlphanumeric>
-                </mat-form-field>
-            </div>
-            <div style="display: flex; justify-content: space-between; width: 100%">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>City</mat-label>
-                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.city"
-                        appAllowAlphaAndSpecificChar>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Zip Code</mat-label>
-                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.zipCode"
-                        appAllowOnlyNumbers>
-                </mat-form-field>
-            </div>
-
-            <h3>New York Address</h3>
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                <mat-label>Address 1</mat-label>
-                <input type="text" matInput required
-                    [formControl]="customerForm.controls.newYorkAddress.controls.address1">
-            </mat-form-field>
-
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                <mat-label>Address 2</mat-label>
-                <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.address2">
-            </mat-form-field>
-            <div style="display: flex; justify-content: space-between; width: 100%">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Building</mat-label>
-                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.bldg"
-                        appAllowAlphanumeric>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Apartment</mat-label>
-                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.apt"
-                        appAllowAlphanumeric>
-                </mat-form-field>
-            </div>
-            <div style="display: flex; justify-content: space-between; width: 100%">
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>City</mat-label>
-                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.city"
-                        appAllowAlphaAndSpecificChar>
-                </mat-form-field>
-                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                    <mat-label>Zip Code</mat-label>
-                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.zipCode"
-                        appAllowOnlyNumbers>
-                </mat-form-field>
-            </div>
-
-            <h3>Florida Notes</h3>
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                <mat-label>Florida Notes</mat-label>
-                <input type="text" matInput [formControl]="customerForm.controls.floridaNotes">
-            </mat-form-field>
-
-            <h3>New York Notes</h3>
-            <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
-                <mat-label>New York Notes</mat-label>
-                <input type="text" matInput [formControl]="customerForm.controls.newYorkNotes">
-            </mat-form-field>
-
-            <h3>Vehicles</h3>
-            @if(currentCustomer?.vehicles && currentCustomer?.vehicles?.length){
-                <div class="vehicles-list">
-                    @for(vehicle of currentCustomer?.vehicles; track vehicle){
-                        <div class="vehicle-item">
-                    <div style="width: 75%">
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Rec No:</span>
-                            <span class="detail-value">{{ vehicle.recNo }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Color:</span>
-                            <span class="detail-value">{{ vehicle.color }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Year:</span>
-                            <span class="detail-value">{{ vehicle.year }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Make:</span>
-                            <span class="detail-value">{{ vehicle.make }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Model:</span>
-                            <span class="detail-value">{{ vehicle.model }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">Plate:</span>
-                            <span class="detail-value">{{ vehicle.plate }}</span>
-                        </div>
-                        <div class="vehicle-detail">
-                            <span class="detail-label">VIN:</span>
-                            <span class="detail-value">{{ vehicle.vin }}</span>
-                        </div>
-                    </div>
-                    <div class="card-actions" style="width: 25%">
-                        <button mat-button style="color: red;" (click)="deleteVehicle(vehicle.id)">Delete</button>
-                    </div>
-                </div>
-                    }
-                
-            </div>
-            }
-            
-            @if(currentCustomer && (!currentCustomer.vehicles || currentCustomer.vehicles.length === 0)){
-                <div style="margin-bottom: 20px; width: 100%">
-                    <div style="margin: 10px">No register vehicles for this customer</div>
-                </div>
-            }
-            
-            <!-- temporary vehicles (not yet persisted) -->
-             @if(tempVehicles && tempVehicles.length > 0){
-                <h3>Pending vehicles</h3>
-                <div class="vehicles-list">
-                    @for(vehicle of tempVehicles; track vehicle){
-                        <div class="vehicle-item">
-                            <div style="width: 75%">
-                                <div class="vehicle-detail">
-                                    <span class="detail-label">Rec No:</span>
-                                    <span class="detail-value">{{ vehicle.recNo }}</span>
-                                </div>
-                                <div class="vehicle-detail">
-                                    <span class="detail-label">Color:</span>
-                                    <span class="detail-value">{{ vehicle.color }}</span>
-                                </div>
-                                <div class="vehicle-detail">
-                                    <span class="detail-label">Year:</span>
-                                    <span class="detail-value">{{ vehicle.year }}</span>
-                                </div>
-                                <div class="vehicle-detail">
-                                    <span class="detail-label">Make:</span>
-                                    <span class="detail-value">{{ vehicle.make }}</span>
-                                </div>
-                                <div class="vehicle-detail">
-                                    <span class="detail-label">Model:</span>
-                                    <span class="detail-value">{{ vehicle.model }}</span>
-                                </div>
-                                <div class="vehicle-detail">
-                                    <span class="detail-label">Plate:</span>
-                                    <span class="detail-value">{{ vehicle.plate }}</span>
-                                </div>
-                                <div class="vehicle-detail">
-                                    <span class="detail-label">VIN:</span>
-                                    <span class="detail-value">{{ vehicle.vin }}</span>
-                                </div>
-                            </div>
-                            <div class="card-actions" style="width: 25%">
-                                <button mat-button style="color: red;" (click)="deleteTempVehicle(vehicle)">Delete</button>
-                            </div>
-                        </div>
-                    }
-                </div>
-             }
-
-            <form [formGroup]="vehicleForm" style="width: 100%">
                 <div style="display: flex; justify-content: space-between; width: 100%">
                     <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>Color</mat-label>
-                        <input matInput formControlName="color">
+                        <mat-label>Middle Name</mat-label>
+                        <input type="text" matInput formControlName="primaryMiddleName" appAllowAlphaAndSpecificChar>
                     </mat-form-field>
                     <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>Year</mat-label>
-                        <input matInput type="number" formControlName="year">
+                        <mat-label>Title</mat-label>
+                        <mat-select matInput formControlName="primaryTitle">
+                            <mat-option value="Mr.">Mr.</mat-option>
+                            <mat-option value="Mrs.">Mrs.</mat-option>
+                        </mat-select>
                     </mat-form-field>
                 </div>
-                <div style="display: flex; justify-content: space-between; width: 100%">
-                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>Make</mat-label>
-                        <input matInput formControlName="make">
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>Model</mat-label>
-                        <input matInput formControlName="model">
-                    </mat-form-field>
-                </div>
-                <div style="display: flex; justify-content: space-between; width: 100%">
-                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>Plate</mat-label>
-                        <input matInput formControlName="plate">
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>State</mat-label>
-                        <input matInput formControlName="state">
-                    </mat-form-field>
-                </div>
-                <div style="display: flex; justify-content: space-between; width: 100%">
-                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>VIN</mat-label>
-                        <input matInput formControlName="vin">
-                    </mat-form-field>
-                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
-                        <mat-label>Weight (lbs)</mat-label>
-                        <input matInput type="number" formControlName="weight">
-                    </mat-form-field>
 
-                </div>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%">
+                    <mat-label>Email</mat-label>
+                    <input type="email" matInput formControlName="email">
+                </mat-form-field>
+
                 <div style="display: flex; justify-content: space-between; width: 100%">
-                    <mat-form-field floatLabel="always" appearance="outline">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Phone</mat-label>
+                        <input type="text" matInput formControlName="primaryPhone" required placeholder="##########"
+                            appAllowOnlyNumbers>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
                         <mat-label>Rec No.</mat-label>
-                        <input matInput type="text" formControlName="recNo">
-                        <mat-hint>Suggested value</mat-hint>
+                        <input type="text" matInput formControlName="recNo" appAllowOnlyNumbers>
+                        <mat-hint>Leave it blank if new customer</mat-hint>
                     </mat-form-field>
                 </div>
-                <div style="display:flex; justify-content: end; align-items:center; margin-bottom: 15px">
-                    <button mat-raised-button color="primary" type="button" (click)="addVehicle()">
-                        Add Vehicle
-                    </button>
+
+                <h3>Secondary Customer</h3>
+
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>First Name</mat-label>
+                    <input type="text" matInput formControlName="secondaryFirstName" appAllowAlphaAndSpecificChar>
+                </mat-form-field>
+
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>Last Name</mat-label>
+                    <input type="text" matInput formControlName="secondaryLastName" appAllowAlphaAndSpecificChar>
+                </mat-form-field>
+
+                <div style="display: flex; justify-content: space-between; width: 100%">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Middle Name</mat-label>
+                        <input type="text" matInput formControlName="secondaryMiddleName" appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Title</mat-label>
+                        <mat-select formControlName="secondaryTitle">
+                            <mat-option value="Mr.">Mr.</mat-option>
+                            <mat-option value="Mrs.">Mrs.</mat-option>
+                        </mat-select>
+                    </mat-form-field>
                 </div>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                    <mat-label>Secondary Phone</mat-label>
+                    <input type="text" matInput formControlName="secondaryPhone" placeholder="##########"
+                        appAllowOnlyNumbers>
+                </mat-form-field>
+
+                <h3>Florida Address</h3>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>Address 1</mat-label>
+                    <input type="text" matInput required
+                        [formControl]="customerForm.controls.floridaAddress.controls.address1">
+                </mat-form-field>
+
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>Address 2</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.address2">
+                </mat-form-field>
+                <div style="display: flex; justify-content: space-between; width: 100%">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Building</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.bldg"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Apartment</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.apt"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                </div>
+                <div style="display: flex; justify-content: space-between; width: 100%">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>City</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.city"
+                            appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Zip Code</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.floridaAddress.controls.zipCode"
+                            appAllowOnlyNumbers>
+                    </mat-form-field>
+                </div>
+
+                <h3>New York Address</h3>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>Address 1</mat-label>
+                    <input type="text" matInput required
+                        [formControl]="customerForm.controls.newYorkAddress.controls.address1">
+                </mat-form-field>
+
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>Address 2</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.address2">
+                </mat-form-field>
+                <div style="display: flex; justify-content: space-between; width: 100%">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Building</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.bldg"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Apartment</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.apt"
+                            appAllowAlphanumeric>
+                    </mat-form-field>
+                </div>
+                <div style="display: flex; justify-content: space-between; width: 100%">
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>City</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.city"
+                            appAllowAlphaAndSpecificChar>
+                    </mat-form-field>
+                    <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                        <mat-label>Zip Code</mat-label>
+                        <input type="text" matInput [formControl]="customerForm.controls.newYorkAddress.controls.zipCode"
+                            appAllowOnlyNumbers>
+                    </mat-form-field>
+                </div>
+
+                <h3>Florida Notes</h3>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>Florida Notes</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.floridaNotes">
+                </mat-form-field>
+
+                <h3>New York Notes</h3>
+                <mat-form-field floatLabel="always" appearance="outline" style="width: 100%;">
+                    <mat-label>New York Notes</mat-label>
+                    <input type="text" matInput [formControl]="customerForm.controls.newYorkNotes">
+                </mat-form-field>
+
+                <h3>Vehicles</h3>
+                @if(currentCustomer?.vehicles && currentCustomer?.vehicles?.length){
+                    <div class="vehicles-list">
+                        @for(vehicle of currentCustomer?.vehicles; track vehicle){
+                            <div class="vehicle-item">
+                        <div style="width: 75%">
+                            <div class="vehicle-detail">
+                                <span class="detail-label">Rec No:</span>
+                                <span class="detail-value">{{ vehicle.recNo }}</span>
+                            </div>
+                            <div class="vehicle-detail">
+                                <span class="detail-label">Color:</span>
+                                <span class="detail-value">{{ vehicle.color }}</span>
+                            </div>
+                            <div class="vehicle-detail">
+                                <span class="detail-label">Year:</span>
+                                <span class="detail-value">{{ vehicle.year }}</span>
+                            </div>
+                            <div class="vehicle-detail">
+                                <span class="detail-label">Make:</span>
+                                <span class="detail-value">{{ vehicle.make }}</span>
+                            </div>
+                            <div class="vehicle-detail">
+                                <span class="detail-label">Model:</span>
+                                <span class="detail-value">{{ vehicle.model }}</span>
+                            </div>
+                            <div class="vehicle-detail">
+                                <span class="detail-label">Plate:</span>
+                                <span class="detail-value">{{ vehicle.plate }}</span>
+                            </div>
+                            <div class="vehicle-detail">
+                                <span class="detail-label">VIN:</span>
+                                <span class="detail-value">{{ vehicle.vin }}</span>
+                            </div>
+                        </div>
+                        <div class="card-actions" style="width: 25%">
+                            <button mat-button style="color: red;" (click)="deleteVehicle(vehicle.id)">Delete</button>
+                        </div>
+                    </div>
+                        }
+                    
+                </div>
+                }
+                
+                @if(currentCustomer && (!currentCustomer.vehicles || currentCustomer.vehicles.length === 0)){
+                    <div style="margin-bottom: 20px; width: 100%">
+                        <div style="margin: 10px">No register vehicles for this customer</div>
+                    </div>
+                }
+                
+                <!-- temporary vehicles (not yet persisted) -->
+                @if(tempVehicles && tempVehicles.length > 0){
+                    <h3>Pending vehicles</h3>
+                    <div class="vehicles-list">
+                        @for(vehicle of tempVehicles; track vehicle){
+                            <div class="vehicle-item">
+                                <div style="width: 75%">
+                                    <div class="vehicle-detail">
+                                        <span class="detail-label">Rec No:</span>
+                                        <span class="detail-value">{{ vehicle.recNo }}</span>
+                                    </div>
+                                    <div class="vehicle-detail">
+                                        <span class="detail-label">Color:</span>
+                                        <span class="detail-value">{{ vehicle.color }}</span>
+                                    </div>
+                                    <div class="vehicle-detail">
+                                        <span class="detail-label">Year:</span>
+                                        <span class="detail-value">{{ vehicle.year }}</span>
+                                    </div>
+                                    <div class="vehicle-detail">
+                                        <span class="detail-label">Make:</span>
+                                        <span class="detail-value">{{ vehicle.make }}</span>
+                                    </div>
+                                    <div class="vehicle-detail">
+                                        <span class="detail-label">Model:</span>
+                                        <span class="detail-value">{{ vehicle.model }}</span>
+                                    </div>
+                                    <div class="vehicle-detail">
+                                        <span class="detail-label">Plate:</span>
+                                        <span class="detail-value">{{ vehicle.plate }}</span>
+                                    </div>
+                                    <div class="vehicle-detail">
+                                        <span class="detail-label">VIN:</span>
+                                        <span class="detail-value">{{ vehicle.vin }}</span>
+                                    </div>
+                                </div>
+                                <div class="card-actions" style="width: 25%">
+                                    <button mat-button style="color: red;" (click)="deleteTempVehicle(vehicle)">Delete</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <form [formGroup]="vehicleForm" style="width: 100%">
+                    <h4>Add New Vehicle</h4>
+                    <div style="display: flex; justify-content: space-between; width: 100%">
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                            <mat-label>Color</mat-label>
+                            <input matInput formControlName="color">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                            <mat-label>Year</mat-label>
+                            <input matInput type="number" formControlName="year">
+                        </mat-form-field>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; width: 100%">
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                            <mat-label>Make</mat-label>
+                            <input matInput formControlName="make">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                            <mat-label>Model</mat-label>
+                            <input matInput formControlName="model">
+                        </mat-form-field>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; width: 100%">
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                            <mat-label>Plate</mat-label>
+                            <input matInput formControlName="plate">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                            <mat-label>State</mat-label>
+                            <input matInput formControlName="state">
+                        </mat-form-field>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; width: 100%">
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                            <mat-label>VIN</mat-label>
+                            <input matInput formControlName="vin">
+                        </mat-form-field>
+                        <mat-form-field floatLabel="always" appearance="outline" style="width: 48%">
+                            <mat-label>Weight (lbs)</mat-label>
+                            <input matInput type="number" formControlName="weight">
+                        </mat-form-field>
+
+                    </div>
+                    <div style="display: flex; justify-content: space-between; width: 100%">
+                        <mat-form-field floatLabel="always" appearance="outline">
+                            <mat-label>Rec No.</mat-label>
+                            <input matInput type="text" formControlName="recNo">
+                            <mat-hint>Suggested value</mat-hint>
+                        </mat-form-field>
+                    </div>
+                    <div style="display:flex; justify-content: end; align-items:center; margin-bottom: 15px">
+                        <button mat-raised-button color="primary" type="button" (click)="addVehicle()">
+                            Add Vehicle
+                        </button>
+                    </div>
+                </form>
             </form>
-        </form>
         }
         
         <div [class.form-actions-desktop]="!isMobile" [class.form-actions-mobile]="isMobile">
