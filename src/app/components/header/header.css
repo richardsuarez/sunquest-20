@@ -40,7 +40,7 @@
 }
 
 .dropdown-menu.open {
-  max-height: 300px; /* adjust depending on menu size */
+  max-height: 500px; /* adjust depending on menu size */
 }
 
 .dropdown-menu button {
