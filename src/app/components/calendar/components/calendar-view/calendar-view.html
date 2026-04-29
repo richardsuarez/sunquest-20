@@ -31,29 +31,33 @@
         @if(day.isCurrentMonth){
         <div class="events-container">
           @for(event of day.events; track event){
-            <div class="event-badge" [style.background-color]="event.color || '#3498db'"
-              [title]="event.title + (event.description ? ': ' + event.description : '')"
-              (click)="onEventClick(event, $event); $event.stopPropagation()">
-              @if(!isMobile){
-              <span class="event-title">{{ event.title}}</span>
-              }
-              @if(!isMobile && event.description && event.description.startsWith('Florida')){
-              <div class="route">
-                <span>F</span>
-                <mat-icon>arrow_forward</mat-icon>
-                <span>N</span>
+            @if(!isMobile){
+              <div class="event-badge" [style.background-color]="event.color || '#3498db'"
+                [title]="event.title + (event.description ? ': ' + event.description : '')"
+                (click)="onEventClick(event, $event); $event.stopPropagation()">
+                <span class="event-title">{{ event.title}}</span>
+                @if(event.description && event.description.startsWith('Florida')){
+                <div class="route">
+                  <span>F</span>
+                  <mat-icon>arrow_forward</mat-icon>
+                  <span>N</span>
+                </div>
+                }
+                @if(event.description && event.description.startsWith('New York')){
+                <div class="route">
+                  <span>N</span>
+                  <mat-icon>arrow_forward</mat-icon>
+                  <span>F</span>
+                </div>
+                }
               </div>
-              }
-              @if(!isMobile && event.description && event.description.startsWith('New York')){
-              <div class="route">
-                <span>N</span>
-                <mat-icon>arrow_forward</mat-icon>
-                <span>F</span>
+            } @else {
+              <div class="event-badge" [style.background-color]="event.color || '#3498db'"
+                [title]="event.title + (event.description ? ': ' + event.description : '')">
+                <!--<span class="event-title">{{ event.title}}</span>-->
               </div>
-              }
-            </div>
+            }
           }
-          
         </div>
         }
       </div>
@@ -65,10 +69,11 @@
 @if(selectedDay){
 <div class="calendar-wrapper">
   <div class="calendar-header-mobile">
-    <button mat-icon-button (click)="selectedDay = null">
+    <button style="display: flex; padding: 0px" mat-button (click)="selectedDay = null">
       <mat-icon>chevron_left</mat-icon>
+      <h2 class="month-year">Back to {{ getMonthYearDisplay() }}</h2>
     </button>
-    <h2 class="month-year">{{ getMonthYearDisplay() }}</h2>
+    <!--<h2 class="month-year">Back to {{ getMonthYearDisplay() }}</h2>-->
   </div>
   <div class="day-cell-mobile" [class.other-month]="!selectedDay.isCurrentMonth" [class.today]="selectedDay.isToday">
 
