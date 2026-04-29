@@ -1,38 +1,76 @@
-<div class="booking-popover" #popoverContainer>
-  <div class="popover-header">
-    <div class="availability-section">
-      <span class="availability-title">Truck</span>
-      <div class="availability-info">
-        <span class="availability-value">{{ getTruckInfo() }}</span>
-      </div>
-    </div>
-    <div class="availability-section">
-      <span class="availability-title">Load</span>
-      <div class="availability-info">
-        <span class="availability-value">{{ trip?.loadNumber }}</span>
-      </div>
-    </div>
-    <div class="availability-section">
-      <span class="availability-title">Direction</span>
-      <div class="availability-info">
-        <span class="availability-value">{{ trip?.origin }} to {{ trip?.destination }}</span>
-      </div>
-    </div>
-    <div class="availability-section">
-      <span class="availability-title">Remaining Capacity</span>
-      <div class="availability-info">
-        <div class="availability-item">
-          <mat-icon class="availability-icon">directions_car</mat-icon>
-          <span class="availability-value">{{ trip?.remCarCap }}</span>
-        </div>
-        <div class="availability-item">
-          <img src="assets/weight.png" alt="weight" class="availability-icon">
-          <span class="availability-value">{{ trip?.remLoadCap }} lb</span>
+<div [class.booking-popover-desktop]="!isMobile" [class.booking-popover-mobile]="isMobile" #popoverContainer>
+  @if(!isMobile){
+    <div class="popover-header-desktop">
+      <div class="availability-section">
+        <span class="availability-title">Truck</span>
+        <div class="availability-info">
+          <span class="availability-value">{{ getTruckInfo() }}</span>
         </div>
       </div>
+      <div class="availability-section">
+        <span class="availability-title">Load</span>
+        <div class="availability-info">
+          <span class="availability-value">{{ trip?.loadNumber }}</span>
+        </div>
+      </div>
+      <div class="availability-section">
+        <span class="availability-title">Direction</span>
+        <div class="availability-info">
+          <span class="availability-value">{{ trip?.origin }} to {{ trip?.destination }}</span>
+        </div>
+      </div>
+      <div class="availability-section">
+        <span class="availability-title">Remaining Capacity</span>
+        <div class="availability-info">
+          <div class="availability-item">
+            <mat-icon class="availability-icon">directions_car</mat-icon>
+            <span class="availability-value">{{ trip?.remCarCap }}</span>
+          </div>
+          <div class="availability-item">
+            <img src="assets/weight.png" alt="weight" class="availability-icon">
+            <span class="availability-value">{{ trip?.remLoadCap }} lb</span>
+          </div>
+        </div>
+      </div>
+      <button mat-icon-button (click)="close()"><mat-icon>close</mat-icon></button>
     </div>
-    <button mat-icon-button (click)="close()"><mat-icon>close</mat-icon></button>
-  </div>
+  } @else {
+    <div class="popover-header-mobile">
+      <button style="display: flex; justify-self: end;" mat-icon-button (click)="close()"><mat-icon>close</mat-icon></button>
+      <div class="availability-section-mobile">
+        <span class="availability-title">Truck</span>
+        <div class="availability-info-mobile">
+          <span class="availability-value">{{ getTruckInfo() }}</span>
+        </div>
+      </div>
+      <div class="availability-section-mobile">
+        <span class="availability-title">Load</span>
+        <div class="availability-info-mobile">
+          <span class="availability-value">{{ trip?.loadNumber }}</span>
+        </div>
+      </div>
+      <div class="availability-section-mobile">
+        <span class="availability-title">Direction</span>
+        <div class="availability-info-mobile">
+          <span class="availability-value">{{ trip?.origin?.startsWith('F') ? 'FL' : 'NY' }} to {{ trip?.destination?.startsWith('F') ? 'FL' : 'NY' }}</span>
+        </div>
+      </div>
+      <div class="availability-section-mobile">
+        <span class="availability-title">Rem. Cap.</span>
+        <div class="availability-info-mobile">
+          <div class="availability-item">
+            <mat-icon class="availability-icon">directions_car</mat-icon>
+            <span class="availability-value">{{ trip?.remCarCap }}</span>
+          </div>
+          <div class="availability-item">
+            <img src="assets/weight.png" alt="weight" class="availability-icon">
+            <span class="availability-value">{{ trip?.remLoadCap }} lb</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+  
 
   <div class="popover-content">
     <!-- Loading state -->
@@ -155,7 +193,7 @@
         <!-- Vehicles Section -->
          @if(getBookingVehicles(currentBooking).length > 0){
           <div class="card-section">
-            <span class="card-label">Vehicles</span>
+            <span class="card-label">Vehicle</span>
             <div class="vehicles-list">
               @for(vehicle of getBookingVehicles(currentBooking); track vehicle){
                 <div class="vehicle-item">

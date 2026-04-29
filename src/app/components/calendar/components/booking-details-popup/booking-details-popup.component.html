@@ -38,7 +38,7 @@
         <div class="vehicle-item">
             <div class="vehicle-header">
               <span class="vehicle-title">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</span>
-              <span class="vehicle-plate">{{ vehicle.plate }}</span>
+              <span class="vehicle-plate">{{ vehicle.plate ? vehicle.plate : 'No plate provided' }}</span>
             </div>
             <div class="vehicle-details">
               <div class="detail-row">
