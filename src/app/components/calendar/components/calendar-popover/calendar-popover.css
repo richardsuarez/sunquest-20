@@ -1,4 +1,4 @@
-.booking-popover {
+.booking-popover-desktop {
   background: white;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -6,7 +6,14 @@
   width: 1100px;
 }
 
-.popover-header {
+.booking-popover-mobile {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.popover-header-desktop {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -16,6 +23,15 @@
   background: #f9f9f9;
   color: #333;
   gap: 20px;
+}
+
+.popover-header-mobile {
+  align-items: center;
+  padding: 5px 20px;
+  border-bottom: 1px solid #ccc;
+  border-radius: 8px 8px 0 0;
+  background: #f9f9f9;
+  color: #333;
 }
 
 .header-left {
@@ -40,6 +56,13 @@
   align-items: center;
 }
 
+.availability-section-mobile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
 .availability-title {
   font-size: 16px;
   font-weight: 600;
@@ -52,6 +75,10 @@
   display: flex;
   gap: 30px;
   align-items: center;
+}
+
+.availability-info-mobile {
+  width: 50%;
 }
 
 .availability-item {
