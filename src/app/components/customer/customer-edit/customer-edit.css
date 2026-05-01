@@ -1,68 +1,72 @@
-.container{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0px 20px;
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px 20px;
 }
 
-.header{
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    width: 100%;
-    max-width: 1500px;
+.header {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  width: 100%;
+  max-width: 1500px;
 }
 
-.body{
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    width: 100%;
-    max-width: 100%;
-    padding-bottom: 20px;
+.body {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  width: 100%;
+  max-width: 100%;
+  padding-bottom: 20px;
 
-    h1{
-        margin: 0px !important
-    }
+  h1 {
+    margin: 0px !important
+  }
 }
 
-.form-desktop{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 20px;
-    gap: 20px;
+.form-desktop {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 20px;
 }
 
-.form-mobile{
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 20px;
-    text-align: center;
+.form-mobile {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  text-align: center;
 }
 
-.form-actions-desktop{
-    display: flex;
-    justify-content: end;
-    gap: 20px;
-    align-items: center;
-
-    button{
-        width: 120px
-    }
+::ng-deep .form-mobile h3 {
+  width: 100%;
 }
 
-.form-actions-mobile{
-    display: flex;
-    justify-content: space-between;
-    flex-grow: 1;
-    gap: 20px;
-    align-items: center;
+.form-actions-desktop {
+  display: flex;
+  justify-content: end;
+  gap: 20px;
+  align-items: center;
+
+  button {
+    width: 120px
+  }
+}
+
+.form-actions-mobile {
+  display: flex;
+  justify-content: space-between;
+  flex-grow: 1;
+  gap: 20px;
+  align-items: center;
 
 
-    button{
-        width: 45%
-    }
+  button {
+    width: 45%
+  }
 }
 
 .information-region {
@@ -87,14 +91,18 @@
 .row {
   display: flex;
   gap: 20px;
-  align-items: flex-start; /* keep items top-aligned */
-  flex-wrap: nowrap; /* default; we'll let children shrink via min-width:0 */
+  align-items: flex-start;
+  /* keep items top-aligned */
+  flex-wrap: nowrap;
+  /* default; we'll let children shrink via min-width:0 */
 }
 
 /* allow each child (mat-form-field etc.) to shrink and take equal share */
-.row > * {
-  flex: 1 1 0;  /* grow, shrink, base 0 */
-  min-width: 0;  /* critical: permits shrinking instead of overflowing */
+.row>* {
+  flex: 1 1 0;
+  /* grow, shrink, base 0 */
+  min-width: 0;
+  /* critical: permits shrinking instead of overflowing */
   box-sizing: border-box;
 }
 
@@ -103,12 +111,13 @@
   .row {
     flex-wrap: wrap;
   }
-  .row > * {
+
+  .row>* {
     flex-basis: 100%;
   }
 }
 
-::ng-deep mat-form-field{
+::ng-deep mat-form-field {
   max-width: 100% !important
 }
 
