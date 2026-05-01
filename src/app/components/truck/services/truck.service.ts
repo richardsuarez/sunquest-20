@@ -18,9 +18,7 @@ export class TruckService {
         .then(snapshot => {
           return snapshot.docs.map(d => {
             const data = d.data() as any;
-            // normalize Firestore Timestamps to JS Date
-            const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
-            return ({ ...data, id: d.id, departureDate } as Truck);
+            return ({ ...data, id: d.id } as Truck);
           });
         })
         .catch(async (err) => {
@@ -28,8 +26,7 @@ export class TruckService {
           const snapshot = await getDocsFromCache(trucksRef);
           return snapshot.docs.map(d => {
             const data = d.data() as any;
-            const departureDate = data.departureDate ? (typeof data.departureDate.toDate === 'function' ? data.departureDate.toDate() : new Date(data.departureDate)) : null;
-            return ({ ...data, id: d.id, departureDate } as Truck);
+            return ({ ...data, id: d.id } as Truck);
           });
         });
 

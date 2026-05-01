@@ -78,7 +78,6 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
   trips: { [truckId: string]: Trip[] } = {};
   truckList: Truck[] = [];
   currentCustomer: Customer | null = null;
-  private requestedTrips = new Set<string>();
   isMobile$!: Observable<boolean>;
   savingBooking$!: Observable<boolean>;
   destroy$ = new Subject<void>()
@@ -191,13 +190,8 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
     this.truckList$.pipe(takeUntil(this.destroy$)).subscribe(trucks => {
       trucks.forEach(t => {
         if (t.id) {
-          // dispatch load trips for trucks that don't have trips yet
-          // and that we haven't already requested during this component lifecycle
-          if (!this.requestedTrips.has(t.id)) {
-            this.requestedTrips.add(t.id);
-            if (this.activeSeason) {
-              this.store.dispatch(BookActions.loadTripsStart({ truckId: t.id, season: this.activeSeason }));
-            }
+          if (this.activeSeason) {
+            this.store.dispatch(BookActions.loadTripsStart({ truckId: t.id, season: this.activeSeason }));
           }
         }
       });
@@ -336,15 +330,17 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
   }
 
   allTripsAreUpcoming(trips: Trip[]) {
-    if (trips.length === 0) return false;
+    /* if (trips.length === 0) return false;
     const now = new Date();
     let aux = true;
     trips.forEach((t) => {
-      if (t.departureDate > now) {
+      if (t.departureDate > now) { 
         aux = false;
       }
     });
-    return aux;
+    return aux; */
+
+    return false;
   }
 
   areSelectedVehicles(): boolean {
@@ -401,18 +397,18 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
     const routeOrigin = this.form.controls.origin.value;
     if (routeOrigin && routeOrigin !== trip.origin) {
       this.snackBar.open(`Selected trip origin (${trip.origin}) does not match route origin (${routeOrigin})`, 'Close', { duration: 5000 });
-    } else if (trip.remCarCap < Object.values(this.vehicleSelection).length) {
-      this.snackBar.open(`Selected trip only allows ${trip.remCarCap} more vehicle(s)`, 'Close', { duration: 5000 });
+    } else if (trip.remCarCap === 0) {
+      this.snackBar.open(`Selected trip do not allow more vehicles`, 'Close', { duration: 5000 });
     } else /* if (trip.remLoadCap < this.selectedVehiclesLoad()) {
       this.snackBar.open(`Selected trip does not have enough load capacity`, 'Close', { duration: 5000 });
     } else if (this.arrivalAt && trip.departureDate > this.arrivalAt) {
       this.snackBar.open(`Selected trip departs after the desired arrival date`, 'Close', { duration: 5000 });
     } else if (this.pickupAt && trip.departureDate < this.pickupAt) {
       this.snackBar.open(`Selected trip departs before the desired pickup date`, 'Close', { duration: 5000 });
-    } else */  {
+    } else */ {
       // if user checks the checkbox then this currentSelectedTrip = trip, 
       // if user unchecks the checkbox then currentSelectedTrip = null
-      if (this.currentSelectedTrip?.id === trip.id) {
+      if (this.currentSelectedTrip && this.currentSelectedTrip.id === trip.id) {
         this.currentSelectedTrip = null;
         this.currentSelectedTruckId = null;
       } else {
@@ -420,26 +416,24 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         this.currentSelectedTruckId = truckId;
       }
 
-      if(this.arrivalAt && trip.departureDate > this.arrivalAt){
-      this.matDialog.open(PopupComponent, {
-        data: {
-          title: 'Warning',
-          message: `Selected trip departs after the desired arrival date.`,
-          cancelButton: 'OK',
-        }
-      });
-    } else if(this.pickupAt && trip.departureDate < this.pickupAt){
-      this.matDialog.open(PopupComponent, {
-        data: {
-          title: 'Warning',
-          message: `Selected trip departs before the desired pickup date.`,
-          cancelButton: 'OK',
-        }
-      });
+      if (this.arrivalAt && trip.departureDate > this.arrivalAt) {
+        this.matDialog.open(PopupComponent, {
+          data: {
+            title: 'Warning',
+            message: `Selected trip departs after the desired arrival date.`,
+            cancelButton: 'OK',
+          }
+        });
+      } else if (this.pickupAt && trip.departureDate < this.pickupAt) {
+        this.matDialog.open(PopupComponent, {
+          data: {
+            title: 'Warning',
+            message: `Selected trip departs before the desired pickup date.`,
+            cancelButton: 'OK',
+          }
+        });
+      }
     }
-    }
-    
-    
   }
 
   crudTitle() {
@@ -475,7 +469,8 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
     const arrivalAt = this.arrivalAt || new Date();
     const pickupAt = this.pickupAt || new Date();
     let booking;
-    if (this.originalBooking?.id) {
+    if (this.originalBooking && this.originalBooking.id) {
+      // editing an existing booking
       booking = {
         id: this.originalBooking.id,
         customer: this.currentCustomer,
@@ -493,17 +488,18 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         pickupWeekOfYear: this.weekNumber(pickupAt),
         from: this.form.controls.origin.value,
         to: this.form.controls.destination.value,
-        departureDate: this.currentSelectedTrip ? this.currentSelectedTrip.departureDate : this.originalBooking?.departureDate!,
-        tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id! : this.originalBooking?.tripId!,
-        truckId: this.currentSelectedTruckId,
+        departureDate: this.currentSelectedTrip ? this.currentSelectedTrip.departureDate : this.originalBooking.departureDate!,
+        tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id! : null,
+        truckId: this.currentSelectedTruckId ? this.currentSelectedTruckId : null,
         deliveryNotes: this.form.controls.deliveryNotes.value,
         pickupNotes: this.form.controls.pickupNotes.value,
         createdAt: new Date(),
-        season: this.originalBooking && this.originalBooking.season
+        season: this.originalBooking.season
           ? this.originalBooking.season
           : this.activeSeason && this.activeSeason.isCurrent ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
       };
     } else {
+      // adding a new booking
       booking = {
         customer: this.currentCustomer,
         vehicleId: this.currentCustomer.vehicles[0].id!,
@@ -522,13 +518,13 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         to: this.form.controls.destination.value,
         departureDate: this.currentSelectedTrip ? this.currentSelectedTrip.departureDate : null,
         tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id! : null,
-        truckId: this.currentSelectedTruckId,
+        truckId: this.currentSelectedTruckId ? this.currentSelectedTruckId : null,
         deliveryNotes: this.form.controls.deliveryNotes.value,
         pickupNotes: this.form.controls.pickupNotes.value,
         createdAt: new Date(),
-        season: this.originalBooking && this.originalBooking.season
-          ? this.originalBooking.season
-          : this.activeSeason && this.activeSeason.isCurrent ? `${this.activeSeason.seasonName}-${this.activeSeason.year}` : null,
+        season: this.activeSeason && this.activeSeason.isCurrent
+          ? `${this.activeSeason.seasonName}-${this.activeSeason.year}`
+          : null,
       };
     }
 
@@ -568,8 +564,8 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
   private updateOriginalTrip() {
     if (this.originalTrip) {
       let originalBookingVehicleLoad = 0;
-      if (this.originalBooking && this.originalBooking?.customer?.vehicles) {
-        originalBookingVehicleLoad = this.originalBooking?.customer?.vehicles[0].weight ?? 0;
+      if (this.originalBooking && this.originalBooking.customer?.vehicles) {
+        originalBookingVehicleLoad = this.originalBooking.customer?.vehicles[0].weight ?? 0;
       }
       const originalTripForUpdate = {
         ...this.originalTrip,
@@ -584,8 +580,8 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
   private updateCurrentTrip(booking: Booking) {
     if (this.currentSelectedTrip) {
       let currentBookingVehicleLoad = 0;
-      if (booking && booking?.customer?.vehicles) {
-        currentBookingVehicleLoad = booking?.customer?.vehicles[0].weight ?? 0;
+      if (booking && booking.customer?.vehicles) {
+        currentBookingVehicleLoad = booking.customer?.vehicles[0].weight ?? 0;
       }
       const currentTripForUpdate = {
         ...this.currentSelectedTrip,
@@ -645,7 +641,7 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
       (this.vehicleSelection && this.selectedVehiclesLoad() > trip.remLoadCap)) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -735,11 +731,11 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         this.pickupAddressForm.controls.zipCode.setValue(this.currentCustomer.floridaAddress.zipCode);
       }
 
-      if(this.currentCustomer && this.currentCustomer.floridaNotes){
+      if (this.currentCustomer && this.currentCustomer.floridaNotes) {
         this.form.controls.pickupNotes.setValue(this.currentCustomer.floridaNotes);
       }
 
-      if(this.currentCustomer && this.currentCustomer.newYorkNotes){
+      if (this.currentCustomer && this.currentCustomer.newYorkNotes) {
         this.form.controls.deliveryNotes.setValue(this.currentCustomer.newYorkNotes);
       }
     } else if (this.form.controls.origin.value === 'New York') {
@@ -764,11 +760,11 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         this.pickupAddressForm.controls.zipCode.setValue(this.currentCustomer.newYorkAddress.zipCode);
       }
 
-      if(this.currentCustomer && this.currentCustomer.newYorkNotes){
+      if (this.currentCustomer && this.currentCustomer.newYorkNotes) {
         this.form.controls.pickupNotes.setValue(this.currentCustomer.newYorkNotes);
       }
 
-      if(this.currentCustomer && this.currentCustomer.floridaNotes){
+      if (this.currentCustomer && this.currentCustomer.floridaNotes) {
         this.form.controls.deliveryNotes.setValue(this.currentCustomer.floridaNotes);
       }
     }
