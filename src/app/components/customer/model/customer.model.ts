@@ -51,4 +51,5 @@ export interface CustomerRecord {
     customer: Customer;
     vehicle: Vehicle | null;
     bookings: Booking[];
+    currentBookingSeeing: number;
 }

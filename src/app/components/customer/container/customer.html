@@ -30,200 +30,422 @@
                 </mat-card-header>
 
                 <mat-card-content>
-                    <div class="customer-info">
-                        <mat-card-title>{{ record.customer.primaryTitle }} {{ record.customer.primaryLastName }}, {{
-                            record.customer.primaryFirstName
-                            }}
-                            {{ record.customer.primaryMiddleName }}</mat-card-title>
-                        @if(record.customer.secondaryFirstName){
-                            <mat-card-subtitle>
-                                {{ record.customer.secondaryTitle }} {{ record.customer.secondaryLastName }}, {{
-                                record.customer.secondaryFirstName }} {{
-                                record.customer.secondaryMiddleName }}
-                            </mat-card-subtitle>
-                        }
-                        <div style="display: block">
-                            <section class="info-section">
-                                <h4>Contact Information</h4>
-                                <div style="margin-left: 20px">
-                                    <p>
-                                        <mat-icon>email</mat-icon>
-                                        @if(record.customer.email){
-                                            <a [href]="'mailto:' + record.customer.email">{{
-                                                record.customer.email }}</a>
-                                        } @else {
-                                            <span style="color: darkgray;">No provided</span>
-                                        }
-                                    </p>
-                                    <p>
-                                        <mat-icon>phone</mat-icon>
-                                        @if(record.customer.primaryPhone){
-                                            <a [href]="'tel:' + record.customer.primaryPhone">{{
-                                                record.customer.primaryPhone }}</a>
-                                        } @else {
-                                            <span style="color: darkgray;">No provided</span>
-                                        }
-                                    </p>
-                                    @if(record.customer.secondaryPhone){
+                    @if(!(isMobile$ | async)){
+                        <div class="customer-info">
+                            <mat-card-title>{{ record.customer.primaryTitle }} {{ record.customer.primaryLastName }}, {{
+                                record.customer.primaryFirstName
+                                }}
+                                {{ record.customer.primaryMiddleName }}</mat-card-title>
+                            @if(record.customer.secondaryFirstName){
+                                <mat-card-subtitle>
+                                    {{ record.customer.secondaryTitle }} {{ record.customer.secondaryLastName }}, {{
+                                    record.customer.secondaryFirstName }} {{
+                                    record.customer.secondaryMiddleName }}
+                                </mat-card-subtitle>
+                            }
+                            <div style="display: block">
+                                <section class="info-section">
+                                    <h4>Contact Information</h4>
+                                    <div style="margin-left: 20px">
+                                        <p>
+                                            <mat-icon>email</mat-icon>
+                                            @if(record.customer.email){
+                                                <a [href]="'mailto:' + record.customer.email">{{
+                                                    record.customer.email }}</a>
+                                            } @else {
+                                                <span style="color: darkgray;">No provided</span>
+                                            }
+                                        </p>
                                         <p>
                                             <mat-icon>phone</mat-icon>
-                                            <a [href]="'tel:' + record.customer.secondaryPhone">{{
-                                                record.customer.secondaryPhone }}</a>
+                                            @if(record.customer.primaryPhone){
+                                                <a [href]="'tel:' + record.customer.primaryPhone">{{
+                                                    record.customer.primaryPhone }}</a>
+                                            } @else {
+                                                <span style="color: darkgray;">No provided</span>
+                                            }
                                         </p>
-                                    }
-                                </div>
-                            </section>
-                            <section class="info-section">
-                                <h4>Vehicle</h4>
-                                <div style="margin-left: 20px;">
-                                    @if(record.vehicle){
-                                        <p><strong>Year:</strong> {{ record.vehicle.year ?? 'No provided' }}</p>
-                                        <p><strong>Make:</strong> {{ record.vehicle.make ?? 'No provided'}}</p>
-                                        <p><strong>Model:</strong> {{ record.vehicle.model ?? 'No provided' }}</p>
-                                        <p><strong>Color:</strong> {{ record.vehicle.color ?? 'No provided' }}</p>
-                                        <p><strong>Plate:</strong> {{ record.vehicle.plate ?? 'No provided' }}</p>
-                                        <p><strong>State:</strong> {{ record.vehicle.state ?? 'No provided' }}</p>
-                                        <p><strong>VIN:</strong> {{ record.vehicle.vin ?? 'No provided' }}</p>
-                                        <p><strong>Weight:</strong> {{ record.vehicle.weight ?? 'No provided' }}</p>
+                                        @if(record.customer.secondaryPhone){
+                                            <p>
+                                                <mat-icon>phone</mat-icon>
+                                                <a [href]="'tel:' + record.customer.secondaryPhone">{{
+                                                    record.customer.secondaryPhone }}</a>
+                                            </p>
+                                        }
+                                    </div>
+                                </section>
+                                <section class="info-section">
+                                    <h4>Vehicle</h4>
+                                    <div style="margin-left: 20px;">
+                                        @if(record.vehicle){
+                                            <p><strong>Year:</strong> {{ record.vehicle.year ?? 'No provided' }}</p>
+                                            <p><strong>Make:</strong> {{ record.vehicle.make ?? 'No provided'}}</p>
+                                            <p><strong>Model:</strong> {{ record.vehicle.model ?? 'No provided' }}</p>
+                                            <p><strong>Color:</strong> {{ record.vehicle.color ?? 'No provided' }}</p>
+                                            <p><strong>Plate:</strong> {{ record.vehicle.plate ?? 'No provided' }}</p>
+                                            <p><strong>State:</strong> {{ record.vehicle.state ?? 'No provided' }}</p>
+                                            <p><strong>VIN:</strong> {{ record.vehicle.vin ?? 'No provided' }}</p>
+                                            <p><strong>Weight:</strong> {{ record.vehicle.weight ?? 'No provided' }}</p>
+                                        } @else {
+                                            <p style="color: darkgray;">No provided</p>
+                                        }
+                                    </div>
+                                </section>
+                                <section class="info-section">
+                                    <h4>Florida Address</h4>
+                                    @if(record.customer.floridaAddress){
+                                        <div style="margin-left: 20px;">
+                                            <p>{{ record.customer.floridaAddress.address1 }} {{
+                                                record.customer.floridaAddress.address2 }}</p>
+                                            <p> {{record.customer.floridaAddress.city }}, {{ record.customer.floridaAddress.state }}
+                                                {{ record.customer.floridaAddress.zipCode }}</p>
+                                        </div>
                                     } @else {
-                                        <p style="color: darkgray;">No provided</p>
+                                        <p style="color: darkgray; margin-left: 20px;">No provided</p>
                                     }
+                                    
+                                </section>
+                                <section class="info-section">
+                                    <h4>New York Address</h4>
+                                    @if(record.customer.newYorkAddress){
+                                        <div style="margin-left: 20px;">
+                                            <p>{{ record.customer.newYorkAddress.address1 }} {{
+                                                record.customer.newYorkAddress.address2 }}</p>
+                                            <p> {{record.customer.newYorkAddress.city }}, {{ record.customer.newYorkAddress.state }}
+                                                {{ record.customer.newYorkAddress.zipCode }}</p>
+                                        </div>
+                                    } @else {
+                                        <p style="color: darkgray; margin-left: 20px;">No provided</p>
+                                    }
+                                </section>
+                                <section class="info-section">
+                                <h4>Florida Notes</h4>
+                                @if(record.customer.floridaNotes){
+                                <div style="margin-left: 20px;">
+                                    <p>{{ record.customer.floridaNotes }}</p>
                                 </div>
-                            </section>
-                            <section class="info-section">
-                                <h4>Florida Address</h4>
-                                @if(record.customer.floridaAddress){
-                                    <div style="margin-left: 20px;">
-                                        <p>{{ record.customer.floridaAddress.address1 }} {{
-                                            record.customer.floridaAddress.address2 }}</p>
-                                        <p> {{record.customer.floridaAddress.city }}, {{ record.customer.floridaAddress.state }}
-                                            {{ record.customer.floridaAddress.zipCode }}</p>
-                                    </div>
                                 } @else {
-                                    <p style="color: darkgray; margin-left: 20px;">No provided</p>
+                                <p style="color: darkgray; margin-left: 20px;">No notes</p>
                                 }
-                                
+
                             </section>
                             <section class="info-section">
-                                <h4>New York Address</h4>
-                                @if(record.customer.newYorkAddress){
-                                    <div style="margin-left: 20px;">
-                                        <p>{{ record.customer.newYorkAddress.address1 }} {{
-                                            record.customer.newYorkAddress.address2 }}</p>
-                                        <p> {{record.customer.newYorkAddress.city }}, {{ record.customer.newYorkAddress.state }}
-                                            {{ record.customer.newYorkAddress.zipCode }}</p>
-                                    </div>
+                                <h4>New York Notes</h4>
+                                @if(record.customer.newYorkNotes){
+                                <div style="margin-left: 20px;">
+                                    <p>{{ record.customer.newYorkNotes }}</p>
+                                </div>
                                 } @else {
-                                    <p style="color: darkgray; margin-left: 20px;">No provided</p>
+                                <p style="color: darkgray; margin-left: 20px;">No notes</p>
                                 }
                             </section>
-                            <section class="info-section">
-                            <h4>Florida Notes</h4>
-                            @if(record.customer.floridaNotes){
-                            <div style="margin-left: 20px;">
-                                <p>{{ record.customer.floridaNotes }}</p>
                             </div>
-                            } @else {
-                            <p style="color: darkgray; margin-left: 20px;">No notes</p>
-                            }
-
-                        </section>
-                        <section class="info-section">
-                            <h4>New York Notes</h4>
-                            @if(record.customer.newYorkNotes){
-                            <div style="margin-left: 20px;">
-                                <p>{{ record.customer.newYorkNotes }}</p>
-                            </div>
-                            } @else {
-                            <p style="color: darkgray; margin-left: 20px;">No notes</p>
-                            }
-                        </section>
+                            <mat-card-actions>
+                                <button mat-button color="warn" (click)="createBooking(record.customer, record.vehicle)" matTooltip="New booking">Book</button>
+                                <button mat-button color="primary" (click)="toEditCustomer(record.customer)" matTooltip="Edit customer">Edit</button>
+                                <button mat-button style="color: red;" (click)="deleteRecord(record)" matTooltip="Delete record">Delete</button>
+                            </mat-card-actions>
                         </div>
-                        <mat-card-actions>
-                            <button mat-button color="warn" (click)="createBooking(record.customer, record.vehicle)" matTooltip="New booking">Book</button>
-                            <button mat-button color="primary" (click)="toEditCustomer(record.customer)" matTooltip="Edit customer">Edit</button>
-                            <button mat-button style="color: red;" (click)="deleteRecord(record)" matTooltip="Delete record">Delete</button>
-                        </mat-card-actions>
-                    </div>
-                    <div style="border-radius: 5px; width: 77%">
-                        <div style=" margin: 10px 0px 10px 0px; padding: 2px;">
-                            <h3 style="text-align: center; margin: 0px;">Bookings</h3>
-                        </div>
-                        @if(record.bookings && record.bookings.length > 0){
-                            <table style="border: 2px solid darkgray;" mat-table [dataSource]="record.bookings" class="mat-elevation-z8">
-                                <ng-container matColumnDef="season">
-                                    <th mat-header-cell *matHeaderCellDef> Season </th>
-                                    <td [class.activeSeason]="isActiveSeason(booking.season)" mat-cell *matCellDef="let booking">
-                                        {{booking.season}} </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="departureDate">
-                                    <th mat-header-cell *matHeaderCellDef> Departure Date </th>
-                                    <td mat-cell *matCellDef="let booking"> {{booking.departureDate | date : 'EEE MMM dd, yyyy'}}
-                                    </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="from">
-                                    <th mat-header-cell *matHeaderCellDef> From </th>
-                                    <td mat-cell *matCellDef="let booking"> {{booking.from}} </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="to">
-                                    <th mat-header-cell *matHeaderCellDef> To </th>
-                                    <td mat-cell *matCellDef="let booking"> {{booking.to}} </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="paymentType">
-                                    <th mat-header-cell *matHeaderCellDef> Payment Type </th>
-                                    <td mat-cell *matCellDef="let booking"> {{booking.paycheck.checkNumber}} </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="bank">
-                                    <th mat-header-cell *matHeaderCellDef> Bank </th>
-                                    <td mat-cell *matCellDef="let booking"> {{booking.paycheck.bankName}} </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="amount">
-                                    <th mat-header-cell *matHeaderCellDef> Amount </th>
-                                    <td mat-cell *matCellDef="let booking"> {{booking.paycheck.amount}} </td>
-                                </ng-container>
-
-                                <!-- <ng-container matColumnDef="notes">
-                                    <th mat-header-cell *matHeaderCellDef> Notes </th>
-                                    <td mat-cell *matCellDef="let booking"> {{booking.notes}} </td>
-                                </ng-container> -->
-
-                                <ng-container matColumnDef="actions">
-                                    <th mat-header-cell *matHeaderCellDef></th>
-                                    <td mat-cell *matCellDef="let booking" style="display: flex; justify-content: space-evenly; padding: 10px 5px">
-                                        @if(activeSeason && activeSeason.isCurrent){
-                                            <button mat-raised-button color="primary" (click)="editBooking(booking, record.customer, record.vehicle)">Edit</button>
-                                        } @else {
-                                            <button mat-raised-button color="primary" (click)="viewBooking(booking)">View</button>
-                                        }
-                                        @if((deletingBooking$ | async) === booking.id){
-                                            <button mat-raised-button disabled style="color: red;">
-                                                <mat-icon>
-                                                    <mat-spinner diameter="18"></mat-spinner>
-                                                </mat-icon>
-                                                Deleting...
-                                            </button>
-                                        } @else {
-                                            <button mat-raised-button style="color: red;" (click)="deleteBooking(booking)">Delete</button>
-                                        }
-                                    </td>
-                                </ng-container>
-
-                                <tr style="background-color: #2664b4; color: white; text-align: center; border-top-left-radius: 10px; border-top-right-radius: 10px; height: 30px;"
-                                    mat-header-row *matHeaderRowDef="bookingColumns"></tr>
-                                <tr mat-row *matRowDef="let row; columns: bookingColumns;"></tr>
-                            </table>
-                        } @else {
-                            <div style="text-align: center; border: 2px solid darkgray">
-                                <h4 style="color: darkgray;">No bookings found.</h4>
+                        <div style="border-radius: 5px; width: 77%">
+                            <div style=" margin: 10px 0px 10px 0px; padding: 2px;">
+                                <h3 style="text-align: center; margin: 0px;">Bookings</h3>
                             </div>
-                        }
-                    </div>
+                            @if(record.bookings && record.bookings.length > 0){
+                                <table style="border: 2px solid darkgray;" mat-table [dataSource]="record.bookings" class="mat-elevation-z8">
+                                    <ng-container matColumnDef="season">
+                                        <th mat-header-cell *matHeaderCellDef> Season </th>
+                                        <td [class.activeSeason]="isActiveSeason(booking.season)" mat-cell *matCellDef="let booking">
+                                            {{booking.season}} </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="departureDate">
+                                        <th mat-header-cell *matHeaderCellDef> Departure Date </th>
+                                        <td mat-cell *matCellDef="let booking"> {{booking.departureDate | date : 'EEE MMM dd, yyyy'}}
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="from">
+                                        <th mat-header-cell *matHeaderCellDef> From </th>
+                                        <td mat-cell *matCellDef="let booking"> {{booking.from}} </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="to">
+                                        <th mat-header-cell *matHeaderCellDef> To </th>
+                                        <td mat-cell *matCellDef="let booking"> {{booking.to}} </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="paymentType">
+                                        <th mat-header-cell *matHeaderCellDef> Payment Type </th>
+                                        <td mat-cell *matCellDef="let booking"> {{booking.paycheck.checkNumber}} </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="bank">
+                                        <th mat-header-cell *matHeaderCellDef> Bank </th>
+                                        <td mat-cell *matCellDef="let booking"> {{booking.paycheck.bankName}} </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="amount">
+                                        <th mat-header-cell *matHeaderCellDef> Amount </th>
+                                        <td mat-cell *matCellDef="let booking"> {{booking.paycheck.amount}} </td>
+                                    </ng-container>
+
+                                    <!-- <ng-container matColumnDef="notes">
+                                        <th mat-header-cell *matHeaderCellDef> Notes </th>
+                                        <td mat-cell *matCellDef="let booking"> {{booking.notes}} </td>
+                                    </ng-container> -->
+
+                                    <ng-container matColumnDef="actions">
+                                        <th mat-header-cell *matHeaderCellDef></th>
+                                        <td mat-cell *matCellDef="let booking" style="display: flex; justify-content: space-evenly; padding: 10px 5px">
+                                            @if(activeSeason && activeSeason.isCurrent){
+                                                <button mat-raised-button color="primary" (click)="editBooking(booking, record.customer, record.vehicle)">Edit</button>
+                                            } @else {
+                                                <button mat-raised-button color="primary" (click)="viewBooking(booking)">View</button>
+                                            }
+                                            @if((deletingBooking$ | async) === booking.id){
+                                                <button mat-raised-button disabled style="color: red;">
+                                                    <mat-icon>
+                                                        <mat-spinner diameter="18"></mat-spinner>
+                                                    </mat-icon>
+                                                    Deleting...
+                                                </button>
+                                            } @else {
+                                                <button mat-raised-button style="color: red;" (click)="deleteBooking(booking)">Delete</button>
+                                            }
+                                        </td>
+                                    </ng-container>
+
+                                    <tr style="background-color: #2664b4; color: white; text-align: center; border-top-left-radius: 10px; border-top-right-radius: 10px; height: 30px;"
+                                        mat-header-row *matHeaderRowDef="bookingColumns"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: bookingColumns;"></tr>
+                                </table>
+                            } @else {
+                                <div style="text-align: center; border: 2px solid darkgray">
+                                    <h4 style="color: darkgray;">No bookings found.</h4>
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        <div style="display: block; width: 100%; padding-top: 10px;">
+                            <mat-accordion style="width: 100%;">
+                                <mat-expansion-panel>
+                                    <mat-expansion-panel-header>
+                                        <div class="customer-info-mobile">
+                                            <mat-card-title style="margin: 0px; padding: 0px">{{ record.customer.primaryTitle }} {{ record.customer.primaryLastName }}, {{
+                                                record.customer.primaryFirstName
+                                                }}
+                                                {{ record.customer.primaryMiddleName }}</mat-card-title>
+                                            @if(record.customer.secondaryFirstName){
+                                                <mat-card-subtitle style="padding: 0px;">
+                                                    {{ record.customer.secondaryTitle }} {{ record.customer.secondaryLastName }}, {{
+                                                    record.customer.secondaryFirstName }} {{
+                                                    record.customer.secondaryMiddleName }}
+                                                </mat-card-subtitle>
+                                            }
+                                        </div>
+                                    </mat-expansion-panel-header>
+                                    <div style="display: block">
+                                        <section class="info-section">
+                                            <h4>Contact Information</h4>
+                                            <div class="info-section-content">
+                                                <div class="info-item">
+                                                    <mat-icon>email</mat-icon>
+                                                    @if(record.customer.email){
+                                                        <a [href]="'mailto:' + record.customer.email" class="info-link">{{
+                                                            record.customer.email }}</a>
+                                                    } @else {
+                                                        <span class="info-empty">No provided</span>
+                                                    }
+                                                </div>
+                                                <div class="info-item">
+                                                    <mat-icon>phone</mat-icon>
+                                                    @if(record.customer.primaryPhone){
+                                                        <a [href]="'tel:' + record.customer.primaryPhone" class="info-link">{{
+                                                            record.customer.primaryPhone }}</a>
+                                                    } @else {
+                                                        <span class="info-empty">No provided</span>
+                                                    }
+                                                </div>
+                                                @if(record.customer.secondaryPhone){
+                                                    <div class="info-item">
+                                                        <mat-icon>phone</mat-icon>
+                                                        <a [href]="'tel:' + record.customer.secondaryPhone" class="info-link">{{
+                                                            record.customer.secondaryPhone }}</a>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </section>
+                                        <section class="info-section">
+                                            <h4>Vehicle</h4>
+                                            <div class="info-section-content">
+                                                @if(record.vehicle){
+                                                    <div class="vehicle-grid">
+                                                        <div class="vehicle-field">
+                                                            <span class="field-label">Year:</span>
+                                                            <span class="field-value">{{ record.vehicle.year ?? 'No provided' }}</span>
+                                                        </div>
+                                                        <div class="vehicle-field">
+                                                            <span class="field-label">Make:</span>
+                                                            <span class="field-value">{{ record.vehicle.make ?? 'No provided'}}</span>
+                                                        </div>
+                                                        <div class="vehicle-field">
+                                                            <span class="field-label">Model:</span>
+                                                            <span class="field-value">{{ record.vehicle.model ?? 'No provided' }}</span>
+                                                        </div>
+                                                        <div class="vehicle-field">
+                                                            <span class="field-label">Color:</span>
+                                                            <span class="field-value">{{ record.vehicle.color ?? 'No provided' }}</span>
+                                                        </div>
+                                                        <div class="vehicle-field">
+                                                            <span class="field-label">Plate:</span>
+                                                            <span class="field-value">{{ record.vehicle.plate ?? 'No provided' }}</span>
+                                                        </div>
+                                                        <div class="vehicle-field">
+                                                            <span class="field-label">State:</span>
+                                                            <span class="field-value">{{ record.vehicle.state ?? 'No provided' }}</span>
+                                                        </div>
+                                                        <div class="vehicle-field">
+                                                            <span class="field-label">VIN:</span>
+                                                            <span class="field-value">{{ record.vehicle.vin ?? 'No provided' }}</span>
+                                                        </div>
+                                                        <div class="vehicle-field">
+                                                            <span class="field-label">Weight:</span>
+                                                            <span class="field-value">{{ record.vehicle.weight ?? 'No provided' }}</span>
+                                                        </div>
+                                                    </div>
+                                                } @else {
+                                                    <p class="info-empty">No provided</p>
+                                                }
+                                            </div>
+                                        </section>
+                                        <section class="info-section">
+                                            <h4>Florida Address</h4>
+                                            @if(record.customer.floridaAddress){
+                                                <div class="info-section-content">
+                                                    <p class="address-line">{{ record.customer.floridaAddress.address1 }} {{
+                                                        record.customer.floridaAddress.address2 }}</p>
+                                                    <p class="address-line">{{record.customer.floridaAddress.city }}, {{ record.customer.floridaAddress.state }}
+                                                        {{ record.customer.floridaAddress.zipCode }}</p>
+                                                </div>
+                                            } @else {
+                                                <p class="info-empty">No provided</p>
+                                            }
+                                            
+                                        </section>
+                                        <section class="info-section">
+                                            <h4>New York Address</h4>
+                                            @if(record.customer.newYorkAddress){
+                                                <div class="info-section-content">
+                                                    <p class="address-line">{{ record.customer.newYorkAddress.address1 }} {{
+                                                        record.customer.newYorkAddress.address2 }}</p>
+                                                    <p class="address-line">{{record.customer.newYorkAddress.city }}, {{ record.customer.newYorkAddress.state }}
+                                                        {{ record.customer.newYorkAddress.zipCode }}</p>
+                                                </div>
+                                            } @else {
+                                                <p class="info-empty">No provided</p>
+                                            }
+                                        </section>
+                                        <section class="info-section">
+                                            <h4>Florida Notes</h4>
+                                            @if(record.customer.floridaNotes){
+                                                <div class="info-section-content">
+                                                    <p class="notes-text">{{ record.customer.floridaNotes }}</p>
+                                                </div>
+                                            } @else {
+                                                <p class="info-empty">No notes</p>
+                                            }
+                                        </section>
+                                        <section class="info-section">
+                                            <h4>New York Notes</h4>
+                                            @if(record.customer.newYorkNotes){
+                                                <div class="info-section-content">
+                                                    <p class="notes-text">{{ record.customer.newYorkNotes }}</p>
+                                                </div>
+                                            } @else {
+                                                <p class="info-empty">No notes</p>
+                                            }
+                                        </section>
+                                    </div>
+                                </mat-expansion-panel>
+                            </mat-accordion>
+                            <mat-card-actions>
+                                <button mat-button color="warn" (click)="createBooking(record.customer, record.vehicle)" matTooltip="New booking" class="action-button">Book</button>
+                                <button mat-button color="primary" (click)="toEditCustomer(record.customer)" matTooltip="Edit customer" class="action-button">Edit</button>
+                                <button mat-button style="color: red;" (click)="deleteRecord(record)" matTooltip="Delete record" class="action-button">Delete</button>
+                            </mat-card-actions>
+                            <h3 style="text-align: center;">Bookings</h3>
+                            @if(record.bookings && record.bookings.length > 0){
+                                <div class="booking-cards-container-mobile">
+                                    <button [disabled]="record.currentBookingSeeing === 0" mat-icon-button (click)="previousBooking(record)" class="booking-nav-button">
+                                        <mat-icon>chevron_left</mat-icon>
+                                    </button>
+                                    <mat-card class="booking-card">
+                                        @if(record.bookings[record.currentBookingSeeing]; as booking){
+                                            <div class="booking-details-grid">
+                                                <div class="booking-detail-row">
+                                                    <span class="booking-label">Season</span>
+                                                    <span class="booking-value" [class.activeSeason]="isActiveSeason(booking.season)">{{booking.season}}</span>
+                                                </div>
+                                                <div class="booking-detail-row">
+                                                    <span class="booking-label">Dep. Date</span>
+                                                    <span class="booking-value">{{booking.departureDate | date : 'EEE MMM dd, yyyy'}}</span>
+                                                </div>
+                                                <div class="booking-detail-row">
+                                                    <span class="booking-label">From</span>
+                                                    <span class="booking-value">{{booking.from}}</span>
+                                                </div>
+                                                <div class="booking-detail-row">
+                                                    <span class="booking-label">To</span>
+                                                    <span class="booking-value">{{booking.to}}</span>
+                                                </div>
+                                                <div class="booking-detail-row">
+                                                    <span class="booking-label">Payment Type</span>
+                                                    <span class="booking-value">{{booking.paycheck.checkNumber}}</span>
+                                                </div>
+                                                <div class="booking-detail-row">
+                                                    <span class="booking-label">Bank</span>
+                                                    <span class="booking-value">{{booking.paycheck.bankName}}</span>
+                                                </div>
+                                                <div class="booking-detail-row">
+                                                    <span class="booking-label">Amount</span>
+                                                    <span class="booking-value">{{booking.paycheck.amount}}</span>
+                                                </div>
+                                            </div>
+                                            <!-- Actions Section -->
+                                            <div class="booking-card-actions">
+                                                @if(activeSeason && activeSeason.isCurrent){
+                                                    <button mat-button color="primary" (click)="editBooking(booking, record.customer, record.vehicle)" class="action-button">Edit</button>
+                                                } @else {
+                                                    <button mat-button color="primary" (click)="viewBooking(booking)" class="action-button">View</button>
+                                                }
+                                                @if((deletingBooking$ | async) === booking.id){
+                                                    <button mat-button disabled style="color: red;" class="action-button">
+                                                        <mat-icon>
+                                                            <mat-spinner diameter="18"></mat-spinner>
+                                                        </mat-icon>
+                                                        Deleting...
+                                                    </button>
+                                                } @else {
+                                                    <button mat-button style="color: red;" (click)="deleteBooking(booking)" class="action-button">Delete</button>
+                                                }
+                                            </div>
+                                        }
+                                        
+                                    </mat-card>
+                                    <button [disabled]="record.currentBookingSeeing === record.bookings.length - 1" mat-icon-button (click)="nextBooking(record)" class="booking-nav-button">
+                                        <mat-icon>chevron_right</mat-icon>
+                                    </button>
+                                    </div>
+                                    <div class="booking-pagination">
+                                        <span class="availability-title">{{ record.currentBookingSeeing + 1 }}/{{record.bookings.length}}</span>
+                                    </div>
+                            } @else {
+                                <div class="no-bookings-container">
+                                    <h4 style="color: darkgray;">No bookings found.</h4>
+                                </div>
+                            }
+                        </div>
+                    }
                 </mat-card-content>
             </mat-card>
         }

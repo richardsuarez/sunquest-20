@@ -219,11 +219,9 @@
                   </div>
                 </div>
               }
-              
             </div>
           </div>
          }        
-
         <!-- Actions Section -->
         <div class="card-actions">
           <button mat-button color="primary" (click)="displayBooking(currentBooking)">Details</button>
@@ -241,7 +239,7 @@
   </div>
 
   <!-- Trip Actions Footer -->
-  <div class="popover-footer">
+  <div [class.popover-footer-desktop]="!isMobile" [class.popover-footer-mobile]="isMobile">
     @if(activeSeason && activeSeason.isCurrent){
       <button mat-button color="primary" (click)="editTrip()">Edit Trip</button>
     }    
