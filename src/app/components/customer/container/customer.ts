@@ -29,6 +29,7 @@ import { BookingDetailsPopupComponent } from '../../calendar/components/booking-
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 @Component({
   selector: 'app-customer',
@@ -41,6 +42,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatInput,
     MatButtonModule,
     MatDividerModule,
+    MatExpansionModule,
     MatListModule,
     MatPaginatorModule,
     MatProgressBar,
@@ -154,7 +156,8 @@ export class CustomerComponent implements OnInit, OnDestroy {
               recNo: vehicle.recNo,
               customer: customer,
               vehicle: vehicle,
-              bookings: vehicleBookings
+              bookings: vehicleBookings,
+              currentBookingSeeing: 0
             }
             this.records = [...this.records, record];
           }
@@ -163,7 +166,8 @@ export class CustomerComponent implements OnInit, OnDestroy {
             recNo: customer.recNo,
             customer: customer,
             vehicle: null,
-            bookings: customerBookings ?? []
+            bookings: customerBookings ?? [],
+            currentBookingSeeing: 0
           }
           this.records = [...this.records, record];
         }
@@ -187,7 +191,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
     return `tel:${phone}`;
   }
 
-  isActiveSeason(season: string): boolean {
+  isActiveSeason(season: string | null): boolean {
     const aux = this.activeSeason?.seasonName + '-' + this.activeSeason?.year;
     return season === aux;
   }
@@ -300,12 +304,24 @@ export class CustomerComponent implements OnInit, OnDestroy {
     }
   }
 
+  nextBooking(record: CustomerRecord){
+    if(record.currentBookingSeeing < record.bookings.length - 1){
+      record.currentBookingSeeing = record.currentBookingSeeing + 1;
+    }
+  }
+
   pastBooking(booking: Booking): boolean {
     const today = new Date();
     if (!booking.departureDate) {
       return false;
     }
     return new Date(booking.departureDate) < today;
+  }
+
+  previousBooking(record: CustomerRecord){
+    if(record.currentBookingSeeing && record.currentBookingSeeing > 0){
+      record.currentBookingSeeing = record.currentBookingSeeing - 1;
+    }
   }
 
   onSearch() {

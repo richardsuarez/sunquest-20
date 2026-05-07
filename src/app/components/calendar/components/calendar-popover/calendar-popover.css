@@ -276,9 +276,19 @@
 }
 
 /* Popover Footer */
-.popover-footer {
+.popover-footer-desktop {
   display: flex;
   justify-content: flex-end;
+  gap: 12px;
+  padding: 16px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+  border-radius: 0 0 8px 8px;
+}
+
+.popover-footer-mobile {
+  display: flex;
+  justify-content: space-evenly;
   gap: 12px;
   padding: 16px;
   border-top: 1px solid #e0e0e0;
