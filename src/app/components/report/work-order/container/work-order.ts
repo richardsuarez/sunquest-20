@@ -130,6 +130,13 @@ export class WorkOrder implements OnInit, OnDestroy {
     return tripCount;
   }
 
+  getRecNo(booking: Booking): string {
+    if (!booking.customer) return 'N/A';
+    if (!booking.customer.vehicles || booking.customer.vehicles.length === 0) return 'N/A';
+    if (!booking.customer.vehicles[0].recNo) return 'N/A';
+    return `Rec No: ${booking.customer.vehicles[0].recNo}`;
+  }
+
   searchResult() {
     if (!this.activeSeason) {
       console.log('No active season selected');

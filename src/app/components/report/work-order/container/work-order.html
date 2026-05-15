@@ -149,7 +149,8 @@
                                             <tr class="booking-row">
                                                 <td>
                                                     <div>
-                                                        <p>{{ booking.customer?.primaryFirstName }} {{ booking.customer?.primaryLastName
+                                                        <p style="font-weight: bold; font-size: 14px; margin-bottom: 5px">{{getRecNo(booking)}}</p>
+                                                        <p style="margin-bottom: 5px">{{ booking.customer?.primaryFirstName }} {{ booking.customer?.primaryLastName
                                                             }}
                                                         </p>
                                                         <p style="display: flex; align-items: center; gap: 4px">
@@ -158,6 +159,7 @@
                                                             }
                                                             {{ booking.customer?.primaryPhone }}
                                                         </p>
+                                                        
                                                     </div>
                                                 </td>
                                                 <td>
