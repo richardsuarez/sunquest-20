@@ -448,10 +448,10 @@ export class ReportService {
                     relevantTrips.push({
                         trip,
                         bookings: tripBookings.sort((a, b) => {
-                            // Sort bookings by customer name
-                            const nameA = (a.customer?.primaryFirstName || '') + (a.customer?.primaryLastName || '');
-                            const nameB = (b.customer?.primaryFirstName || '') + (b.customer?.primaryLastName || '');
-                            return nameA.localeCompare(nameB);
+                            // Sort bookings by pickup date
+                            const pickupAtA = a.pickupAt || new Date(0);
+                            const pickupAtB = b.pickupAt || new Date(0);
+                            return pickupAtA.getTime() - pickupAtB.getTime();
                         })
                     });
                 }
