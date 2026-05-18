@@ -1,0 +1,163 @@
+@if(vehicle){
+    <p><span style="font-weight: bold">Rec No:</span> {{ vehicle.recNo }}</p>
+    <p><span style="font-weight: bold">First Name 1:</span> {{ customer.primaryFirstName }}</p>
+    <p><span style="font-weight: bold">Last Name 1:</span> {{ customer.primaryLastName }}</p>
+    <p><span style="font-weight: bold">First Name 2:</span> {{ customer.secondaryFirstName }}</p>
+    <p><span style="font-weight: bold">Last Name 2:</span> {{ customer.secondaryLastName }}</p>
+    <p><span style="font-weight: bold">Title:</span> {{ customer.primaryTitle }} / {{
+        customer.secondaryTitle }}</p>
+    <p><span style="font-weight: bold">Email:</span> {{ customer.email }}</p>
+    <p><span style="font-weight: bold">Primary Cell:</span> {{ customer.primaryPhone }}</p>
+    <p style="margin-bottom: 20px"><span style="font-weight: bold">Secondary Cell:</span> {{
+        customer.secondaryPhone }}</p>
+    <p><span style="font-weight: bold">Car:</span> {{ vehicle.make }}</p>
+    <p><span style="font-weight: bold">Model:</span> {{ vehicle.model }}</p>
+    <p><span style="font-weight: bold">Year:</span> {{ vehicle.year }}</p>
+    <p><span style="font-weight: bold">Plate:</span> {{ vehicle.plate }}</p>
+    <p><span style="font-weight: bold">State:</span> {{ vehicle.state }}</p>
+    <p><span style="font-weight: bold">VIN:</span> {{ vehicle.vin }}</p>
+    <p><span style="font-weight: bold">Color:</span> {{ vehicle.color }}</p>
+    <p style="margin-bottom: 20px;"><span style="font-weight: bold">Weight:</span> {{
+        vehicle.weight }}</p>
+    <p><span style="font-weight: bold">NY Address:</span> {{ customer.newYorkAddress.address1 }} {{
+        customer.newYorkAddress.address2 }}</p>
+    <p><span style="font-weight: bold">NY Town:</span> {{ customer.newYorkAddress.city }}</p>
+    <p><span style="font-weight: bold">NY State:</span> {{ customer.newYorkAddress.state }}</p>
+    <p><span style="font-weight: bold">NY Zip:</span> {{ customer.newYorkAddress.zipCode }}</p>
+    <p><span style="font-weight: bold">NY Apt:</span> {{ customer.newYorkAddress.apt }}</p>
+    <p><span style="font-weight: bold">NY Bldg:</span> {{ customer.newYorkAddress.bldg }}</p>
+    <p style="margin-bottom: 60px"><span style="font-weight: bold">NY Notes:</span> {{ newYorkNotes() }} </p>
+    <p><span style="font-weight: bold">FL Address:</span> {{ customer.floridaAddress.address1 }} {{
+        customer.newYorkAddress.address2 }}</p>
+    <p><span style="font-weight: bold">FL Town:</span> {{ customer.floridaAddress.city }}</p>
+    <p><span style="font-weight: bold">FL State:</span> {{ customer.floridaAddress.state }}</p>
+    <p><span style="font-weight: bold">FL Zip:</span> {{ customer.floridaAddress.zipCode }}</p>
+    <p><span style="font-weight: bold">FL Apt:</span> {{ customer.floridaAddress.apt }}</p>
+    <p><span style="font-weight: bold">FL Bldg:</span> {{ customer.floridaAddress.bldg }}</p>
+    <p style="margin-bottom: 60px"><span style="font-weight: bold">FL Notes:</span> {{ floridaNotes() }} </p>
+    @if(booking){
+        <div style="display: flex;">
+            <p style="margin-right: 150px"><span style="font-weight: bold">Check No:</span> {{ booking.paycheck.checkNumber }}
+            </p>
+            <p><span style="font-weight: bold">Bank:</span> {{ booking.paycheck.bankName }} </p>
+        </div>
+        <p><span style="font-weight: bold">Price:</span> {{ booking.paycheck.amount }}</p>
+        <p><span style="font-weight: bold">Customer Arriving:</span></p>
+        <div style="display: flex; margin-bottom: 20px">
+            <p style="margin-right: 150px"><span style="font-weight: bold">Date:</span> {{ booking.arrivalAt | date:
+                'MM/dd/yyyy' }} </p>
+            <p><span style="font-weight: bold">Time:</span> {{ booking.arrivalAt | date: 'hh:mm a' }} </p>
+        </div>
+        <div style="display: flex">
+            <p style="margin-right: 150px"><span style="font-weight: bold">PU Date:</span> {{ booking.pickupAt | date:
+                'MM/dd/yyyy' }} </p>
+            <p><span style="font-weight: bold">PU Time:</span> {{ booking.pickupAt | date: 'hh:mm a' }} </p>
+        </div>
+        <p><span style="font-weight: bold">Origin:</span> {{ booking.from }}</p>
+        <p><span style="font-weight: bold">Destination:</span> {{ booking.to }}</p>
+        <p><span style="font-weight: bold">Delay Date:</span> </p>
+        @if(truck){
+            <div style="display: flex;">
+                <p style="margin-right: 150px"><span style="font-weight: bold">Truck #:</span> {{ truck.truckNumber }}</p>
+                <p><span style="font-weight: bold">Company Name:</span> {{ truck.companyName }}</p>
+            </div>
+        } @else {
+            <div style="display: flex;">
+                <p style="margin-right: 150px"><span style="font-weight: bold">Truck #:</span></p>
+                <p><span style="font-weight: bold">Company Name:</span></p>
+            </div>
+        }
+        <div style="display: flex;">
+            <p style="margin-right: 150px"><span style="font-weight: bold">Departure:</span> {{ booking.departureDate | date:
+                'MM/dd/yyyy hh:mm a' }} </p>
+            <p><span style="font-weight: bold">Arrival:</span> {{ booking.arrivalAt | date: 'MM/dd/yyyy hh:mm a' }}</p>
+        </div>
+    } @else {
+        <div style="display: flex;">
+            <p style="margin-right: 150px"><span style="font-weight: bold">Check No:</span></p>
+            <p><span style="font-weight: bold">Bank:</span></p>
+        </div>
+        <p><span style="font-weight: bold">Price:</span></p>
+        <p><span style="font-weight: bold">Customer Arriving:</span></p>
+        <div style="display: flex; margin-bottom: 20px">
+            <p style="margin-right: 150px"><span style="font-weight: bold">Date:</span></p>
+            <p><span style="font-weight: bold">Time:</span></p>
+        </div>
+        <div style="display: flex">
+            <p style="margin-right: 150px"><span style="font-weight: bold">PU Date:</span></p>
+            <p><span style="font-weight: bold">PU Time:</span></p>
+        </div>
+        <p><span style="font-weight: bold">Origin:</span></p>
+        <p><span style="font-weight: bold">Destination:</span></p>
+        <p><span style="font-weight: bold">Delay Date:</span></p>
+        <div style="display: flex;">
+            <p style="margin-right: 150px"><span style="font-weight: bold">Truck #:</span></p>
+            <p><span style="font-weight: bold">Company Name:</span></p>
+        </div>
+        <div style="display: flex;">
+            <p style="margin-right: 150px"><span style="font-weight: bold">Departure:</span></p>
+            <p><span style="font-weight: bold">Arrival:</span></p>
+        </div>
+    }
+} @else {
+    <p><span style="font-weight: bold">Rec No:</span> {{ customer.recNo }}</p>
+    <p><span style="font-weight: bold">First Name 1:</span> {{ customer.primaryFirstName }}</p>
+    <p><span style="font-weight: bold">Last Name 1:</span> {{ customer.primaryLastName }}</p>
+    <p><span style="font-weight: bold">First Name 2:</span> {{ customer.secondaryFirstName }}</p>
+    <p><span style="font-weight: bold">Last Name 2:</span> {{ customer.secondaryLastName }}</p>
+    <p><span style="font-weight: bold">Title:</span> {{ customer.primaryTitle }} / {{
+        customer.secondaryTitle }}</p>
+    <p><span style="font-weight: bold">Email:</span> {{ customer.email }}</p>
+    <p><span style="font-weight: bold">Primary Cell:</span> {{ customer.primaryPhone }}</p>
+    <p style="margin-bottom: 20px"><span style="font-weight: bold">Secondary Cell:</span> {{
+        customer.secondaryPhone }}</p>
+    <p><span style="font-weight: bold">Car:</span></p>
+    <p><span style="font-weight: bold">Model:</span></p>
+    <p><span style="font-weight: bold">Year:</span></p>
+    <p><span style="font-weight: bold">Plate:</span></p>
+    <p><span style="font-weight: bold">State:</span></p>
+    <p><span style="font-weight: bold">VIN:</span></p>
+    <p><span style="font-weight: bold">Color:</span></p>
+    <p style="margin-bottom: 20px;"><span style="font-weight: bold">Weight:</span></p>
+    <p><span style="font-weight: bold">NY Address:</span> {{ customer.newYorkAddress.address1 }} {{
+        customer.newYorkAddress.address2 }}</p>
+    <p><span style="font-weight: bold">NY Town:</span> {{ customer.newYorkAddress.city }}</p>
+    <p><span style="font-weight: bold">NY State:</span> {{ customer.newYorkAddress.state }}</p>
+    <p><span style="font-weight: bold">NY Zip:</span> {{ customer.newYorkAddress.zipCode }}</p>
+    <p><span style="font-weight: bold">NY Apt:</span> {{ customer.newYorkAddress.apt }}</p>
+    <p><span style="font-weight: bold">NY Bldg:</span> {{ customer.newYorkAddress.bldg }}</p>
+    <p style="margin-bottom: 60px"><span style="font-weight: bold">NY Notes:</span> {{ customer.newYorkNotes }}</p>
+    <p><span style="font-weight: bold">FL Address:</span> {{ customer.floridaAddress.address1 }} {{
+        customer.floridaAddress.address2 }}</p>
+    <p><span style="font-weight: bold">FL Town:</span> {{ customer.floridaAddress.city }}</p>
+    <p><span style="font-weight: bold">FL State:</span> {{ customer.floridaAddress.state }}</p>
+    <p><span style="font-weight: bold">FL Zip:</span> {{ customer.floridaAddress.zipCode }}</p>
+    <p><span style="font-weight: bold">FL Apt:</span> {{ customer.floridaAddress.apt }}</p>
+    <p><span style="font-weight: bold">FL Bldg:</span> {{ customer.floridaAddress.bldg }}</p>
+    <p style="margin-bottom: 60px"><span style="font-weight: bold">FL Notes:</span> {{ customer.floridaNotes }}</p>
+    <div style="display: flex;">
+        <p style="margin-right: 150px"><span style="font-weight: bold">Check No:</span></p>
+        <p><span style="font-weight: bold">Bank:</span></p>
+    </div>
+    <p><span style="font-weight: bold">Price:</span></p>
+    <p><span style="font-weight: bold">Customer Arriving:</span></p>
+    <div style="display: flex; margin-bottom: 20px">
+        <p style="margin-right: 150px"><span style="font-weight: bold">Date:</span></p>
+        <p><span style="font-weight: bold">Time:</span></p>
+    </div>
+    <div style="display: flex">
+        <p style="margin-right: 150px"><span style="font-weight: bold">PU Date:</span></p>
+        <p><span style="font-weight: bold">PU Time:</span></p>
+    </div>
+    <p><span style="font-weight: bold">Origin:</span></p>
+    <p><span style="font-weight: bold">Destination:</span></p>
+    <p><span style="font-weight: bold">Delay Date:</span></p>
+    <div style="display: flex;">
+        <p style="margin-right: 150px"><span style="font-weight: bold">Truck #:</span></p>
+        <p><span style="font-weight: bold">Company Name:</span></p>
+    </div>
+    <div style="display: flex;">
+        <p style="margin-right: 150px"><span style="font-weight: bold">Departure:</span></p>
+        <p><span style="font-weight: bold">Arrival:</span></p>
+    </div>
+}

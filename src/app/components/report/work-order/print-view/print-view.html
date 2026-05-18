@@ -9,7 +9,7 @@
                  @for(truckReport of report.trucks; track truckReport){
                     <div class="truck-section">
                         <div class="truck-header">
-                            <h2>{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                            <h2 style="margin-bottom: 3px !important; margin-top: 5px !important;">{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
                         </div>
                         @for(bookingGroup of truckReport.trips; track bookingGroup){
                             <div class="trip-section">
@@ -44,6 +44,7 @@
                                                 <tr>
                                                     <td>
                                                         <div>
+                                                            <p style="font-weight: bold; font-size: 10px; margin-bottom: 5px">{{getRecNo(booking)}}</p>
                                                             <p>{{ booking.customer?.primaryFirstName }} {{
                                                                 booking.customer?.primaryLastName }}
                                                             </p>
@@ -67,10 +68,10 @@
                                                                     'MM/dd/yyyy' }}</p>
                                                             </div>
                                                             @if(booking.pickupNotes){
-                                                                <p style="margin-top: 10px">Notes</p>
+                                                                <p>Notes</p>
                                                                 <p style="font-weight: bold">{{ booking.pickupNotes }}</p>
                                                             } @else {
-                                                                <p style="margin-top: 10px">No notes</p>
+                                                                <p>No notes</p>
                                                             }
                                                         </div>
                                                     </td>
@@ -83,10 +84,10 @@
                                                                 {{ booking.arrivalAt | date: 'MM/dd/yyyy' }}
                                                             </p>
                                                             @if(booking.deliveryNotes){
-                                                                <p style="margin-top: 10px">Notes</p>
+                                                                <p>Notes</p>
                                                                 <p style="font-weight: bold">{{ booking.deliveryNotes }}</p>
                                                             } @else {
-                                                                <p style="margin-top: 10px">No notes</p>
+                                                                <p>No notes</p>
                                                             }
                                                         </div>
                                                     </td>
@@ -110,7 +111,7 @@
 
                 <div class="truck-section">
                     <div class="truck-header">
-                        <h2>{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                        <h2 style="margin-bottom: 3px !important; margin-top: 5px !important;">{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
                     </div>
                     @for(bookingGroup of truckReport.trips; track bookingGroup){
                         <div class="trip-section">
@@ -145,6 +146,7 @@
                                             <tr>
                                                 <td>
                                                     <div>
+                                                        <p style="font-weight: bold; font-size: 14px; margin-bottom: 5px">{{getRecNo(booking)}}</p>
                                                         <p>{{ booking.customer?.primaryFirstName }} {{
                                                             booking.customer?.primaryLastName }}
                                                         </p>
@@ -168,10 +170,10 @@
                                                                 'MM/dd/yyyy' }}</p>
                                                         </div>
                                                         @if(booking.pickupNotes){
-                                                            <p style="margin-top: 10px">Notes</p>
+                                                            <p>Notes</p>
                                                             <p style="font-weight: bold">{{ booking.pickupNotes }}</p>
                                                         } @else {
-                                                            <p style="margin-top: 10px">No notes</p>
+                                                            <p>No notes</p>
                                                         }
                                                     </div>
                                                 </td>
@@ -184,10 +186,10 @@
                                                             {{ booking.arrivalAt | date: 'MM/dd/yyyy' }}
                                                         </p>
                                                         @if(booking.deliveryNotes){
-                                                            <p style="margin-top: 10px">Notes</p>
+                                                            <p>Notes</p>
                                                             <p style="font-weight: bold">{{ booking.deliveryNotes }}</p>
                                                         } @else {
-                                                            <p style="margin-top: 10px">No notes</p>
+                                                            <p>No notes</p>
                                                         }
                                                     </div>
                                                 </td>
@@ -235,6 +237,7 @@
                                 <tr class="booking-row">
                                     <td>
                                         <div>
+                                            <p style="font-weight: bold; font-size: 14px; margin-bottom: 5px">{{getRecNo(booking)}}</p>
                                             <p>{{ booking.customer?.primaryFirstName }} {{ booking.customer?.primaryLastName
                                                 }}
                                             </p>
@@ -254,10 +257,10 @@
                                             <p>{{ formatAddress(booking.pickupAddress) }}</p>
                                             <p>{{ booking.pickupAt | date: 'MM/dd/yyyy'}}</p>
                                             @if(booking.pickupNotes){
-                                                <p style="margin-top: 10px">Notes</p>
+                                                <p>Notes</p>
                                                 <p style="font-weight: bold">{{ booking.pickupNotes }}</p>
                                             } @else {
-                                                <p style="margin-top: 10px">No notes</p>
+                                                <p>No notes</p>
                                             }
                                         </div>
                                     </td>
@@ -266,10 +269,10 @@
                                             <p>{{ formatAddress(booking.arrivalAddress) }}</p>
                                             <p>{{ booking.arrivalAt | date: 'MM/dd/yyyy'}}</p>
                                             @if(booking.deliveryNotes){
-                                                <p style="margin-top: 10px">Notes</p>
+                                                <p>Notes</p>
                                                 <p style="font-weight: bold">{{ booking.deliveryNotes }}</p>
                                             } @else {
-                                                <p style="margin-top: 10px">No notes</p>
+                                                <p>No notes</p>
                                             }
                                         </div>
                                     </td>
