@@ -42,6 +42,13 @@ export class PrintViewWorkOrder implements AfterViewInit {
     return `${address1}${address2 ? `, ${address2}` : ''}${bldg ? `, Bldg. ${bldg}` : ''}${apt ? `, Apt. ${apt}` : ''}, ${city}, ${state} ${zipCode}`;
   }
 
+  getRecNo(booking: Booking): string {
+    if (!booking.customer) return 'N/A';
+    if (!booking.customer.vehicles || booking.customer.vehicles.length === 0) return 'N/A';
+    if (!booking.customer.vehicles[0].recNo) return 'N/A';
+    return `Rec No: ${booking.customer.vehicles[0].recNo}`;
+  }
+
   getTripTotals(bookings: Booking[]): { weight: number; volume: number } {
     return bookings.reduce(
       (acc, booking) => ({

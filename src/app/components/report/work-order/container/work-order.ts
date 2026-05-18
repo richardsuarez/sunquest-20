@@ -22,6 +22,8 @@ import { Address } from '../../../customer/model/customer.model';
 import { MatDialogModule } from '@angular/material/dialog';
 import { PrintViewWorkOrder } from '../print-view/print-view';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { CustomerReportTemplate } from '../../customer-report-template/customer-report-template';
+import { Trip } from '../../../trip/model/trip.model';
 
 @Component({
   selector: 'app-report',
@@ -36,6 +38,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
     ReactiveFormsModule,
     AsyncPipe,
     MatDialogModule,
+    CustomerReportTemplate,
     PrintViewWorkOrder
 ],
   templateUrl: './work-order.html',
@@ -63,7 +66,12 @@ export class WorkOrder implements OnInit, OnDestroy {
   bookingList: Booking[] = [];
   truckList: Truck[] = [];
 
-  printingData!: {bookReport: BookReport | null, truckTrips: TruckReport | null, bookingGroup: BookingGroup | null}
+  printingData!: {
+    type: null | 'trip' | 'booking', 
+    bookReport: BookReport | null, 
+    truckTrips: TruckReport | null, 
+    bookingGroup: BookingGroup | null,
+  }
   printing = false;
 
   // Print preview state
@@ -152,8 +160,38 @@ export class WorkOrder implements OnInit, OnDestroy {
     this.store.dispatch(ReportActions.loadBookingsStart({ start: this.dateRange.value.start!, end: this.dateRange.value.end!, season: this.activeSeason! }));
   }
 
+  printBooking(booking: Booking, truck: Truck, trip: Trip) {
+    this.printingData = {
+      type: 'booking',
+      bookReport: {
+        trucks: [{
+          truck,
+          trips: [{
+            trip,
+            bookings: [booking]
+          }]
+        }],
+        totalBookings: 1
+      },
+      truckTrips: null,
+      bookingGroup: null,
+    };
+    this.printing = true;
+    setTimeout(() => {
+      window.print();
+      this.printing = false;
+      this.printingData = {
+        type: null,
+        bookReport: null,
+        truckTrips: null,
+        bookingGroup: null,
+      };
+    }, 100)
+  }
+
   printFullReport(report: BookReport) {
     this.printingData = {
+      type: 'trip',
       bookReport: report,
       truckTrips: null,
       bookingGroup: null,
@@ -162,6 +200,7 @@ export class WorkOrder implements OnInit, OnDestroy {
     setTimeout(() => {
       this.printing = false;
       this.printingData = {
+        type: null,
         bookReport: null,
         truckTrips: null,
         bookingGroup: null,
@@ -171,6 +210,7 @@ export class WorkOrder implements OnInit, OnDestroy {
 
   printAllTripsForTruck(report: TruckReport) {
     this.printingData = {
+      type: 'trip',
       bookReport: null,
       truckTrips: report,
       bookingGroup: null,
@@ -179,6 +219,7 @@ export class WorkOrder implements OnInit, OnDestroy {
     setTimeout(() => {
       this.printing = false;
       this.printingData = {
+        type: null,
         bookReport: null,
         truckTrips: null,
         bookingGroup: null,
@@ -188,6 +229,7 @@ export class WorkOrder implements OnInit, OnDestroy {
 
   printTrip(bookingGroup: BookingGroup) {
     this.printingData = {
+      type: 'trip',
       bookReport: null,
       truckTrips: null,
       bookingGroup: bookingGroup,
@@ -196,6 +238,7 @@ export class WorkOrder implements OnInit, OnDestroy {
     setTimeout(() => {
       this.printing = false;
       this.printingData = {
+        type: null,
         bookReport: null,
         truckTrips: null,
         bookingGroup: null,

@@ -142,6 +142,7 @@
                                             <th>Vehicle</th>
                                             <th>Pickup</th>
                                             <th>Arrival</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -213,25 +214,49 @@
                                                         }
                                                     </div>
                                                 </td>
+                                                <td>
+                                                    <button mat-stroked-button (click)="printBooking(booking, truckReport.truck, bookingGroup.trip)">
+                                                        <mat-icon>print</mat-icon>
+                                                        Print Booking
+                                                    </button>
+                                                </td>
                                             </tr>
                                         }
-                                        
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                      }
-                    
                 </div>
              }
-            
         </div>
      }
-    
 } @else {
-    <app-print-view-work-order 
-        [bookReport]="printingData.bookReport"
-        [truckTrips]="printingData.truckTrips" 
-        [bookingGroup]="printingData.bookingGroup">
-    </app-print-view-work-order>
+    @if(printingData.type === 'trip'){
+        <app-print-view-work-order 
+            [bookReport]="printingData.bookReport"
+            [truckTrips]="printingData.truckTrips" 
+            [bookingGroup]="printingData.bookingGroup">
+        </app-print-view-work-order>
+    } @else {
+        @if(printingData.type === 'booking' && 
+            printingData.bookReport &&
+            printingData.bookReport.trucks && 
+            printingData.bookReport.trucks !== null && 
+            printingData.bookReport.trucks[0].trips && 
+            printingData.bookReport.trucks[0].trips[0].bookings &&
+            printingData.bookReport.trucks[0].trips[0].bookings[0] &&
+            printingData.bookReport.trucks[0].trips[0].bookings[0].customer &&
+            printingData.bookReport.trucks[0].trips[0].bookings[0].customer.vehicles &&
+            printingData.bookReport.trucks[0].trips[0].bookings[0].customer.vehicles[0]){
+            <app-customer-report-template
+                [customer]="printingData.bookReport.trucks[0].trips[0].bookings[0].customer"
+                [vehicle]="printingData.bookReport.trucks[0].trips[0].bookings[0].customer.vehicles[0]" 
+                [isPrinting]="printing"
+                [printFilter]="printingData.bookReport.trucks[0].trips[0].bookings[0].customer.vehicles[0].recNo ?? ''"
+                [booking]="printingData.bookReport.trucks[0].trips[0].bookings[0]"
+                [truck]="printingData.bookReport.trucks[0].truck">
+            </app-customer-report-template>
+        }
+    }
 }

@@ -186,24 +186,6 @@
     }
 }
 
-/* Trip Totals */
-/* .trip-totals {
-    display: flex;
-    justify-content: space-evenly;
-    padding: 12px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    font-size: 13px;
-    border-left: 5px solid #4CAF50;
-    border-top: 1px solid #4CAF50;
-    border-right: 5px solid #4CAF50;
-    border-bottom: 1px solid #4CAF50;
-}
-
-.trip-totals p {
-    margin: 5px 0;
-} */
-
 /* Print Styles */
 @media print {
 
@@ -233,9 +215,6 @@
         margin: 0;
         padding: 10mm;
         background: white;
-    }
-
-    .body {
         padding: 0;
         width: 100%;
     }
@@ -290,10 +269,17 @@
         border-bottom: 1px solid #666;
     }
 
-    /* Remove shadows and transitions */
-    * {
-        box-shadow: none !important;
-        transition: none !important;
+    /* Ensure customer report template is visible during print */
+    app-customer-report-template,
+    app-customer-report-template * {
+        display: block !important;
+        visibility: visible !important;
+        padding: 10px;
+    }
+
+    app-customer-report-template p {
+        display: block !important;
+        visibility: visible !important;
     }
 }
 

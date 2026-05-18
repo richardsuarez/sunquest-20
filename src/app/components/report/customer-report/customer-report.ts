@@ -19,6 +19,7 @@ import { Customer } from '../../customer/model/customer.model';
 import { AllowAlphanumericDirective } from "../../../shared/directives/allow-alphanumeric.directive";
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSelectModule } from '@angular/material/select';
+import { CustomerReportTemplate } from '../customer-report-template/customer-report-template';
 
 @Component({
   selector: 'app-book-report',
@@ -37,6 +38,7 @@ import { MatSelectModule } from '@angular/material/select';
     MatSelectModule,
     AllowOnlyAlphaCharDirective,
     AllowAlphanumericDirective,
+    CustomerReportTemplate
   ],
   templateUrl: './customer-report.html',
   styleUrl: './customer-report.css'

@@ -1,0 +1,35 @@
+.page {
+    margin-bottom: 20px;
+}
+
+.page p {
+    margin-bottom: 2px;
+}
+
+p {
+    margin: 0px;
+}
+
+.customer-section {
+    margin-bottom: 30px;
+}
+
+@media print {
+    p {
+        display: block !important;
+        visibility: visible !important;
+        color: #000 !important;
+        font-size: 14px;
+    }
+
+    span {
+        display: inline !important;
+        visibility: visible !important;
+        color: #000 !important;
+        opacity: 1 !important;
+    }
+
+    .customer-section {
+        margin: 0px !important;
+    }
+}
