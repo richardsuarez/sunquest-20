@@ -538,7 +538,7 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
           this.updateOriginalTrip();
           this.updateCurrentTrip(booking);
         } else {
-          this.updatePaidBookingsOfAtripIfNeedIt(booking)
+          this.updatePaidBookingsOfAtripIfNeedIt(booking);
         }
       } else {
         // if user unselects the original trip and does not select any, then we need to update the original trip capacity by adding back the booked load and cars

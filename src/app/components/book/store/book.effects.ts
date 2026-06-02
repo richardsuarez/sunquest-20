@@ -50,12 +50,17 @@ export class BookEffects {
                                 }
                                 const remCarCapDelta = action.trip?.remCarCap ? action.trip.remCarCap - 1 : 0;
                                 const remWeightCapDelta = action.trip?.remLoadCap ? action.trip.remLoadCap - totalWeight : 0;
+                                let auxPaidBookings = action.trip.paidBookings;
+                                if(action.booking.paycheck && action.booking.paycheck.amount && action.booking.paycheck.amount > 1200) {
+                                    auxPaidBookings = (auxPaidBookings || 0) + 1;
+                                }
                                 const updatedTrip = {
                                     ...action.trip,
                                     remCarCap: remCarCapDelta,
                                     remLoadCap: remWeightCapDelta,
-                                    loadNumber: action.trip?.loadNumber || 0
-                                }
+                                    loadNumber: action.trip?.loadNumber || 0,
+                                    paidBookings: auxPaidBookings,
+                                };
                                 return runInInjectionContext(this.injector, () =>
                                     this.bookingService.updateTrip(action.booking.truckId, updatedTrip).pipe(
                                         map(() => {
