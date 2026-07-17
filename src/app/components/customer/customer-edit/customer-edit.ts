@@ -232,7 +232,14 @@ export class CustomerEdit implements OnInit, OnDestroy {
   onSubmit() {
     if (this.customerForm.valid && (!this.customerForm.pristine || (this.tempVehicles && this.tempVehicles.length > 0))) {
       if (this.crud === 'edit' && this.currentCustomer) {
-        const auxCustomer = { ...this.currentCustomer, ...this.customerForm.getRawValue() };
+        const auxCustomer = this.currentCustomer.recNo === this.customerForm.value.recNo
+          ? { ...this.currentCustomer, ...this.customerForm.getRawValue() }
+          : { ...this.currentCustomer, 
+              ...this.customerForm.getRawValue(), 
+              vehicles: this.currentCustomer.vehicles?.map(v => ({ 
+                ...v, recNo: this.updateVehicleRecNo(v.recNo!, this.currentCustomer?.recNo!, this.customerForm.value.recNo!) 
+              })) 
+            };
         this.store.dispatch(updateCustomerStart({ customer: auxCustomer, vehicles: this.tempVehicles }));
       }
       else if (this.crud === 'new') {
@@ -286,6 +293,11 @@ export class CustomerEdit implements OnInit, OnDestroy {
 
     deleteTempVehicle(vehicle: Partial<Vehicle>) {
       this.tempVehicles = this.tempVehicles.filter((tempVeh) => tempVeh.id !== vehicle.id);
+    }
+
+    updateVehicleRecNo(oldVehicleRecNo: string, oldRecNo: string, newRecNo: string): string {
+      if (!oldVehicleRecNo || !newRecNo || !oldRecNo) return oldVehicleRecNo;
+      return oldVehicleRecNo.replace(oldRecNo, newRecNo);
     }
   }
 

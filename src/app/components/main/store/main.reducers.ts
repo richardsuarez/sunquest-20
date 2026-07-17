@@ -96,7 +96,7 @@ export const mainReducer = createReducer(
 
   on(MainActions.closeSeasonSuccess, (state, { seasonId }) => {
     const updatedSeasons = state.seasons.map(s =>
-      s.id === seasonId ? { ...s, isCurrent: false } : s
+      s.id === seasonId ? { ...s, isActive: false, isCurrent: false } : s
     );
 
     return {

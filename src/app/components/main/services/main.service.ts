@@ -73,7 +73,7 @@ export class MainService {
       return from((async () => {
         try {
           const seasonDoc = doc(this.firestore, 'seasons', seasonId);
-          await updateDoc(seasonDoc, { isCurrent: false });
+          await updateDoc(seasonDoc, { isActive: false, isCurrent: false });
         } catch (error) {
           throw error;
         }
