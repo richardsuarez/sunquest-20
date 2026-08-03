@@ -51,13 +51,13 @@
                             <div style="text-align: center">
                                 <h3>Trucks</h3>
                             </div>
-                            <div style="text-align: center"><span>{{ report.trucks.length }}</span></div>
+                            <div style="text-align: center"><span>{{ countRealTrucks(report.trucks) }}</span></div>
                         </div>
                         <div class="info">
                             <div style="text-align: center">
                                 <h3>Trips</h3>
                             </div>
-                            <div style="text-align: center"><span>{{ allTrips() }}</span></div>
+                            <div style="text-align: center"><span>{{ countRealTrips() }}</span></div>
                         </div>
                         <div class="info">
                             <div style="text-align: center">
@@ -67,8 +67,8 @@
                         </div>
                     } @else {
                         <div>
-                            <p><strong>Trucks:</strong> {{ report.trucks.length }}</p>
-                            <p><strong>Trips:</strong> {{ allTrips() }}</p>
+                            <p><strong>Trucks:</strong> {{ countRealTrucks(report.trucks) }}</p>
+                            <p><strong>Trips:</strong> {{ countRealTrips() }}</p>
                             <p><strong>Bookings:</strong> {{ report.totalBookings }}</p>
                         </div>
                     }
@@ -95,7 +95,12 @@
                 <div class="truck-section">
                     <!-- Truck Header -->
                     <div class="truck-header">
-                        <h2>{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                        @if(truckReport.truck){
+                            <h2>{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                        } @else {
+                            <h2>Unassigned bookings</h2>
+                        }
+                        
                         <div class="all-trips-print-button">
                             <button mat-stroked-button (click)="printAllTripsForTruck(truckReport)">
                                 <mat-icon>print</mat-icon>
@@ -110,17 +115,32 @@
                             <!-- Trip Header -->
                             <div class="trip-header">
                                 <div>
-                                    <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
-                                    <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
-                                        bookingGroup.trip.destination }}</h2>
-                                    @if(!isMobile){
-                                        <p class="trip-details">
-                                            <span>Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy' }}</span>
-                                            <span>Arrival: {{ bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</span>
-                                        </p>
+                                    @if(bookingGroup.trip){
+                                        <h3>Trip: {{ bookingGroup.trip.loadNumber }}</h3>
+                                        <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
+                                            bookingGroup.trip.destination }}</h2>
+                                        @if(!isMobile){
+                                            <p class="trip-details">
+                                                <span>Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy' }}</span>
+                                                <span>Arrival: {{ bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</span>
+                                            </p>
+                                        } @else {
+                                            <p class="trip-details">Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy' }}</p>
+                                            <p class="trip-details">Arrival: {{ bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</p>
+                                        }
                                     } @else {
-                                        <p class="trip-details">Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy' }}</p>
-                                        <p class="trip-details">Arrival: {{ bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</p>
+                                        <h3>Trip: <span style="font-style: italic;">unknown</span></h3>
+                                        <h2>{{ bookingGroup.bookings[0].from }} <mat-icon>arrow_forward</mat-icon>{{
+                                            bookingGroup.bookings[0].to }}</h2>
+                                        @if(!isMobile){
+                                            <p class="trip-details">
+                                                <span>Departure: <span style="font-style: italic;">unknown</span></span>
+                                                <span>Arrival: <span style="font-style: italic;">unknown</span></span>
+                                            </p>
+                                        } @else {
+                                            <p class="trip-details">Departure: <span style="font-style: italic;">unknown</span></p>
+                                            <p class="trip-details">Arrival: <span style="font-style: italic;">unknown</span></p>
+                                        }
                                     }
                                 </div>
 

@@ -3,12 +3,12 @@ import { Trip } from "../../trip/model/trip.model";
 import { Truck } from "../../truck/model/truck.model";
 
 export interface BookingGroup {
-  trip: Trip;
+  trip: Trip | null;
   bookings: Booking[];
 }
 
 export interface TruckReport {
-  truck: Truck;
+  truck: Truck | null;
   trips: BookingGroup[];
 }
 

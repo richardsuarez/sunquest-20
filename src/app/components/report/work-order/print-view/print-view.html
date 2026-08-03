@@ -9,24 +9,38 @@
                  @for(truckReport of report.trucks; track truckReport){
                     <div class="truck-section">
                         <div class="truck-header">
-                            <h2 style="margin-bottom: 3px !important; margin-top: 5px !important;">{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                            @if(truckReport.truck){
+                                <h2 style="margin-bottom: 3px !important; margin-top: 5px !important;">{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                            } @else {
+                                <h2 style="margin-bottom: 3px !important; margin-top: 5px !important;">Unassigned</h2>
+                            }
                         </div>
                         @for(bookingGroup of truckReport.trips; track bookingGroup){
                             <div class="trip-section">
                                 <div class="trip-header">
-                                    <div>
-                                        <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
-                                        <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
-                                            bookingGroup.trip.destination }}</h2>
-                                    </div>
-                                    <div class="trip-details">
-                                        <span>Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy'
-                                            }}</span>
-                                        @if(bookingGroup.trip.arrivalDate){
-                                            <span>Arrival: {{
-                                                bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</span>
-                                        }
-                                    </div>
+                                    @if(bookingGroup.trip){
+                                        <div>
+                                            <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
+                                            <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
+                                                bookingGroup.trip.destination }}</h2>
+                                        </div>
+                                        <div class="trip-details">
+                                            <span>Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy'
+                                                }}</span>
+                                            @if(bookingGroup.trip.arrivalDate){
+                                                <span>Arrival: {{
+                                                    bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</span>
+                                            }
+                                        </div>
+                                    } @else {
+                                        <div>
+                                            <h3>Trip: <span style="font-style: italic;">unknown</span></h3>
+                                        </div>
+                                        <div class="trip-details">
+                                            <span>Departure: <span style="font-style: italic;">unknown</span></span>
+                                            <span>Arrival: <span style="font-style: italic;">unknown</span></span>
+                                        </div>
+                                    }
                                 </div>
 
                                 <div class="bookings-table">
@@ -111,24 +125,39 @@
 
                 <div class="truck-section">
                     <div class="truck-header">
-                        <h2 style="margin-bottom: 3px !important; margin-top: 5px !important;">{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                        @if(truckReport.truck){
+                            <h2 style="margin-bottom: 3px !important; margin-top: 5px !important;">{{ truckReport.truck.truckNumber }} | {{ truckReport.truck.companyName }}</h2>
+                        } @else {
+                            <h2 style="margin-bottom: 3px !important; margin-top: 5px !important;">Unassigned</h2>
+                        }
                     </div>
                     @for(bookingGroup of truckReport.trips; track bookingGroup){
                         <div class="trip-section">
                             <div class="trip-header">
-                                <div>
-                                    <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
-                                    <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
-                                        bookingGroup.trip.destination }}</h2>
-                                </div>
-                                <div class="trip-details">
-                                    <span>Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy'
-                                        }}</span>
-                                    @if(bookingGroup.trip.arrivalDate){
-                                        <span>Arrival: {{
-                                            bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</span>
-                                    }
-                                </div>
+                                @if(bookingGroup.trip){
+                                    <div>
+                                        <h3>Trip {{ bookingGroup.trip.loadNumber }}</h3>
+                                        <h2>{{ bookingGroup.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
+                                            bookingGroup.trip.destination }}</h2>
+                                    </div>
+                                    <div class="trip-details">
+                                        <span>Departure: {{ bookingGroup.trip.departureDate | date: 'MMM dd, yyyy'
+                                            }}</span>
+                                        @if(bookingGroup.trip.arrivalDate){
+                                            <span>Arrival: {{
+                                                bookingGroup.trip.arrivalDate | date: 'MMM dd, yyyy' }}</span>
+                                        }
+                                    </div>
+                                } @else {
+                                    <div>
+                                        <h3>Trip: <span style="font-style: italic">unknown</span></h3>
+                                    </div>
+                                    <div class="trip-details">
+                                        <span>Departure: <span style="font-style: italic;">unknown</span></span>
+                                        <span>Arrival: <span style="font-style: italic;">unknown</span></span>
+                                    </div>
+                                }
+                                
                             </div>
 
                             <div class="bookings-table">
@@ -210,15 +239,24 @@
             <div class="print-trip" [ngSwitch]="true">
                 <div class="trip-header">
                     <div>
-                        <h3>Trip {{ bookingGroup!.trip.loadNumber }}</h3>
-                        <h2>{{ bookingGroup!.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
-                            bookingGroup!.trip.destination }}</h2>
-                        <p class="trip-details">
-                            <span>Departure: {{ bookingGroup!.trip.departureDate | date: 'MMM dd, yyyy' }}</span>
-                            @if(bookingGroup!.trip.arrivalDate){
-                                <span>Arrival: {{ bookingGroup!.trip.arrivalDate | date: 'MMM dd, yyyy' }}</span>
-                            }
-                        </p>
+                        @if(bookingGroup.trip){
+                            <h3>Trip {{ bookingGroup!.trip.loadNumber }}</h3>
+                            <h2>{{ bookingGroup!.trip.origin }} <mat-icon>arrow_forward</mat-icon>{{
+                                bookingGroup!.trip.destination }}</h2>
+                            <p class="trip-details">
+                                <span>Departure: {{ bookingGroup!.trip.departureDate | date: 'MMM dd, yyyy' }}</span>
+                                @if(bookingGroup!.trip.arrivalDate){
+                                    <span>Arrival: {{ bookingGroup!.trip.arrivalDate | date: 'MMM dd, yyyy' }}</span>
+                                }
+                            </p>
+                        } @else {
+                            <h3>Trip: <span style="font-style: italic">unknown</span></h3>
+                            <p class="trip-details">
+                                <span>Departure: <span style="font-style: italic;">unknown</span></span>
+                                <span>Arrival: <span style="font-style: italic;">unknown</span></span>
+                            </p>
+                        }
+                        
                     </div>
                 </div>
 

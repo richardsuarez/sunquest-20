@@ -130,12 +130,19 @@ export class WorkOrder implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  allTrips(): number {
+  countRealTrips(): number {
     let tripCount = 0;
     this.bookReport$.pipe(takeUntil(this.destroy$)).subscribe(report => {
-      tripCount = report ? report.trucks.reduce((acc, truck) => acc + truck.trips.length, 0) : 0
+      tripCount = report 
+      ? report.trucks.reduce((acc, truck) => 
+        acc + truck.trips.filter(trip => !!trip.trip).length, 0) 
+      : 0
     });
     return tripCount;
+  }
+
+  countRealTrucks(trucks: TruckReport[]): number {
+    return trucks.filter(truckReport => truckReport.truck !== null).length;
   }
 
   getRecNo(booking: Booking): string {
@@ -160,7 +167,7 @@ export class WorkOrder implements OnInit, OnDestroy {
     this.store.dispatch(ReportActions.loadBookingsStart({ start: this.dateRange.value.start!, end: this.dateRange.value.end!, season: this.activeSeason! }));
   }
 
-  printBooking(booking: Booking, truck: Truck, trip: Trip) {
+  printBooking(booking: Booking, truck: Truck | null, trip: Trip | null) {
     this.printingData = {
       type: 'booking',
       bookReport: {
