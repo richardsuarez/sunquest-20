@@ -463,18 +463,35 @@ export class ReportService {
                     truck,
                     trips: relevantTrips.sort((a, b) => {
                         // Sort trips by departure date
-                        const dateA = new Date(a.trip.departureDate || 0).getTime();
-                        const dateB = new Date(b.trip.departureDate || 0).getTime();
+                        const dateA = new Date(a.trip && a.trip.departureDate || 0).getTime();
+                        const dateB = new Date(b.trip && b.trip.departureDate || 0).getTime();
                         return dateA - dateB;
                     })
                 });
+            }
+
+            if(bookingsByTrip.has(null)) {
+                const unassignedBookings = bookingsByTrip.get(null) || [];
+                if (unassignedBookings.length > 0) {
+                    truckReports.push({
+                        truck: null,
+                        trips: [{
+                            trip: null,
+                            bookings: unassignedBookings.sort((a, b) => {
+                                const pickupAtA = a.pickupAt || new Date(0);
+                                const pickupAtB = b.pickupAt || new Date(0);
+                                return pickupAtA.getTime() - pickupAtB.getTime();
+                            })
+                        }]
+                    });
+                }
             }
         });
 
         // Sort trucks by truckNumber
         truckReports.sort((a, b) => {
-            const nameA = a.truck.truckNumber || '';
-            const nameB = b.truck.truckNumber || '';
+            const nameA = a.truck && a.truck.truckNumber || '';
+            const nameB = b.truck && b.truck.truckNumber || '';
             return nameA.localeCompare(nameB);
         });
 
