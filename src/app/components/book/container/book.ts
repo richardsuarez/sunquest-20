@@ -488,7 +488,7 @@ export class Book implements OnInit, OnDestroy, AfterViewInit {
         pickupWeekOfYear: this.weekNumber(pickupAt),
         from: this.form.controls.origin.value,
         to: this.form.controls.destination.value,
-        departureDate: this.currentSelectedTrip ? this.currentSelectedTrip.departureDate : this.originalBooking.departureDate!,
+        departureDate: this.currentSelectedTrip ? this.currentSelectedTrip.departureDate : null,
         tripId: this.currentSelectedTrip ? this.currentSelectedTrip.id! : null,
         truckId: this.currentSelectedTruckId ? this.currentSelectedTruckId : null,
         deliveryNotes: this.form.controls.deliveryNotes.value,
