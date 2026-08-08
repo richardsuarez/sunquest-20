@@ -1,8 +1,7 @@
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { bookings, customerList, loading, searchCriteria, totalPagination } from '../store/customer.selectors';
-import { Customer, Vehicle } from '../model/customer.model';
+import { Customer, SearchCriteria, Vehicle } from '../model/customer.model';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { map, Observable, Subject, takeUntil } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,7 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
-import { MatFormField, MatSuffix } from '@angular/material/form-field';
+import { MatFormFieldModule, MatSuffix } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -30,13 +29,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-customer',
   imports: [
     CommonModule,
     MatIconModule,
-    MatFormField,
+    MatFormFieldModule,
     ReactiveFormsModule,
     MatCardModule,
     MatInput,
@@ -49,7 +49,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatSuffix,
     MatTableModule,
     MatProgressSpinnerModule,
-    MatTooltip
+    MatTooltip,
+    MatSelectModule,
   ],
   templateUrl: './customer.html',
   styleUrl: './customer.css'
@@ -64,7 +65,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   loading$!: Observable<boolean>;
   customerList$!: Observable<Customer[] | null>;
   searchCustomer = new FormControl<string | null>('');
-  searchCriteria!: string;
+  searchCriteria!: SearchCriteria;
   totalPagination$!: Observable<number>;
   seasons$!: Observable<Season[]>;
   bookings$!: Observable<Booking[]>;
@@ -74,6 +75,7 @@ export class CustomerComponent implements OnInit, OnDestroy {
   bookingColumns: string[] = ['season', 'departureDate', 'from', 'to', 'paymentType', 'bank', 'amount', /* 'notes', */ 'actions'];
   currentBookings: Booking[] | null = null;
   bookingTagForDeletion: string | null = null;
+  searchCriteriaSelector = new FormControl('recNo');
 
   constructor(
     private readonly store: Store,
@@ -333,7 +335,8 @@ export class CustomerComponent implements OnInit, OnDestroy {
     //if (this.searchCustomer.value === this.searchCriteria) return
 
     this.store.dispatch(CustomerActions.updateSearchCriteria({
-      criteria: this.searchCustomer.value || ''
+      criteria: this.searchCriteriaSelector.value || '',
+      value: this.searchCustomer.value || ''
     }));
     this.store.dispatch(CustomerActions.getNextCustomerListStart());
   }

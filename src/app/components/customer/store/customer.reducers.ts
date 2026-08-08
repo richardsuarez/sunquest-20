@@ -10,7 +10,10 @@ const initialState: CustomerState = {
     customerList: null,
     customerViewModel: null,
     bookingList: [],
-    searchCriteria: '',
+    searchCriteria: {
+        criteria: '',
+        value: ''
+    },
     savingCustomer: false,
     totalPagination: 0,
     appError: null,
@@ -116,7 +119,10 @@ export const customerReducer = createReducer(
     })),
     on(CustomerActions.updateSearchCriteria, (state, action) => ({
         ...state,
-        searchCriteria: action.criteria
+        searchCriteria: {
+            criteria: action.criteria,
+            value: action.value
+        }
     })),
     on(CustomerActions.resetCustomerViewModel, (state) => ({
         ...state,
@@ -124,7 +130,10 @@ export const customerReducer = createReducer(
     })),
     on(CustomerActions.resetSearchCriteria, (state) => ({
         ...state,
-        searchCriteria: '',
+        searchCriteria: {
+            criteria: '',
+            value: ''
+        }
     }))
     ,
     on(CustomerActions.getVehiclesEnd, (state, action) => ({
