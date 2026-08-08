@@ -1,7 +1,7 @@
 import { inject, Injectable, runInInjectionContext, EnvironmentInjector } from '@angular/core';
 import { Firestore, collection, query, orderBy, limit, startAfter, doc, addDoc, deleteDoc, updateDoc, or, where, getDocFromServer, endAt, getDocsFromServer, getDocsFromCache, and, getCountFromServer, endBefore, limitToLast, getDocs } from '@angular/fire/firestore';
 import { from, Observable, of } from 'rxjs';
-import { Customer } from '../model/customer.model';
+import { Customer, SearchCriteria } from '../model/customer.model';
 import { Vehicle } from '../model/customer.model';
 import { Season } from '../../season/models/season.model';
 import { Booking } from '../../book/model/booking.model';
@@ -16,39 +16,78 @@ export class CustomerService {
 
   // #region Customer
 
-  async getCustomerList(criteria: string): Promise<Customer[]> {
+  async getCustomerList(criteria: SearchCriteria): Promise<Customer[]> {
     return runInInjectionContext(this.injector, async () => {
       const customerRef = collection(this.firestore, this.collectionName);
-      const filter = criteria?.trim() || '';
-      let auxQ = or(
-          and(
-            where('primaryLastName', '>=', filter),
-            where('primaryLastName', '<', filter + '\uf8ff'),
-          ),
-          and(
-            where('primaryPhone', '>=', filter),
-            where('primaryPhone', '<', filter + '\uf8ff'),
-          ),
-          and(
-            where('secondaryPhone', '>=', filter),
-            where('secondaryPhone', '<', filter + '\uf8ff'),
-          ),
+      const filter = criteria?.value?.trim() || '';
+      let q;
+      if(criteria.criteria === 'recNo' && filter) {
+        q = query(
+          customerRef,
           and(
             where('recNo', '>=', filter),
             where('recNo', '<', filter + '\uf8ff'),
-          )
+          ),
+          orderBy('recNo'),
         );
-
-      let q = query(
-        customerRef,
-        auxQ,
-        orderBy('primaryLastName'),
-        orderBy('primaryFirstName'),
-        orderBy('primaryPhone'),
-        orderBy('secondaryPhone'),
-        orderBy('recNo'),
-      );
-
+      } else if(criteria.criteria === 'firstName' && filter) {
+        q = query(
+          customerRef,
+          or(
+            and(
+              where('primaryFirstName', '>=', filter),
+              where('primaryFirstName', '<', filter + '\uf8ff'),
+            ),
+            and(
+              where('secondaryFirstName', '>=', filter),
+              where('secondaryFirstName', '<', filter + '\uf8ff'),
+            )
+          ),
+          orderBy('primaryFirstName'),
+          orderBy('secondaryFirstName'),
+        );
+      } else if(criteria.criteria === 'lastName' && filter) {
+        q = query(
+          customerRef,
+          or(
+            and(
+              where('primaryLastName', '>=', filter),
+              where('primaryLastName', '<', filter + '\uf8ff'),
+            ),
+            and(
+              where('secondaryLastName', '>=', filter),
+              where('secondaryLastName', '<', filter + '\uf8ff'),
+            )
+          ),
+          orderBy('primaryLastName'),
+          orderBy('secondaryLastName'),
+        );
+      } else if(criteria.criteria === 'email' && filter) {
+        q = query(
+          customerRef,
+          and(
+            where('email', '>=', filter),
+            where('email', '<', filter + '\uf8ff'),
+          ),
+          orderBy('email'),
+        );
+      } else {
+        q = query(
+          customerRef,
+          or(
+            and(
+              where('primaryPhone', '>=', filter),
+              where('primaryPhone', '<', filter + '\uf8ff'),
+            ),
+            and(
+              where('secondaryPhone', '>=', filter),
+              where('secondaryPhone', '<', filter + '\uf8ff'),
+            )
+          ),
+          orderBy('primaryPhone'),
+          orderBy('secondaryPhone'),
+        );
+      }
       // ✅ Try network first, fallback to cache if offline
       let customers: Customer[] = [];
       try {
@@ -58,6 +97,7 @@ export class CustomerService {
           DocumentID: doc.id,
         }));
       } catch (error) {
+        console.log(error);
         const snapshot = await runInInjectionContext(this.injector, () => getDocsFromCache(q));
         customers = snapshot.docs.map(doc => ({
           ...doc.data() as Customer,

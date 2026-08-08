@@ -58,7 +58,7 @@ export const loadCustomer = createAction(
 
 export const updateSearchCriteria = createAction(
     '[Customer] Update search criteria',
-    props<{criteria: string}>()
+    props<{criteria: string, value: string}>()
 );
 
 export const resetCustomerViewModel = createAction(

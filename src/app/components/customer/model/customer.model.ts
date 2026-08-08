@@ -53,3 +53,8 @@ export interface CustomerRecord {
     bookings: Booking[];
     currentBookingSeeing: number;
 }
+
+export interface SearchCriteria {
+    criteria: string;
+    value: string;
+}

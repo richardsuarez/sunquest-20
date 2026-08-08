@@ -5,16 +5,25 @@
         </button>
     </div>
     <div class="search">
+        <mat-form-field appearance="outline" floatLabel="always" subscriptSizing="dynamic" 
+            style="margin-right: 15px;">
+            <mat-label>Search by:</mat-label>
+            <mat-select matInput [formControl]="searchCriteriaSelector">
+                <mat-option value="recNo">RecNo</mat-option>
+                <mat-option value="firstName">First Name</mat-option>
+                <mat-option value="lastName">Last Name</mat-option>
+                <mat-option value="email">Email</mat-option>
+                <mat-option value="phone">Phone</mat-option>
+            </mat-select>
+        </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic" [class.form-field]="!(isMobile$ | async)"
             [class.form-field-mobile]="isMobile$ | async">
-            <input type="text" matInput [formControl]="searchCustomer"
-                [placeholder]="!(isMobile$ | async) ? 'Search by Rec No, Last Name or Phone Number' : 'Search customer'"
+            <input type="text" matInput [formControl]="searchCustomer" placeholder="Type something..."
                 (keyup.enter)="onSearch()">
             <button mat-icon-button matSuffix class="search-button" color="primary" (click)="onSearch()">
                 <mat-icon>search</mat-icon>
             </button>
         </mat-form-field>
-
     </div>
     @if(loading$ | async){
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
